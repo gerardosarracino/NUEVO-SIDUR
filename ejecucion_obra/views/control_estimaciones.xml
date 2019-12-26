@@ -1,0 +1,677 @@
+<odoo>
+  <data>
+
+<record model="ir.actions.act_window" id="orden_cambio_action">
+        <field name="name">Ordenes de cambio</field>
+        <field name="res_model">control.ordenes_cambio</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">current</field>
+    </record>
+
+      <record id="ordenes_tree" model="ir.ui.view">
+          <field name="name">tree ordenes</field>
+          <field name="model">control.ordenes_cambio</field>
+          <field name="arch" type="xml">
+              <tree string="">
+                  <field name="vinculo_estimaciones"/>
+              </tree>
+          </field>
+      </record>
+
+   <record model="ir.ui.view" id="orden_cambio_form">
+          <field name="name">Orden de cambio</field>
+          <field name="model">control.ordenes_cambio</field>
+          <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    
+                    <sheet>
+                        <h1><field name="orden_pago" placeholder="Orden de pago" class="oe_inline"/></h1>
+                    </sheet>
+                    <group colspan="1" col="2">
+                        <h1>
+                            <h2>Estimación: <field name="vinculo_estimaciones" readonly="1"/></h2>
+                        </h1>
+                        <h1>
+                            <h2>Contrato: <field name="numero_contrato"/></h2>
+                        </h1>
+
+                    </group>
+
+                    <br/>
+                     <group>
+                        <field name="cuentas_bancos" class="oe_inline"/>
+                    </group>
+
+                    <group>
+                         <field name="fecha" class="oe_inline"/>
+                    </group>
+                    <group>
+                         <field name="total_estimado" class="oe_inline"/>
+                    </group>
+                   
+                </sheet>
+            </form>
+          </field>
+        </record>
+
+      <record id="conceptos_search_est" model="ir.ui.view">
+         <field name="name">concepto search</field>
+         <field name="model">proceso.conceptos_part</field>
+          <field name="arch" type="xml">
+              <search string="">
+                <field name="id_partida" />
+                <field name="name" />
+                <field name="descripcion" />
+                <field name="categoria" />
+                <field name="clave_linea"/>
+                <field name="concepto"/>
+                <field name="medida"/>
+                <field name="cantidad" />
+                <field name="precio_unitario" />
+                <field name="importe"/>
+          </search>
+         </field>
+      </record>
+
+    <!-- ESTIMACIONES FORM -->
+  <record id="control_estimaciones_estimaciones_form" model="ir.ui.view">
+        <field name="name">control de estimaciones form</field>
+        <field name="model">control.estimaciones</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <header>
+                            <button string="Total conceptos estimados" name="imprimir_accion" type="object"
+                            icon="fa-book"/>
+
+                            <button string="Orden de pago" name="OrdenesPago" type="object" class="oe_highlight"
+                                    icon="fa-file-text"/>
+
+                </header>
+
+                <sheet>
+
+                    <div>
+                        <h1>
+                            <field name="ide_estimacion" readonly="1" force_save="1"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+                        <page string="Datos Generales De La Estimación">
+
+                            <group string="Datos Generales De La Estimación" colspan="1" col="2">
+                                <group>
+                                    <field name="estimacion_ids" readonly="1" force_save="1" invisible="1"/>
+                                    <!-- por mientras para activar metodos -->
+                                    <field name="p_id" invisible="1"/>
+                                    <field name="obra"/>
+
+                                    <field name="montodiario_programado"/>
+                                    <field name="dias_desfasamiento"/>
+                                    <field name="monto_atraso"/>
+                                    <field name="porcentaje_est"/>
+                                    <field name="porc_total_ret"/>
+                                    <field name="total_ret_est"/>
+                                    <field name="ret_neta_est" force_save="1"/>
+                                    <field name="devolucion_est" force_save="1"/>
+                                    <br/>
+                                    <field name="tipo_estimacion" widget="radio"/>
+                                </group>
+                                <group>
+                                    <field name="idobra" attrs="{'readonly': [('tipo_estimacion','!=', '2')],
+                                    'required': [('tipo_estimacion','=', '2')]}" class="oe_inline"/>
+                                    <hr attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"/>
+                                    <field name="estimacion_esc" attrs="{'invisible': [('tipo_estimacion','!=', '2')],
+                                    'required': [('tipo_estimacion','=', '2')]}"
+                                     domain="[('obra.id', '=', obra)]"/>
+                                    <hr attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"/>
+                                    <field name="por_escalatoria" attrs="{'invisible': [('tipo_estimacion','!=', '2')],
+                                    'required': [('tipo_estimacion','=', '2')]}"
+                                    class="oe_inline" />
+                                    <hr attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"/>
+                                    <field name="sub_total_esc" attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"
+                                    class="oe_inline"/>
+                                    <hr attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"/>
+                                    <field name="sub_total_esc_h" attrs="{'invisible': [('tipo_estimacion','!=', '2')]}"
+                                    class="oe_inline" readonly="1" force_save="1"/>
+
+                                </group>
+                            </group>
+
+                            <group  colspan="2" col="2">
+                                <group string="Periodo de la Estimación">
+                                    <field name="fecha_inicio_estimacion" class="oe_inline"/>
+                                    <br/>
+                                    <field name="fecha_termino_estimacion" class="oe_inline"/>
+                                </group>
+                                <group string="Seguimiento">
+                                    <field name="fecha_presentacion" class="oe_inline"/>
+                                    <br/>
+                                    <field name="fecha_revision" class="oe_inline"/>
+                                </group>
+                                <group string="Indique si Aplica">
+                                    <field name="si_aplica" widget="radio" nolabel="1"/>
+                                </group>
+                                <group string="Notas:">
+                                    <field name="notas" nolabel="1"/>
+                                </group>
+                            </group>
+
+                                <group colspan="10" col="1" string="Deducciones">
+                                    <field name="deducciones" nolabel="1" force_save="1">
+                                        <tree create="false" force_save="1">
+                                            <!-- field name="estimacion" force_save="1"/ -->
+                                            <field name="name" string="Deducción"/>
+                                            <field name="porcentaje" force_save="1" />
+                                            <field name="valor" force_save="1" />
+                                        </tree>
+                                    </field>
+                                </group>
+
+
+
+                                    <group string="Cálculo De Estimación"  colspan="2" col="3">
+                                        <group>
+                                            <p colspan="4" align="left">Importe ejecutado estimación:   $<field name="estimado" readonly="1" force_save="1" nolabel="1"
+                                            style="color: #237570; font-size: 15px;"/></p>
+                                        </group>
+                                        <group>
+                                            <p colspan="4" align="left">Amortización de Anticipo <field name="amort_anticipo_partida" placeholder="Ingresar % de anticipo"
+                                            style="color: #048A72;" class="oe_inline"/>%:   $<field name="amort_anticipo" force_save="1" nolabel="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                         </group>
+                                        <group>
+                                            <p colspan="4" align="left">Neto Estimación sin IVA: $<field name="estimacion_subtotal" readonly="1" force_save="1" nolabel="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                        </group>
+                                    </group>
+
+                                    <group  colspan="2" col="3">
+                                        <group>
+                                            <p colspan="4" align="left">I.V.A. 16%: $<field name="estimacion_iva" readonly="1" force_save="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                        </group>
+                                        <group>
+                                            <p colspan="4" align="left">Neto Estimación con IVA: $<field name="estimacion_facturado" readonly="1" force_save="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                         </group>
+                                        <group>
+                                            <p colspan="4" align="left">Menos Suma Deducciones: $<field name="estimado_deducciones" readonly="1" force_save="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                        </group>
+                                    </group>
+
+                                    <group  colspan="2" col="3">
+                                        <group>
+                                            <p colspan="4" align="left">Retención/Devolución: $<field name="ret_dev" readonly="1" nolabel="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                        </group>
+                                        <group>
+                                            <p colspan="4" align="left">	Sanción por Incump. de plazo: $<field name="sancion" readonly="1" nolabel="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                         </group>
+                                        <group>
+                                            <p colspan="4" align="left">	Importe liquido: $<field name="a_pagar" readonly="1" nolabel="1"
+                                            style="color: #237570;font-size: 15px;"/></p>
+                                        </group>
+                                    </group>
+
+                                    <group string="Penas Convencionales" colspan="2" col="4">
+                                            <field name="menos_clau_retraso" class="oe_inline"/>
+                                            <field name="sancion_incump_plazo" class="oe_inline"/>
+                                    </group>
+                                </page>
+
+                        <page string="Conceptos Ejecutados En El Periodo"  attrs="{'invisible': [('tipo_estimacion','!=', '1')]}" > <!-- attrs="{'invisible': [('tipo_estimacion','!=', '1')]}" -->
+                            <separator string="Conceptos Ejecutados En El Periodo"/>
+                            <group>
+                                <field name="estimado" string="TOTAL DE CONCEPTOS: " readonly="1" force_save="1"/>
+                            </group>
+
+                            <field name="conceptos_partidas" string="" widget="section_and_note_one2many">
+                                    <tree editable="bottom" delete="false" create="false" force_save="1">
+                                        <field name="id_partida" invisible="1" force_save="1"/>
+
+                                        <field name="categoria" readonly="1" force_save="1" class="text-left"/>
+
+                                        <field name="clave_linea" readonly="1" string="Clave" force_save="1"/>
+                                        <field name="concepto" readonly="1" string="Concepto" force_save="1"
+                                        attrs="{'invisible': ['|', ('concepto','=', '-'),('concepto','=', '.')]}"/>
+                                        <field name="medida" readonly="1" string="U.M" force_save="1"
+                                               attrs="{'invisible': ['|', ('medida','=', '-'),('medida','=', '.')]}"/>
+                                        <field name="precio_unitario" readonly="1" attrs="{'invisible':[('precio_unitario','=',0.0)]}"
+                                        force_save="1" />
+                                        <field name="cantidad" readonly="1" attrs="{'invisible':[('cantidad','=',0)]}"
+                                        string="Contratada" force_save="1"/>
+
+                                        <field name="est_ant" attrs="{'invisible':[('est_ant','=',0.0)]}"/>
+                                        <field name="pendiente" attrs="{'invisible':[('pendiente','=',0.0)]}"/>
+                                        <field name="estimacion" force_save="1" />
+                                        <field name="importe_ejecutado" sum="Importe Ejecutado"
+                                               attrs="{'invisible':[('importe_ejecutado','=',0.0)]}"/>
+
+                                    </tree>
+                                </field>
+
+                           <!--'form_view_ref': 'proceso_contratacion.conceptos_tree',  -->
+
+                            <!-- field name="conceptos_partidas" string="" domain="[('id_partida.id', '=', obra)]">
+                                    <tree editable="bottom">
+                                        <control>
+                                            <create string="Agregar Conceptos"
+                                                    />
+                                        </control>
+                                        <field name="id_partida" invisible="1"/>
+                                        <field name="categoria" readonly="1" invisible="1"/>
+                                        <field name="clave_linea" readonly="1" string="Clave"/>
+                                        <field name="concepto" readonly="1" string="Concepto"/>
+                                        <field name="medida" readonly="1" string="U.M"/>
+                                        <field name="precio_unitario" readonly="1" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
+                                        <field name="cantidad" readonly="1" attrs="{'invisible':[('cantidad','=',0)]}"
+                                        string="Contratada"/>
+
+                                        <field name="est_ant" />
+                                        <field name="pendiente" />
+                                        <field name="estimacion" force_save="1"/>
+                                        <field name="importe_ejecutado" sum="Importe Ejecutado"/>
+                                    </tree>
+                                </field -->
+
+                            <field name="total_conceptos" readonly="1" invisible="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+      <!-- PARTIDAS ESTIMACIONES SEARCH-->
+      <record model="ir.ui.view" id="partidas_estimaciones_search">
+         <field name="name">elaboracion contrato</field>
+         <field name="model">control.estimaciones</field>
+         <field name="arch" type="xml">
+            <search>
+                <field name="obra"/>
+                <field name="ide_estimacion"/>
+                <field name="tipo_estimacion"/>
+                <field name="fecha_inicio_estimacion" />
+                <field name="fecha_termino_estimacion"/>
+                <field name="estimado"/>
+                <field name="amort_anticipo"/>
+                <field name="estimacion_subtotal"/>
+                <field name="estimacion_facturado"/>
+                <field name="estimado_deducciones"/>
+                <field name="total_ret_est"/>
+                <field name="sancion"/>
+                <field name="a_pagar"/>
+            </search>
+         </field>
+        </record>
+
+    <!-- ESTIMACIONES TREE -->
+    <record id="control_estimaciones_estimaciones_tree" model="ir.ui.view">
+        <field name="name">control de estimaciones tree</field>
+        <field name="model">control.estimaciones</field>
+        <field name="arch" type="xml">
+            <tree string="" decoration-info="tipo_estimacion=='2'">
+                <field name="idobra" string="#"/>
+                <field name="obra" invisible="1"/>
+                <field name="ide_estimacion" string="# Id"/>
+                <field name="tipo_estimacion" string="Tipo"/>
+                <field name="fecha_inicio_estimacion" string="Fecha Inicio" />
+                <field name="fecha_termino_estimacion" string="Fecha Termino"/>
+                <field name="estimado" string="Estimado" sum="Estimado"/>
+                <field name="amort_anticipo" string="Amort. anticipo" sum="Total Amort."/>
+                <field name="estimacion_subtotal" string="Subtotal" sum="Total Subtotal"/>
+                <field name="estimacion_iva" string="I.V.A" sum="Total I.V.A"/>
+                <field name="estimacion_facturado" string="Facturado" sum="Total Facturado"/>
+                <field name="estimado_deducciones" string="Deducciones" sum="Total Deducciones"/>
+                <field name="total_ret_est" string="Ret/Dev." sum="Total Ret/Dev"/>
+                <field name="ret_neta_est" string="Ret/Dev." sum="Total Ret/Dev"/>
+                <field name="sancion" string="Sanción" sum="Total Sanción"/>
+                <field name="a_pagar" string="A pagar" sum="Total Importe Liquido"/>
+                <field name="monto_programado_est" string="Monto Programado" sum="Total Monto Programado"/>
+            </tree>
+        </field>
+    </record>
+
+ <!-- BOTON ESTIMACIONES -->
+<record model="ir.actions.act_window" id="action_estimaciones1">
+        <field name="name">Estimaciones</field>
+        <field name="res_model">control.estimaciones</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('control_estimaciones_estimaciones_form')}),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('control_estimaciones_estimaciones_tree')})]"/>
+        <field name="target">new</field>
+    </record>
+<record model="ir.actions.act_window" id="action_estimaciones2">
+        <field name="name">Estimaciones</field>
+        <field name="res_model">control.estimaciones</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('control_estimaciones_estimaciones_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('control_estimaciones_estimaciones_form')})]"/>
+    </record>s
+
+      <!-- VISTA TREE DE PARTIDAS -->
+      <record model="ir.ui.view" id="estimaciones_tree">
+      <field name="name">Estimaciones Tree</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <tree create="false">
+            <field name="fecha" string="Fecha"/>
+            <field name="numero_contrato" string="# Contrato"/>
+            <field name="objeto" string="Objeto" />
+            <field name="contratista" string="Contratista" />
+            <field name="obra" string="Obra"/>
+            <field name="residente_obra" string="Residente"/>
+        </tree>
+      </field>
+    </record>
+
+      <!-- VISTA CON BOTONES HACIA ESTIMACION -->
+    <record id="vista_form_estimaciones" model="ir.ui.view">
+        <field name="name">vista form estimaciones</field>
+        <field name="model">partidas.partidas</field>
+        <field name="arch" type="xml">
+            <!--xpath expr="//footer" position="before">
+               <button name="%(estimacion_reporte_estado_cuenta1)d" string="Imprimir Estado de Cuenta" type="action" class="oe_highlight" icon="fa-arrow-right"/>
+          </xpath -->
+            <form string="" >
+                <sheet>
+
+                  <div class="oe_button_box oe_read_only" name="button_box" attrs="{'invisible': [('verif_programa', '=', False)]}">
+
+                  <button string="Estimaciones" type="action" name="%(action_estimaciones1)d" class="oe_highlight" context="{
+                       'search_default_obra': active_id,
+                       'default_obra': active_id
+                       }" attrs="{'invisible': [('contar_estimaciones', '&gt;', 0)]}" icon="fa-usd"/>
+                  <button string="Estimaciones" type="action" name="%(action_estimaciones2)d" class="oe_highlight" context="{
+                       'search_default_obra': active_id,
+                       'default_obra': active_id
+                       }" attrs="{'invisible': [('contar_estimaciones', '=', 0)]}" icon="fa-usd"/>
+
+                      <button string="Imprimir Estado de Cuenta" type="action" name="%(estimacion_reporte_estado_cuenta1)d" class="oe_highlight"
+                              icon="fa-print"/>
+
+                      <!-- <button type="action" icon="fa-list" string="Estado de Cuenta"></button> -->
+
+                </div>
+
+                    <field name="contar_estimaciones" force_save="1" invisible="1"/>
+                    <!-- dejar partida id la uso para activar un metodo por mientras-->
+                    <field name="p_id" invisible="1"/>
+
+                    <field name="verif_programa" readonly="1" invisible="1"/>
+
+                   <group string="Nombre de la Obra:" colspan="2" col="4">
+                        <field name="obra" nolabel="1" readonly="1"/>
+                         <p attrs="{'invisible': [('verif_programa', '=', True)]}"
+                            align="right" style="color: #DE0C0C">No hay Programa Para La Estimación*</p>
+                   </group>
+                            <hr/>
+                        <group colspan="2" col="5" context="{'default_ejercicio': obra.id}">
+                            <separator string="Programa"/>
+                            <separator string="Ejercicio" />
+                            <separator string="Monto/Iva"/>
+                            <separator string="Municipio"/>
+                            <separator string="Localidad"/>
+                        </group>
+                        <group colspan="2" col="6">
+                            <field name="programaInversion" readonly="True" string="" nolabel="1"/>
+                            <field name="ejercicio" string="" nolabel="1"/>
+                            <field name="total_partida" widget="monetary" string="" nolabel="1"/>
+                            <field name="municipio" string="" nolabel="1"/>
+                            <field name="localidad" string="" nolabel="1"/>
+                        </group>
+                          <hr/>
+                        <group colspan="2" col="5">
+                           <separator string="Fecha del Anticipo"/>
+                           <separator string="Fecha del contrato"/>
+                           <separator string="Fecha de Inicio Contractual"/>
+                           <separator string="Fecha de Termino Contractual"/>
+                           <separator string="Supervision Externa"/>
+                        </group>
+
+                        <group colspan="2" col="6">
+                          <field name="fecha_anticipos" readonly="1" string="" nolabel="1"/>
+                          <field name="fecha" string="" nolabel="1"/>
+                          <field name="fechainicio" string="" nolabel="1"/>
+                          <field name="fechatermino" string="" nolabel="1"/>
+                          <field name="supervisionexterna1" string="" nolabel="1"/>
+
+                        </group>
+
+                    <field name="esti">
+                        <tree>
+                            <field name="idobra"/>
+                            <field name="tipo_estimacion"/>
+                            <field name="fecha_inicio_estimacion"/>
+                            <field name="fecha_termino_estimacion"/>
+                            <field name="estimado"/>
+                            <field name="a_pagar"/>
+                        </tree>
+                    </field>
+
+
+                    <notebook>
+                        <page string="Residencia">
+                            <group string="Residencia">
+                                <group><field name="residente_obra"/></group>
+                                <group><field name="supervision_externa"/></group>
+                                <group><field name="director_obras"/></group>
+                                <group><field name="puesto_director_obras"/></group>
+                            </group>
+                        </page>
+
+
+                        <!-- ANTICIPOS -->
+                        <page string="Anticipos">
+
+                            <group attrs="{'invisible':[('anticipada', '=' , True)]}">
+                            <p>NO HAY ANTICIPO</p>
+                            </group>
+
+                            <group attrs="{'invisible':[('anticipada', '=' , False)]}">
+                                <group string="Anticipo">
+                                    <field name="numero_contrato" readonly="1"/>
+                                    <field name="contratista" readonly="1"/>
+                                    <field name="anticipada" invisible="1" readonly="1"/>
+                                </group>
+                                <group colspan="2" col="4">
+                                    <field name="fecha_anticipos" readonly="1" />
+                                    <field name="porcentaje_anticipo" class="oe_inline" readonly="1"/>
+                                    <field name="total_anticipo_porcentaje" readonly="1"/>
+                                    <field name="anticipo_material" class="oe_inline" readonly="1"/>
+                                    <field name="total_partida" readonly="1" string="Importe Contratado"/>
+                                </group>
+
+                                <group>
+                                    <field name="anticipo_a" readonly="1"/>
+                                    <field name="iva_anticipo" readonly="1"/>
+                                    <field name="total_anticipo" readonly="1"/>
+                                </group>
+
+                                <group colspan="2" col="4">
+                                    <field name="numero_fianza" class="oe_inline" readonly="1"/>
+                                    <field name="afianzadora" readonly="1"/>
+                                    <field name="fecha_fianza" readonly="1"/>
+                                </group>
+                             </group>
+                        </page>
+
+                        <!-- PAGINA DE CONV. MODIFICATORIOS -->
+                        <page string="Conv. Modificatorios">
+                            <group string="Conv. Modificatorios" >
+                            </group>
+                                <field name="convenios_modificatorios" string="" widget="one2many">
+                                    <tree editable="bottom">
+                                        <field name="fecha_convenios"/>
+                                        <field name="referencia_convenios"/>
+                                        <field name="observaciones_convenios"/>
+                                        <field name="tipo_convenio"/>
+                                        <field name="importe_convenios"/>
+                                        <field name="iva_convenios"/>
+                                        <field name="total_convenios"/>
+                                    </tree>
+                                </field>
+
+                        </page>
+
+                        <!-- PAGINA DE CATALOGOS -->
+                        <page string="Catálogo">
+                      <div class="panel-body">
+                        <h2 colspan="2" align="left"> Catálogo de Niveles/Conceptos del Contrato: <field name="numero_contrato" nolabel="1"/></h2>
+                      </div>
+                            <group>
+                        <group colspan="2" col="6">
+                            <field name="total" />
+                            <field name="total_contrato"/>
+                            <field name="diferencia"  class="o_light_label"/>
+                        </group>
+
+                        <field name="conceptos_partidas" string="# Concepto de partidas" widget="section_and_note_one2many"
+                        readonly="1">
+                            <tree>
+                                <control>
+                                    <create string="Nivel Padre"
+                                            context="{'form_view_ref': 'proceso_contratacion.categoria_seccion_form'}"/>
+
+                                    <create string="Agregar Linea"
+                                            context="{'form_view_ref': 'proceso_contratacion.categoria_form_linea'}"/>
+
+                                </control>
+                                <!-- field name="name" widget="section_and_note_text" force_save="1" string="Clave"
+                                context="{'form_view_ref': 'proceso_contratacion.categoria_seccion_form'}"/-->
+                                <field name="categoria" />
+                                <field name="clave_linea"/>
+                                <!-- <field name="sequence" type="handle" readonly="1" force_save="1" invisible="1"/>
+                                <field name="display_type" readonly="1" force_save="1" invisible="1"/> -->
+
+
+                                <field name="concepto"/>
+                                <field name="medida"/>
+                                <field name="cantidad" attrs="{'invisible':[('cantidad','=',0)]}"/>
+                                <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
+                                <field name="importe" sum="importe" attrs="{'invisible':[('importe','=',0.0)]}"/>
+                            </tree>
+                        </field>
+                                <group class="oe_subtotal_footer">
+                                        <h6 style="position:relative;
+                                                      display: inline-block;
+                                                         left: -75px;
+                                                          top: -50px;
+                                                  white-space: nowrap;"> TOTAL:  </h6>
+                                </group>
+                    </group>
+                        </page>
+
+                        <!-- <page string="Programa">
+                            <group string="Programa">
+                                <group colspan="1" col="4">
+                                    <field name="fecha_inicio_programa" readonly="1"/>
+                                    <field name="fecha_termino_programa" readonly="1"/>
+                                    <field name="total_partida" readonly="True" widget="monetary"/>
+                                    <field name="restante_programa" readonly="1"/>
+                                </group>
+
+                                <field name="programa_contrato" widget='one2many'>
+                                    <control>
+                                        <create string="Agregar Periodo"/>
+                                    </control>
+                                    <tree editable="bottom">
+                                        <field name="fecha_inicio"/>
+                                        <field name="fecha_termino"/>
+                                        <field name="monto" sum="Total:"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page> -->
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+<!-- ACCIONES VENTANA ESTIMACIONES -->
+    <record model="ir.actions.act_window" id="ejecucion_obra_control_estimacion_action_window">
+      <field name="name">Control de Estimaciones</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">partidas.partidas</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('estimaciones_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('vista_form_estimaciones')})]"/>
+    </record>
+
+      <record id="deducciones_tree" model="ir.ui.view">
+          <field name="name">Deducciones</field>
+          <field name="model">control.deducciones</field>
+          <field name="arch" type="xml">
+              <tree string="">
+                  <field name="name"/>
+                  <field name="porcentaje"/>
+                  <field name="valor"/>
+              </tree>
+          </field>
+      </record>
+
+      <record model="ir.actions.act_window" id="deducciones_action">
+      <field name="name">deduc</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">control.deducciones</field>
+      <field name="view_mode">tree</field>
+    </record>
+
+      <!--<field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('proc_contratacion_elaboracion_contrato_3')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('vista_form_estimaciones')})]"/>
+    </record>-->
+      <record id="detalle_tree" model="ir.ui.view">
+          <field name="name">detalle import</field>
+          <field name="model">control.detalle_conceptos</field>
+          <field name="arch" type="xml">
+              <tree string="">
+                  <field name="id_sideop"/>
+                  <field name="categoria"/>
+                  <field name="descripcion"/>
+                  <field name="clave_linea"/>
+                  <field name="concepto"/>
+                  <field name="cantidad"/>
+                  <field name="estimacion"/>
+              </tree>
+          </field>
+      </record>
+
+      <record id="detalle_action" model="ir.actions.act_window">
+          <field name="name">detalle import action</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">control.detalle_conceptos</field>
+          <field name="view_mode">tree</field>
+          <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+              <!-- Add Text Here -->
+            </p><p>
+              <!-- More details about what a user can do with this object will be OK -->
+            </p>
+          </field>
+      </record>
+
+    <menuitem name="Ejecución de Obra" id="ejecucion_obra.menu_root" sequence="0" web_icon="ejecucion_obra,static/description/icon.png"/>
+
+    <menuitem name="Control de Estimaciones" id="control_esstimacion" parent="ejecucion_obra.menu_root"
+              action="ejecucion_obra_control_estimacion_action_window" sequence="2"/>
+
+      <menuitem name="DETALLES IMPORT" id="detalle_act" parent="ejecucion_obra.menu_root"
+              action="detalle_action" sequence="8"/>
+
+
+      <menuitem name="deducciones" id="deducciones_menu" parent="ejecucion_obra.menu_root"
+              action="deducciones_action" sequence="9"/>
+  </data>
+</odoo>

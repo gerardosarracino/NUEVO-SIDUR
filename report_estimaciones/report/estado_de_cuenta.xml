@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="estimacion_reporte_estado_cuenta"
+            model="control.estimaciones"
+            string="Estado de Cuenta"
+            report_type="qweb-pdf"
+            paperformat="paperformat_estimacion"
+            name="report_estimaciones.report_estado_cuenta"
+            menu="True"
+        />
+    </data>
+</odoo>

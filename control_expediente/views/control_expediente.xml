@@ -1,0 +1,100 @@
+<odoo>
+  <data>
+
+      <!-- VISTA TREE DE PARTIDAS -->
+      <record model="ir.ui.view" id="control_expediente_tree">
+      <field name="name">Ingreso de Documentos al Expediente Único Tree</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <tree create="false">
+            <field name="fecha" string="Fecha"/>
+            <field name="numero_contrato" string="# Contrato"/>
+            <field name="objeto" string="Objeto" />
+            <field name="contratista" string="Contratista" />
+            <field name="obra" string="Obra"/>
+            <field name="residente_obra" string="Residente"/>
+        </tree>
+      </field>
+    </record>
+
+      <!-- VISTA CON BOTONES HACIA ESTIMACION -->
+    <record id="control_expediente_vista_form" model="ir.ui.view">
+        <field name="name">Ingreso de Documentos al Expediente Único Form</field>
+        <field name="model">partidas.partidas</field>
+        <field name="arch" type="xml">
+            <form string="" >
+                <sheet>
+
+                   <group string="Nombre de la Obra:" colspan="2" col="4">
+                        <field name="obra" nolabel="1" readonly="1"/>
+                   </group>
+                            <hr/>
+                        <group colspan="2" col="5" context="{'default_ejercicio': obra.id}">
+                            <separator string="Programa"/>
+                            <separator string="Ejercicio" />
+                            <separator string="Monto/Iva"/>
+                            <separator string="Municipio"/>
+                            <separator string="Localidad"/>
+                        </group>
+                        <group colspan="2" col="6">
+                            <field name="programaInversion" readonly="True" string="" nolabel="1"/>
+                            <field name="ejercicio" string="" nolabel="1"/>
+                            <field name="total_partida" widget="monetary" string="" nolabel="1"/>
+                            <field name="municipio" string="" nolabel="1"/>
+                            <field name="localidad" string="" nolabel="1"/>
+                        </group>
+                          <hr/>
+                        <group colspan="2" col="5">
+                           <separator string="Fecha del Anticipo"/>
+                           <separator string="Fecha del contrato"/>
+                           <separator string="Fecha de Inicio Contractual"/>
+                           <separator string="Fecha de Termino Contractual"/>
+                           <separator string="Supervision Externa"/>
+                        </group>
+
+                        <group colspan="2" col="6">
+                          <field name="fecha_anticipos" readonly="1" string="" nolabel="1"/>
+                          <field name="fecha" string="" nolabel="1"/>
+                          <field name="fechainicio" string="" nolabel="1"/>
+                          <field name="fechatermino" string="" nolabel="1"/>
+                          <field name="supervisionexterna1" string="" nolabel="1"/>
+                        </group>
+                    <hr/>
+                    <group>
+                        <field name="tabla_control" nolabel="1">
+                            <tree>
+                                <control>
+                                    <create string="Agregar Documento"/>
+                                </control>
+                                <field name="etapa"/>
+                                <field name="responsable"/>
+                                <field name="nombre"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+<!-- ACCIONES VENTANA ESTIMACIONES -->
+    <record model="ir.actions.act_window" id="control_expediente_action">
+      <field name="name">Ingreso de Documentos al Expediente Único</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">partidas.partidas</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('control_expediente_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('control_expediente_vista_form')})]"/>
+    </record>
+
+
+    <menuitem name="Control de Expediente Único" id="control_expediente.menu_root" sequence="0" web_icon="control_expediente,static/description/icon.png"/>
+
+    <menuitem name="Ingreso de Documentos al Expediente Único" id="control_expediente_documentos"
+              parent="control_expediente.menu_root"
+              action="control_expediente_action" sequence="1"/>
+
+  </data>
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="estimacion_report_relacion_con"
+            model="control.estimaciones"
+            string="Relación de Conceptos"
+            report_type="qweb-pdf"
+            paperformat="paperformat_estimacion"
+            name="report_estimaciones.report_conceptos"
+        />
+    </data>
+</odoo>

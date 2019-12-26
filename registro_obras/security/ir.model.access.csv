@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_registro_ejercicio,registro.ejercicio,model_registro_ejercicio,,1,1,1,1
+access_registro_unidadadminsol,registro.unidadadminsol,model_registro_unidadadminsol,,1,1,1,1
+access_registro_tipoproyecto,registro.tipoproyecto,model_registro_tipoproyecto,,1,1,1,1
+access_registro_tipoobraetapa,registro.tipoobraetapa,model_registro_tipoobraetapa,,1,1,1,1
+access_registro_tipolocalidad,registro.tipolocalidad,model_registro_tipolocalidad,,1,1,1,1
+access_registro_unidadm,registro.unidadm,model_registro_unidadm,,1,1,1,1
+access_registro_obra,registro.obra,model_registro_obra,,1,1,1,1
+access_registro_proyectoejecutivo,registro.proyectoejecutivo,model_registro_proyectoejecutivo,,1,1,1,1
+access_registro_seguimientoobra,registro.seguimientoobra,model_registro_seguimientoobra,,1,1,1,1
+access_registro_programarobra,registro.programarobra,model_registro_programarobra,,1,1,1,1
+access_registro_estructurafinanciera,registro.estructurafinanciera,model_registro_estructurafinanciera,,1,1,1,1

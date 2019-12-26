@@ -1,0 +1,152 @@
+<odoo>
+  <data>
+ 
+
+    <!--record model="ir.actions.act_window" id="finiquito.finiquitado_action_window">
+      <field name="name">Anexo técnico</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">finiquito.finiquitado</field>
+      <field name="target">new</field>
+      <field name="view_mode">form,tree</field>
+    </record-->
+    
+  <!-- PARTIDAS -->    
+    <record model="ir.ui.view" id="finiquito.partidas_search">
+      <field name="name">Finiquito</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="fecha" string="Fecha"/>
+          <field name="numero_contrato"/>
+          <field name="obra"/>
+          <field name="contratista"/>
+          <field name="total_partida"/>
+         </search>
+        </field>
+     </record>
+    
+    <record model="ir.ui.view" id="finiquito.partidas_tree">
+      <field name="name">finiquito.partidas.tree</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <tree create="false">
+          <field name="fecha" string="Fecha"/>
+          <field name="numero_contrato"/>
+          <field name="obra"/>
+          <field name="contratista"/>
+          <field name="total_partida" string="Importe contratado"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="finiquito.partidas_form">
+      <field name="name">partidas.partidas.form</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <form create="false">
+        <sheet>
+        <group string="Datos cierre contrato">
+          <group>
+          <field name="fecha1"/>
+          <field name="fecha2"/>
+          <field name="numero"/>
+          <field name="nota1"/>
+          </group>
+          <group>
+          <field name="fecha3"/>
+          <field name="fecha4"/>
+          <field name="fecha5"/>
+          <field name="fecha6"/>
+          </group>
+          <group>
+          <field name="fecha7"/>
+          <field name="fecha8"/>
+          <field name="fecha9"/>
+          <field name="fecha10"/>
+          </group>
+          <group>
+          <field name="fecha11"/>
+          <field name="description"/>
+          <field name="creditosContra"/>
+          </group>
+        </group>
+         </sheet>
+         </form>
+      </field>
+    </record>
+ <!-- ACCIONES VENTANA -->
+    <record model="ir.actions.act_window" id="finiquito.partidas_action_window">
+      <field name="name">Finiquito de contrato</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">partidas.partidas</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'tree', 'view_id': ref('finiquito.partidas_tree')}),
+      (0, 0, {'view_mode': 'form', 'view_id': ref('finiquito.partidas_form')})]"/>
+      <field name="view_mode">tree,form</field>
+    </record>
+    <!-- MENUS -->
+    <menuitem name="Finiquito" id="finiquito.menu_root" sequence="0" web_icon="finiquito,static/description/icon.png"/>
+      <menuitem name="Control de cierre final de contratos" id="finiquito.finiquito_menu" parent="finiquito.menu_root" action="finiquito.partidas_action_window" sequence="1"/>
+
+
+
+
+
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="finiquito.list">
+      <field name="name">finiquito list</field>
+      <field name="model">finiquito.finiquito</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="finiquito.action_window">
+      <field name="name">finiquito window</field>
+      <field name="res_model">finiquito.finiquito</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="finiquito.action_server">
+      <field name="name">finiquito server</field>
+      <field name="model_id" ref="model_finiquito_finiquito"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="finiquito" id="finiquito.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="finiquito.menu_1" parent="finiquito.menu_root"/>
+    <menuitem name="Menu 2" id="finiquito.menu_2" parent="finiquito.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="finiquito.menu_1_list" parent="finiquito.menu_1"
+              action="finiquito.action_window"/>
+    <menuitem name="Server to list" id="finiquito" parent="finiquito.menu_2"
+              action="finiquito.action_server"/>
+    -->
+  </data>
+</odoo>

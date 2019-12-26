@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_autorizacion_obra1,autorizacion_obra.oficios_de_autorizacion,model_autorizacion_obra_oficios_de_autorizacion,,1,1,1,1
+access_autorizacion_obra2,autorizacion_obra.anexo_tecnico,model_autorizacion_obra_anexo_tecnico,,1,1,1,1
+access_autorizacion_obra3,autorizacion_obra.cancelarrecurso,model_autorizacion_obra_cancelarrecurso,,1,1,1,1

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_control_estimaciones,control.estimaciones,model_control_estimaciones,,1,1,1,1
+access_control_deducciones,control.deducciones,model_control_deducciones,,1,1,1,1
+access_programa_programa_obra,programa.programa_obra,model_programa_programa_obra,,1,1,1,1
+access_programa_tabla,programa.tabla,model_programa_tabla,,1,1,1,1
+access_programa_programa_version,programa.programa_version,model_programa_programa_version,,1,1,1,1
+access_control_ordenes_cambio,control.ordenes_cambio,model_control_ordenes_cambio,,1,1,1,1
+access_control_cuentasbancos,control.cuentasbancos,model_control_cuentasbancos,,1,1,1,1
+access_control_detalle_conceptos,control.detalle_conceptos,model_control_detalle_conceptos,,1,1,1,1

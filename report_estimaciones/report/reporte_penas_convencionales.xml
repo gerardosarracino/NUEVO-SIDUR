@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="estimacion_report_penas"
+            model="control.estimaciones"
+            string="Penas Convencionales"
+            report_type="qweb-html"
+            paperformat="paperformat_estimacion"
+            print_report_name="object.obra.numero_contrato.contrato + '/' + object.ide_estimacion"
+            name="report_estimaciones.report_penas_con"
+        />
+    </data>
+</odoo>

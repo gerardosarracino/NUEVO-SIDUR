@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="estimacion_report_concentrado"
+            model="control.estimaciones"
+            string="Estimación Concentrado"
+            report_type="qweb-pdf"
+            paperformat="paperformat_estimacion"
+            name="report_estimaciones.report_concentrado"
+        />
+    </data>
+</odoo>

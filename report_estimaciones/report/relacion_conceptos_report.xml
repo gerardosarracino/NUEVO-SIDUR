@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_conceptos" >
+            <t t-call="web.html_container">
+                 <t t-foreach="docs" t-as="o">
+                     <t t-call="web.external_layout">
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                          <div class="page text-center">
+                               <h2>GOBIERNO DEL ESTADO DE SONORA</h2>
+                          </div>
+
+                            <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+
+
+                         <div class="text-center">
+                             <table class="table table-sm table-striped">
+                                 <thead>
+                                     <tr>
+                                         <th>CONCENTRADO DE ESTIMACIONES</th>
+                                         <th>PERIODO DE EJECUCIÓN</th>
+                                         <th>LICITACION No</th>
+                                         <th>CONTRATO No</th>
+                                         <th>CONTRATISTA</th>
+                                     </tr>
+                                 </thead>
+
+                                 <tbody>
+                                    <tr>
+                                        <th><span t-field="o.obra"/></th>
+                                        <th><span t-field="o.fecha_inicio_estimacion"/>
+                                        <strong>AL</strong>
+                                        <span t-field="o.fecha_termino_estimacion"/></th>
+                                        <th><p> LICITACION XXXX</p></th>
+                                        <th><span t-field="o.obra"/></th>
+                                        <th><span t-field="o.contratista_contrato"/></th>
+                                    </tr>
+                                </tbody>
+                             </table>
+                         </div>
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <div class="text-center">
+                             <table class="table table-sm table-striped">
+                                 <thead>
+                                     <tr>
+                                         <th>CLAVE</th>
+                                         <th>GRUPO</th>
+                                         <th>CONCEPTO</th>
+                                         <th>MEDIDA</th>
+                                         <th>P.U.</th>
+                                         <th>CANTIDAD</th>
+                                         <th>ESTIMACION ANTERIOR</th>
+                                         <th>ESTIMACION</th>
+                                         <th>IMPORTE</th>
+                                     </tr>
+                                 </thead>
+
+                                 <tbody>
+                                     <tr t-foreach="o.conceptos_partidas" t-as="l">
+                                       <td>
+                                             <span t-field="l.categoria"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.clave_linea"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.concepto"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.medida"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.precio_unitario"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.cantidad"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.est_ant"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.estimacion"/>
+                                       </td>
+                                         <td>
+                                             <span t-field="l.importe_ejecutado"/>
+                                       </td>
+
+                                    </tr>
+                                </tbody>
+                             </table>
+                         </div>
+                     </t>
+                 </t>
+            </t>
+        </template>
+    </data>
+</odoo>

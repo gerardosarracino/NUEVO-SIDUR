@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_estado_cuenta" >
+            <t t-call="web.html_container">
+                 <t t-foreach="docs" t-as="o">
+                     <t t-call="web.external_layout">
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                          <div class="page text-center">
+                               <h2>GOBIERNO DEL ESTADO DE SONORA</h2>
+                               <h4>SISTEMA DE CONTROL Y SEGUIMIENTO DE OBRAS PÚBLICAS</h4>
+                               <h5>Reporte de Estado de Cuenta</h5>
+                          </div>
+
+                            <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <div>
+                             <b>CONTRATO:  </b> <span t-field="o.obra"/>
+                         </div>
+
+
+                         <div class="text-center">
+                             <table class="table table-sm table-striped">
+                                 <thead>
+                                     <tr>
+                                         <td colspan="2">RESUMEN</td>
+                                        <td colspan="2">ANTICIPO</td>
+                                     </tr>
+                                 </thead>
+
+                                 <tbody>
+                                    <tr>
+                                        <td>IMPORTE DEL CONTRATO ORIGINAL = - clave</td>
+                                        <td> <span t-field="o.monto_programado_est"/> </td>
+                                        <td>ANTICIPO OTORGADO =</td>
+                                        <td> <span t-field="o.anticipo_contrato"/> </td>
+                                    </tr>
+                                    <tr>
+                                        <td>IMPORTE DE CONVENIOS DE AMPLIACION =</td>
+                                        <td>8</td>
+                                        <td>ANTICIPO AMORTIZADO =</td>
+                                        <td>10</td>
+                                    </tr>
+                                    <tr>
+                                        <td>IMPORTE DE CONVENIOS DE REDUCCION =</td>
+                                        <td>x</td>
+                                        <td>ANTICIPO POR AMORTIZAR = 0</td>
+                                        <td>x</td>
+                                    </tr>
+                                    <tr>
+                                        <td>IMPORTE TOTAL DEL CONTRATO =</td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>IMPORTE DE LAS ESTIMACIONES ANTERIORES =</td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>IMPORTE DE ESTA ESTIMACION =</td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>ACUMULADO DE ESTIMACIONES = </td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>SALDO POR ESTIMAR =</td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                             </table>
+                         </div>
+
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <div class="text-center">
+                             <table class="table table-sm table-striped">
+                            <tbody>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Tipo</td>
+                                    <td>Fecha Inicio</td>
+                                    <td>FechaTermino</td>
+                                    <td>Estimado</td>
+                                    <td>Amort ANT</td>
+                                    <td>Sub-Total </td>
+                                    <td>I.V.A.</td>
+                                    <td>Facturado</td>
+                                    <td>Deducciones</td>
+                                    <td>Retenciones</td>
+                                    <td>Sancion</td>
+                                    <td>A Pagar</td>
+                                </tr>
+                                <tr>
+                                    <td>0</td>
+                                    <td>Anticipo</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                     </t>
+                 </t>
+            </t>
+        </template>
+    </data>
+</odoo>

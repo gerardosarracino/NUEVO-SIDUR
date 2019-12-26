@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_estimaciones" >
+            <t t-call="web.html_container">
+                 <t t-foreach="docs" t-as="o">
+                     <t t-call="web.external_layout">
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                          <div class="page text-center" >
+                              <div class="oe_structure">
+                               <h4><b>GOBIERNO DEL ESTADO DE SONORA</b></h4>
+                               <h5><b>DIRECCIÓN DE EJECUCIÓN DE OBRA</b></h5>
+                               <h6><b>CONTROL DE ESTIMACIONES</b></h6>
+                              </div>
+                          </div>
+
+                        <hr/>
+
+                            <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <div class="text-center">
+                             <table class="table table-sm table-bordered">
+                                 <tbody>
+                                    <tr>
+                                        <td colspan="2" rowspan="2" style="width:7%"><strong>OBRA:</strong></td>
+                                        <td colspan="2" rowspan="2" style="width:61%"><span t-field="o.obra"/></td>
+                                        <td rowspan="2" style="width:7%"><strong>LUGAR:</strong></td>
+                                        <td rowspan="2" style="width:15%" class="text-left"><span t-field="o.municipio_contrato"/></td>
+                                        <td style="width:10%"><strong>FECHA:</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span t-field="o.fecha_contrato"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" rowspan="2"></td>
+                                        <td><strong>ESTIMACIÓN No.</strong></td>
+                                        <td><strong>POR OBRA EFECTUADA EN EL PERIODO DE:</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b style="font-size: 15px;"><span t-field="o.idobra"/></b></td>
+                                        <td><p><span t-field="o.fecha_inicio_estimacion"/> <strong> AL </strong>
+                                            <span t-field="o.fecha_termino_estimacion"/></p></td>
+                                    </tr>
+                                </tbody>
+
+
+                             </table>
+                         </div>
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                         <div class="text-center">
+                             <table class="table table-sm table-bordered">
+                                 <thead>
+                                     <tr>
+                                         <th colspan="9">DATOS DE CONTRATACION</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody>
+                                     <tr>
+                                         <th>CONTRATO</th>
+                                         <th>FECHA</th>
+                                         <th>IMPORTE TOTAL</th>
+                                         <th>ANTICIPO</th>
+                                         <th colspan="2">FECHAS</th>
+                                         <th colspan="2">AVANCES</th>
+                                         <th>TIPO INVERSIÓN</th>
+                                     </tr>
+                                    <tr>
+                                        <td><p class="m-0" t-field="o.numero_contrato"/></td>
+                                        <td><p t-field="o.fecha_contrato"/></td>
+                                        <td><p t-field="o.monto_contrato"/></td>
+                                        <td><p t-field="o.anticipo_contrato"/></td>
+                                        <td class="text-center">
+                                            <p class="text-center">INICIO</p>
+                                            <p t-field="o.fechainicio_contrato"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <p class="text-center">TERMINO</p>
+                                            <p t-field="o.fechatermino_contrato"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <p class="text-center">FISICO</p>
+                                            <p class="text-center">50%</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-center">FINANC</p>
+                                            <p class="text-center">60%</p>
+                                        </td>
+
+                                        <th><span t-field="o.tipobra_contrato"/></th>
+                                    </tr>
+                                </tbody>
+                             </table>
+                         </div>
+
+                         <div>
+                         <table class="table table-sm table-bordered">
+                             <tr>
+                                 <th class="text-center">ESTADO DE CUENTA ANTICIPO</th>
+                                 <th class="text-center">ESTADO CUENTA DE OBRA</th>
+                                 <th class="text-center">LIQUIDACIÓN</th>
+                                 <th></th>
+                             </tr>
+                            <tr>
+                                <td class="text-center">
+                                    <p>ESTA ESTIMACION  </p>
+                                    <p>105,417.62  </p>
+                                    <p>ACUMULADO ANTERIOR  </p>
+                                    <p>2,383,086.75  </p>
+                                    <p>ACUMULADO TOTAL  </p>
+                                    <p>2,488,504.37 </p>
+                                    <p>ANTICIPO PAGADO  </p>
+                                    <p>2,488,504.37 </p>
+                                    <p>SALDO ANTICIPO  </p>
+                                    <p>0.00 </p>
+                                </td>
+
+                                <td class="text-center">
+                                    <p>ESTA ESTIMACION  </p>
+                                    <p>105,417.62  </p>
+                                    <p>ACUMULADO ANTERIOR  </p>
+                                    <p>2,383,086.75  </p>
+                                    <p>ACUMULADO TOTAL  </p>
+                                    <p>2,488,504.37 </p>
+                                    <p>MONTO CONTRATO  </p>
+                                    <p>2,488,504.37 </p>
+                                    <p>SALDO DE CONTRATO </p>
+                                    <p>97,185.14 </p>
+                                </td>
+
+                                <td >
+                                    <p>IMPORTE ESTIMACIÓN  </p>
+                                    <p>AMORTIZACIÓN ANTICIPO  </p>
+                                    <p>SUBTOTAL </p>
+                                    <p>16 % I.V.A. </p>
+                                    <p>TOTAL </p>
+                                    <p><strong>DEDUCCIONES: </strong>  </p>
+                                    <p t-foreach="o.deducciones" t-as="l">
+                                        <p><span t-field="l.name"/></p>
+                                    </p>
+
+                                    <p>SANCIÓN POR INCUMPLIMIENTO DE PLAZO </p>
+                                    <p>RETENCIÓN/DEVOLUCIÓN POR ATRASO </p>
+                                    <p><strong>ALCANCE LIQUIDO</strong>	</p>
+                                </td>
+
+                                <td class="table-active text-right">
+                                    <p><span t-field="o.estimado"/> </p>
+                                    <p><span t-field="o.amort_anticipo"/> </p>
+                                    <p><span t-field="o.estimacion_subtotal"/></p>
+                                    <p><span t-field="o.estimacion_iva"/></p>
+                                    <p><span t-field="o.estimacion_facturado"/></p>
+                                    <br/>
+                                    <p t-foreach="o.deducciones" t-as="l">
+                                        <p><span t-field="l.valor"/></p>
+                                    </p>
+
+                                    <p><span t-field="o.ret_dev"/></p>
+                                    <p><span t-field="o.sancion"/></p>
+                                    <b><span t-field="o.a_pagar"/></b>
+                                </td>
+                            </tr>
+                         </table>
+                     </div>
+
+                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                            <t t-esc="foo"/>
+
+                     <div class="text-center">
+                         <table class="table table-condensed">
+                             <tr>
+                                 <th>FORMULO</th>
+                                 <th></th>
+                                 <th>REVISO</th>
+                                 <th></th>
+                             </tr>
+
+                            <tr>
+                                <td><span t-field="o.contratista_contrato"/><br/>
+                                <p style="font-size: 11px;">CONTRATISTA</p>
+                                </td>
+
+                                <td>x<br/>
+                                <p style="font-size: 11px;">SUPERVISOR SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO</p></td>
+                                <td>x<br/>
+                                <p style="font-size: 11px;">DIRECTOR DE CONSTRUCCIÓN DE OBRAS VIALES SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO</p></td>
+                                <td><span t-field="o.subdirector_contrato"/><br/>
+                                <p style="font-size: 11px;">DIRECTOR GENERAL DE EJECUCIÓN DE OBRA SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO
+                                </p>
+                                </td>
+                            </tr>
+                         </table>
+                     </div>
+
+                     </t>
+                 </t>
+            </t>
+        </template>
+    </data>
+</odoo>
