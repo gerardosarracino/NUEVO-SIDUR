@@ -37,7 +37,7 @@
                             <field name="porcentaje_anticipo" required="True" class="oe_inline" attrs="{'readonly':[('total_anticipo', '&gt;' , 1)]}"/>
                             <field name="total_anticipo_porcentaje"/>
                             <field name="anticipo_material" class="oe_inline" attrs="{'readonly':[('total_anticipo', '&gt;' , 1)]}"/>
-                            <field name="monto_sin_iva" readonly="1" string="Importe Contratado" force_save="1"/>
+                            <field name="monto_sin_iva" readonly="1" string="Importe Contratado" />
                         </group>
 
                         <group>

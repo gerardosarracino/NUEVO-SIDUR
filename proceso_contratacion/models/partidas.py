@@ -153,7 +153,7 @@ class Partidas(models.Model):
     monto_partida = fields.Float(string="Monto", )
     iva_partida = fields.Float(string="Iva", compute="iva", store=True)
     total_partida = fields.Float(string="Total", compute="SumaContrato", store=True)
-    monto_sin_iva = fields.Float(string="Total", compute="SumaContrato", store=True)
+    monto_sin_iva = fields.Float(string="Total", compute="SumaContrato")
 
     # SUMA DE LAS PARTIDAS
     total_contrato = fields.Float(related="numero_contrato.impcontra")
@@ -396,7 +396,9 @@ class Partidas(models.Model):
     @api.one
     def programa_verif(self):
         busqueda = self.env['programa.programa_obra'].search([('obra.id', '=', self.id)])
-        if busqueda.fecha_inicio_programa:
+        busqueda2 = self.env['programa.programa_obra'].search_count([('obra.id', '=', self.id)])
+        print(busqueda2)
+        if busqueda2 >= 1:
             print("SI HAY PROGRAMA")
             self.verif_programa = True
         else:

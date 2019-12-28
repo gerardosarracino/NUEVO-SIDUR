@@ -3,6 +3,8 @@ from datetime import date
 from datetime import datetime
 import calendar
 from odoo.exceptions import ValidationError
+import warnings
+
 
 
 class Estimaciones(models.Model):
@@ -291,7 +293,6 @@ class Estimaciones(models.Model):
             datem3 = datetime(fechatermino.year, fechatermino.month, 1)
             # fecha termino de estimacion mes y año
             datem4 = datetime(f_estimacion_termino.year, f_estimacion_termino.month, 1)
-            print("--------------------")
             print('inicio ciclo')
             # LAS FECHAS DE ESTIMACIONES SON EL MISMO DIA
             if f_estimacion_inicio == f_estimacion_termino:
@@ -383,7 +384,6 @@ class Estimaciones(models.Model):
                 elif datem3 <= datem4:
                     acum = acum + i.monto
                     print('CUANDO LA ESTIMACION ES IGUAL AL DIA DEL ULTIMO MES')
-                    print('---')
                     f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
                     f2 = datetime.strptime(str(f_estimacion_termino), date_format)
                     r = f2 - f1
@@ -478,14 +478,9 @@ class Estimaciones(models.Model):
 
                         dtp = dia_ultimo_prog2 - dia_ultimo_prog
                         calculo_fecha = dtp.days
-                        print(diastransest + 1)
-                        print(calculo_fecha + 1)
                         ultimo_monto = i.monto
                         x1 = acum - ultimo_monto
-                        print(x1)
                         x2 = (i.monto / (calculo_fecha + 1)) * (diastransest + 1)
-                        print('monto', i.monto)
-                        print(x2)
                         m_estimado = x1 + x2
 
                         self.diasest = diasest
@@ -569,7 +564,6 @@ class Estimaciones(models.Model):
                     acum = acum + i.monto
                     print('CUANDO LA ESTIMACION ES MENOS DE 30 DIAS EN EL MES')
                     # acum += i.monto
-                    print(acum)
                     f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
                     f2 = datetime.strptime(str(f_estimacion_termino), date_format)
                     r = f2 - f1
@@ -761,18 +755,15 @@ class Estimaciones(models.Model):
         '''else:
             print('YA EXISTEN LAS DEDUCCIONESD')'''
 
-
-
     # METODO PARA JALAR IMPORTE DE LOS CONCEPTOS DE PARTIDA
     @api.one
     @api.depends('conceptos_partidas')
     def suma_conceptos(self):
-        print('conceptos')
         suma = 0
         for i in self.conceptos_partidas:
             resultado = i.importe_ejecutado
             suma = suma + resultado
-            self.estimado = suma
+        self.estimado = suma
 
     # METODO PARA CALCULAR ESTIMACION NETA SIN IVA
     @api.one
@@ -804,10 +795,12 @@ class Estimaciones(models.Model):
                 rec.update({
                     'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.ret_neta_est
                 })
+
             elif self.retenido_anteriormente >= self.total_ret_est:
                 rec.update({
                     'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est
                 })
+
 
     # METODO PARA CALCULAR ESTIMACION + IVA
     @api.one
@@ -953,8 +946,11 @@ class Detalleconceptos(models.Model):
 
 class Deducciones(models.Model):
     _name = 'control.deducciones'
+    # importacion
+    id_sideop = fields.Integer()
 
     estimacion = fields.Many2one('control.estimaciones', 'id hacia estimaciones para conexion', store=True)
+
     name = fields.Char()
     porcentaje = fields.Float()
     valor = fields.Float(store=True)

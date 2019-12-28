@@ -385,16 +385,22 @@
 
                   <div class="oe_button_box oe_read_only" name="button_box" attrs="{'invisible': [('verif_programa', '=', False)]}">
 
-                  <button string="Estimaciones" type="action" name="%(action_estimaciones1)d" class="oe_highlight" context="{
+                  <button type="action" name="%(action_estimaciones1)d" class="oe_stat_button" context="{
                        'search_default_obra': active_id,
                        'default_obra': active_id
-                       }" attrs="{'invisible': [('contar_estimaciones', '&gt;', 0)]}" icon="fa-usd"/>
-                  <button string="Estimaciones" type="action" name="%(action_estimaciones2)d" class="oe_highlight" context="{
-                       'search_default_obra': active_id,
-                       'default_obra': active_id
-                       }" attrs="{'invisible': [('contar_estimaciones', '=', 0)]}" icon="fa-usd"/>
+                       }" attrs="{'invisible': [('contar_estimaciones', '&gt;', 0)]}" icon="fa-usd">
+                      <field string="Estimaciones" name="contar_estimaciones" widget="statinfo"/>
+                  </button>
 
-                      <button string="Imprimir Estado de Cuenta" type="action" name="%(estimacion_reporte_estado_cuenta1)d" class="oe_highlight"
+                  <button type="action" name="%(action_estimaciones2)d" class="oe_stat_button" context="{
+                       'search_default_obra': active_id,
+                       'default_obra': active_id
+                       }" attrs="{'invisible': [('contar_estimaciones', '=', 0)]}" icon="fa-usd">
+                      <field string="Estimaciones" name="contar_estimaciones" widget="statinfo"/>
+                  </button>
+
+                      <button string="Estado de Cuenta" type="action" name="%(estimacion_reporte_estado_cuenta1)d" class="oe_highlight"
+                              help="Imprimir Estado de Cuenta"
                               icon="fa-print"/>
 
                       <!-- <button type="action" icon="fa-list" string="Estado de Cuenta"></button> -->

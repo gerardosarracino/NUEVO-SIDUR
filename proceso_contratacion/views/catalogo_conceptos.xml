@@ -300,7 +300,7 @@
                       <group>
                         <group colspan="2" col="6">
                             <group>
-                                <field name="monto_sin_iva" force_save="1"/>
+                                <field name="monto_sin_iva" />
                             </group>
 
                             <!-- DIFERENTE AL TOTAL ROJO -->

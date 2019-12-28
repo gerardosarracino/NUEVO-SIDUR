@@ -14,8 +14,8 @@ class ProgramaObra(models.Model):
     obra_id = fields.Char(compute="partidaEnlace", store=True)
     obra_id2 = fields.Char(compute="partidaEnlaceId", store=True)
 
-    fecha_inicio_programa = fields.Date('Fecha Inicio:', related="programa_contratos.fecha_inicio", store=True)
-    fecha_termino_programa = fields.Date('Fecha Término:', compute="fechaTermino", store=True)
+    fecha_inicio_programa = fields.Date('Fecha Inicio:', related="programa_contratos.fecha_inicio")
+    fecha_termino_programa = fields.Date('Fecha Término:', compute="fechaTermino")
     monto_programa_aux = fields.Float(compute='SumaProgramas')
     restante_programa = fields.Float(string="Restante:", compute='DiferenciaPrograma')
 
