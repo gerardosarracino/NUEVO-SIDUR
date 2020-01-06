@@ -238,9 +238,6 @@ class Partidas(models.Model):
     # Contador de convenios por obra
     count_convenios_modif = fields.Integer(compute="contar_covenios")
 
-    # CONTAR REGISTROS DE ESTIMACIONES
-    contar_estimaciones = fields.Integer(compute='ContarEstimaciones', string="PRUEBA")
-
     # VISTA DE INFORMACION DE LA PARTIDA
     ejercicio = fields.Many2one("registro.ejercicio", string="Ejercicio", related="obra.obra_planeada.ejercicio")
     municipio = fields.Many2one('generales.municipios', 'Municipio', related="obra.obra_planeada.municipio")
@@ -291,10 +288,78 @@ class Partidas(models.Model):
     # VALOR DEL IVA TRAIDO DESDE CONFIGURACION
     b_iva = fields.Float(string="IVA DESDE CONFIGURACION", compute="BuscarIva")
 
-    esti = fields.Many2many(comodel_name="control.estimaciones", nolabel="1")
+    # CONTAR REGISTROS DE ESTIMACIONES
+    contar_estimaciones = fields.Integer(compute='ContarEstimaciones', string="PRUEBA")
+    # M2M PARA PODER HACER REPORTE DE ESTADO DE CUENTA DE ESTIMACIONES MAS SU METODO
+    esti = fields.Many2many(comodel_name="control.estimaciones", nolabel="1", compute="estimaciones_report")
 
     # CONTROL DE EXPEDIENTES
-    tabla_control = fields.Many2many('control_expediente.control_expediente')
+    # tabla_control = fields.Many2many('control.expediente')
+
+    tabla_control = fields.One2many('control.expediente', 'p_id')
+
+    # METODO PARA CREAR NUEVO DOCUMENTO CON BOTON
+    @api.multi
+    def expediente_crear(self):
+        # VISTA OBJETIVO
+        view = self.env.ref('control_expediente.form_control_expediente')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Control Expediente',
+            'res_model': 'control.expediente',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_p_id': self.id},
+            'view_id': view.id,
+        }
+
+    # ACTIVADOR DE ONCHANGE PARA PRUEBAS
+    prueba_expediente = fields.Char(string="PRUEBA METODO EJECUCION", required=False, )
+
+    # METODO PARA INSERTAR EXPEDIENTES A LA TABLA
+    @api.multi  # if these fields are changed, call method
+    @api.onchange('p_id', 'prueba_expediente')
+    def control_expediente(self):
+        b_expediente = self.env['control_expediente.control_expediente'].search([])
+        b_partida = self.env['partidas.partidas'].search([('id', '=', self._origin.id)])
+
+        self.update({
+            'tabla_control': [[5]]
+        })
+
+        for c_exp in b_expediente:
+            self.update({
+                'tabla_control': [[0, 0, {'nombre': c_exp.id,
+                                          'p_id': self.id,
+                                        'etapa': c_exp.etapa}]]
+            })
+
+    @api.multi
+    def estimaciones_report(self):
+        partidas = self.env['partidas.partidas']
+        _search_partida = self.env['partidas.partidas'].search(
+            [("id", "=", self.id)]).id
+        dedu = self.env['control.estimaciones'].search(
+            [("obra.id", "=", self.id)])
+        for i in dedu:
+            datos_esti = {
+                'esti': [[1, i.id, {
+                    'idobra': i.idobra,
+                    'tipo_estimacion': i.tipo_estimacion,
+                    'fecha_inicio_estimacion': i.fecha_inicio_estimacion,
+                    'fecha_termino_estimacion': i.fecha_termino_estimacion,
+                    'estimado': i.estimado,
+                    'a_pagar': i.a_pagar,
+                }]]}
+            partida_est = partidas.browse(_search_partida)
+            esti = partida_est.update(datos_esti)
+
+    # METODO DE CONTAR REGISTROS DE FINIQUITOS PARA ABRIR VISTA EN MODO NEW O TREE VIEW
+    @api.one
+    def ContarEstimaciones(self):
+        print('SE CONTO LA ESTIMACION C:')
+        count = self.env['control.estimaciones'].search_count([('obra', '=', self.id)])
+        self.contar_estimaciones = count
 
     @api.multi
     def CategoriasForm(self):
@@ -461,12 +526,6 @@ class Partidas(models.Model):
     '''@api.one
     def nombrePartida(self):
         self.numero_contrato = self.enlace.id'''
-
-    # METODO DE CONTAR REGISTROS DE FINIQUITOS PARA ABRIR VISTA EN MODO NEW O TREE VIEW
-    @api.one
-    def ContarEstimaciones(self):
-        count = self.env['control.estimaciones'].search_count([('obra', '=', self.id)])
-        self.contar_estimaciones = count
 
     # METODO DE JCHAIRZ
     @api.onchange('ruta_critica')

@@ -33,6 +33,7 @@ access_proceso_contra_fallo,proceso.contra_fallo,model_proceso_contra_fallo,,1,1
 access_proceso_propuesta_lic,proceso.propuesta_lic,model_proceso_propuesta_lic,,1,1,1,1
 access_proceso_datos_fallo,proceso.datos_fallo,model_proceso_datos_fallo,,1,1,1,1
 access_proceso_frente,proceso.frente,model_proceso_frente,,1,1,1,1
+access_control_expediente,control.expediente,model_control_expediente,,1,1,1,1
 
 
 

@@ -45,6 +45,7 @@ class registro_obra(models.Model):
 	# _inherit = 'res.partner'
 
 	id_sideop = fields.Integer('ID SIDEOP')
+
 	name = fields.Char('ID SIDEOP', compute="id_sideop_metod")
 
 	@api.one

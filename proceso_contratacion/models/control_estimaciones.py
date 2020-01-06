@@ -5,6 +5,8 @@ import calendar
 from odoo.exceptions import ValidationError
 import warnings
 
+'''CONTROL DE ESTIMACIONES SE ENCUENTRA EN EL MODULO DE CONTRATOS PARA HACER POSIBLE UN M2M HACIA ESTIMACIONES Y PODER
+SACAR UN REPORTE'''
 
 
 class Estimaciones(models.Model):
@@ -12,6 +14,7 @@ class Estimaciones(models.Model):
     _rec_name = 'idobra'
 
     id_sideop = fields.Integer('ID SIDEOP')
+
     num_contrato = fields.Char('ID contrato SIDEOP')
 
     # NUMERO DE ESTIMACION
@@ -948,7 +951,9 @@ class Deducciones(models.Model):
     _name = 'control.deducciones'
     # importacion
     id_sideop = fields.Integer()
+    num_esti = fields.Integer()
 
+    # PENDIENTE
     estimacion = fields.Many2one('control.estimaciones', 'id hacia estimaciones para conexion', store=True)
 
     name = fields.Char()

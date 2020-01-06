@@ -25,50 +25,33 @@
             <form string="" >
                 <sheet>
 
-                   <group string="Nombre de la Obra:" colspan="2" col="4">
-                        <field name="obra" nolabel="1" readonly="1"/>
-                   </group>
-                            <hr/>
-                        <group colspan="2" col="5" context="{'default_ejercicio': obra.id}">
-                            <separator string="Programa"/>
-                            <separator string="Ejercicio" />
-                            <separator string="Monto/Iva"/>
-                            <separator string="Municipio"/>
-                            <separator string="Localidad"/>
-                        </group>
-                        <group colspan="2" col="6">
-                            <field name="programaInversion" readonly="True" string="" nolabel="1"/>
-                            <field name="ejercicio" string="" nolabel="1"/>
-                            <field name="total_partida" widget="monetary" string="" nolabel="1"/>
-                            <field name="municipio" string="" nolabel="1"/>
-                            <field name="localidad" string="" nolabel="1"/>
-                        </group>
-                          <hr/>
-                        <group colspan="2" col="5">
-                           <separator string="Fecha del Anticipo"/>
-                           <separator string="Fecha del contrato"/>
-                           <separator string="Fecha de Inicio Contractual"/>
-                           <separator string="Fecha de Termino Contractual"/>
-                           <separator string="Supervision Externa"/>
-                        </group>
+                    <field name="prueba_expediente"/>
 
-                        <group colspan="2" col="6">
-                          <field name="fecha_anticipos" readonly="1" string="" nolabel="1"/>
-                          <field name="fecha" string="" nolabel="1"/>
-                          <field name="fechainicio" string="" nolabel="1"/>
-                          <field name="fechatermino" string="" nolabel="1"/>
-                          <field name="supervisionexterna1" string="" nolabel="1"/>
-                        </group>
-                    <hr/>
                     <group>
-                        <field name="tabla_control" nolabel="1">
-                            <tree>
-                                <control>
-                                    <create string="Agregar Documento"/>
-                                </control>
-                                <field name="etapa"/>
-                                <field name="responsable"/>
-                                <field name="nombre"/>
+                        <button name="expediente_crear" type="object" string="Agregar Documento" class="btn btn-info"
+                    style="float:right;"/>
+                    </group>
+
+
+                    <group>
+                        <field name="tabla_control" nolabel="1" widget='one2many'>
+                            <tree editable="bottom" delete="false" create="false">
+                                <!--control>
+                                    <create string="Agregar Documento" context="{'form_view_ref': 'control_expediente.form_control_expediente',
+                                    'default_p_id': active_id}"/>
+                                </control -->
+                                <field name="p_id" readonly="1" force_save="1"/>
+                                <field name="etapa" readonly="1" force_save="1"/>
+                                <field name="nombre" readonly="1" force_save="1"/>
+                                <field name="referencia" readonly="1"/>
+                                <field name="fecha" readonly="1"/>
+                                <field name="aplica"/>
+                                <field name="existe"/>
+                                <field name="documento" readonly="1" filename="nombre_documento"/>
+                                <field name="nombre_documento" readonly="1"/>
+
+                                <button name="vista_expediente" type="object" string="Editar"/>
+
                             </tree>
                         </field>
                     </group>
@@ -76,6 +59,29 @@
             </form>
         </field>
     </record>
+
+      <record id="form_control_expediente" model="ir.ui.view">
+          <field name="name">Control de Expediente Form</field>
+          <field name="model">control.expediente</field>
+          <field name="arch" type="xml">
+              <form string="">
+                  <sheet>
+                      <group>
+                          <field name="p_id" force_save="1"/>
+                          <field name="etapa" force_save="1"/>
+                          <field name="nombre" force_save="1"/>
+                          <field name="referencia"/>
+                          <field name="existe"/>
+                          <field name="aplica"/>
+                          <field name="fecha" />
+                          <field name="comentarios"/>
+                          <field name="documento" filename="nombre_documento"/>
+                          <field name="nombre_documento"/>
+                      </group>
+                  </sheet>
+              </form>
+          </field>
+      </record>
 
 
 <!-- ACCIONES VENTANA ESTIMACIONES -->
