@@ -65,7 +65,10 @@
 
                        <field name="obra" string="Partida:"/>
 
-                       <field name="total_programa" string="Total programa:" force_save="1"/>
+                         <field name="total_partida" readonly="True" widget="monetary" string="Monto del Contrato"/>
+                           <p attrs="{'invisible': [('count_convenio','&lt;=', '1')]}" style="color: #EE8121;">
+                              Con Convenio Modificatorio*</p>
+
                        <field name="obraid" string="Partida:" invisible="1"/>
                    </group>
                    <group>
@@ -73,9 +76,7 @@
                           <field name="fecha_inicio_programa" readonly="1"/>
                           <field name="fecha_termino_programa" readonly="1"/>
 
-                          <field name="total_partida" readonly="True" widget="monetary"/>
-                           <p attrs="{'invisible': [('count_convenio','&lt;=', '1')]}" style="color: #EE8121;">
-                              Con Convenio Modificatorio*</p>
+                         <field name="total_programa" string="Total programa:" force_save="1"/>
 
                           <field name="restante_programa" readonly="1"/>
                        </group>

@@ -1,9 +1,11 @@
+from __future__ import division
 from odoo import models, fields, api, exceptions
 from datetime import date
 from datetime import datetime
 import calendar
 from odoo.exceptions import ValidationError
 import warnings
+
 
 '''CONTROL DE ESTIMACIONES SE ENCUENTRA EN EL MODULO DE CONTRATOS PARA HACER POSIBLE UN M2M HACIA ESTIMACIONES Y PODER
 SACAR UN REPORTE'''
@@ -279,7 +281,7 @@ class Estimaciones(models.Model):
         # FECHA TERMINO PROGRAMA
         fecha_inicio_termino = b_programa.fecha_termino_programa
 
-        monto_contrato = b_programa.total_partida
+        monto_contrato = b_programa.total_programa
         # NUMERO DE DIAS DESDE EL INICIO DE LA ESTIMACION HASTA EL TERMINO DE ESTA
         diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
         acum = 0
@@ -475,7 +477,70 @@ class Estimaciones(models.Model):
                     # datem = datetime(fecha_inicio_termino.year, fecha_inicio_termino.month, 1)
 
                     # -------------------------
+                    esti = self.env['control.estimaciones'].search(
+                        [('obra.id', '=', self.obra.id)])
+
                     if datem4 == datem:
+
+                        for x in esti:
+                            if x.idobra > self.idobra:
+                            # SI NO ES LA ULTIMA ESTIMACION ENTONCES
+                                pass
+
+                            elif x.idobra == self.idobra:
+                                # VERIFICAR SI ES INICIO O TERMINO DE ESTIMACION LOS DIAS ESTIMADOS ENTRE FECHAS diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
+                                diasestx = calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[1]
+
+                                fx = datetime.strptime(str(f_estimacion_inicio),
+                                                       date_format)  # CAMBIO DE PRUEBA DE F TERMINO A F INICIO, y quite day
+                                fy = datetime.strptime(str(f_estimacion_termino), date_format)
+                                rx = fy - fx
+                                diastransestx = rx.days
+
+                                ultimo_monto = i.monto
+                                x1 = acum - ultimo_monto
+                                x2 = i.monto / diasestx
+                                m_estimado = x1 + x2 * (diastransestx + 1)
+
+                                self.diasest = diasestx
+                                self.diastransest = diastransestx
+
+                                # MONTO PROGRAMADO PARA ESTA ESTIMACION
+                                self.monto_programado_est = m_estimado
+                                # self.reduccion = monto_final
+                                # DIAS DE DIFERENCIA ENTRE EST
+                                self.diasdif = dias + 1
+                                # TOTAL DIAS PERIODO PROGRAMA
+                                self.diasperiodo = total_dias_periodo
+                                # MONTO DIARIO PROGRAMADO
+                                self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                                # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
+                                self.diasrealesrelacion = self.montoreal / self.montodiario_programado
+                                # DIAS DE DESFASAMIENTO
+                                if self.dias_transcurridos <= self.diasrealesrelacion:
+                                    self.dias_desfasamiento = 0
+                                else:
+                                    self.dias_desfasamiento = self.dias_transcurridos - self.diasrealesrelacion
+                                # MONTO DE ATRASO
+                                self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
+                                # PORCENTAJE ESTIMADO
+                                self.porcentaje_est = (m_estimado / monto_contrato) * 100
+                                # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
+                                # %
+                                self.porc_total_ret = self.retencion * self.dias_desfasamiento
+
+                                self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
+
+                                if self.ret_neta_est == 0:
+                                    self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                                elif self.retenido_anteriormente <= self.total_ret_est:
+                                    self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                                else:
+                                    self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+
+                        # SI ES LA ULTIMa o unica estimacion entonces
+
+                        print(' AHHHHHHHHHHHHHHHHHHHHHHH')
                         dia_ultimo_prog = datetime.strptime(str(fecha_inicio_termino.replace(day=1)), date_format)
                         dia_ultimo_prog2 = datetime.strptime(str(fecha_inicio_termino), date_format)
 
@@ -522,6 +587,7 @@ class Estimaciones(models.Model):
                             self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
 
                     else:
+                        print('OHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
                         ultimo_monto = i.monto
                         x1 = acum - ultimo_monto
                         x2 = i.monto / diasest

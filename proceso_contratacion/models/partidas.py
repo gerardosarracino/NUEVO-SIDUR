@@ -174,6 +174,9 @@ class Partidas(models.Model):
     diferencia = fields.Float(string="Diferencia:", compute="Diferencia", required=True)
 
     # ANTICIPOS
+    # VERIFICAR PARA IMPORTACION DE ANTICIPO SI ROW[ID] SERA NECESARIA PARA POSTERIORES IMPORTACIONES
+    # id_sideop_anticipo = fields.Integer()
+
     fecha_anticipos = fields.Date(string="Fecha Anticipo", )
     porcentaje_anticipo = fields.Float(string="Anticipo Inicio", default="0.30", )
     total_anticipo_porcentaje = fields.Float(string="Total Anticipo", compute="anticipo_por")
