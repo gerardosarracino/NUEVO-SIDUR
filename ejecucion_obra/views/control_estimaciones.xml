@@ -363,7 +363,7 @@
       <field name="arch" type="xml">
         <tree create="false">
             <field name="fecha" string="Fecha"/>
-            <field name="numero_contrato" string="# Contrato"/>
+            <field name="num_contrato_related" string="# Contrato"/>
             <field name="objeto" string="Objeto" />
             <field name="contratista" string="Contratista" />
             <field name="obra" string="Obra"/>
@@ -462,7 +462,7 @@
                             <field name="a_pagar"/>
                         </tree>
                     </field>
-
+                    <field name="num_contrato_related"/>
 
                     <notebook>
                         <page string="Residencia">
