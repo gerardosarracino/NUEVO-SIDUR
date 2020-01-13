@@ -1,11 +1,9 @@
-from __future__ import division
 from odoo import models, fields, api, exceptions
 from datetime import date
 from datetime import datetime
 import calendar
 from odoo.exceptions import ValidationError
 import warnings
-
 
 '''CONTROL DE ESTIMACIONES SE ENCUENTRA EN EL MODULO DE CONTRATOS PARA HACER POSIBLE UN M2M HACIA ESTIMACIONES Y PODER
 SACAR UN REPORTE'''
@@ -16,7 +14,6 @@ class Estimaciones(models.Model):
     _rec_name = 'idobra'
 
     id_sideop = fields.Integer('ID SIDEOP')
-
     num_contrato = fields.Char('ID contrato SIDEOP')
 
     # NUMERO DE ESTIMACION
@@ -59,7 +56,7 @@ class Estimaciones(models.Model):
     fecha_inicio_estimacion = fields.Date(string="Del:", default=fields.Date.today())
     fecha_termino_estimacion = fields.Date(string="Al:", default=fields.Date.today())
     fecha_presentacion = fields.Date(string="Fecha de presentación:", default=fields.Date.today())
-    fecha_revision = fields.Date(string="Fecha revisión Residente:",  default=fields.Date.today())
+    fecha_revision = fields.Date(string="Fecha revisión Residente:", default=fields.Date.today())
 
     radio_aplica = [(
         '1', "Estimación Finiquito"), ('2', "Amortizar Total Anticipo	")]
@@ -68,10 +65,10 @@ class Estimaciones(models.Model):
     notas = fields.Text(string="Notas:", required=False, )
 
     # DEDUCCIONES
-    deducciones = fields.Many2many('control.deducciones', string="Deducciones:", store=True )
+    deducciones = fields.Many2many('control.deducciones', string="Deducciones:", store=True)
 
     # CALCULO DE LA ESTIMACION
-    estimado = fields.Float(string="Importe ejecutado estimación:", compute="suma_conceptos", store=True)
+    estimado = fields.Float(string="Importe ejecutado estimación:", compute="suma_conceptos", )
     amort_anticipo = fields.Float(string="Amortización de Anticipo:", compute="amortizacion_anticipo")
 
     # amort_anticipo_partida = fields.Float(related="obra.numero_contrato.contrato_partida_adjudicacion.porcentaje_anticipo")
@@ -81,7 +78,8 @@ class Estimaciones(models.Model):
     estimacion_subtotal = fields.Float(string="Neto Estimación sin IVA:", compute="Estimacion_sinIva")
     estimacion_iva = fields.Float(string="I.V.A. 16%", compute="Estimacion_Iva")
     estimacion_facturado = fields.Float(string="Neto Estimación con IVA:", compute="Estimacion_conIva")
-    estimado_deducciones = fields.Float(string="Menos Suma Deducciones:", required=False, )
+
+    estimado_deducciones = fields.Float(string="Menos Suma Deducciones:", compute="SumaDeducciones")
 
     ret_dev = fields.Float(string="Retención/Devolución:", required=False, )
 
@@ -95,9 +93,9 @@ class Estimaciones(models.Model):
 
     # CONCEPTOS EJECUTADOS
     # conceptos_partidas = fields.Many2many('proceso.conceptos_part', store=True) # compute="conceptosEjecutados"
-    conceptos_partidas = fields.Many2many('control.detalle_conceptos', store=True) # compute="conceptosEjecutados"
+    conceptos_partidas = fields.Many2many('control.detalle_conceptos', store=True)  # compute="conceptosEjecutados"
 
-    total_conceptos = fields.Float(string="Total:",  required=False)
+    total_conceptos = fields.Float(string="Total:", required=False)
 
     # ID DE LA ESTIMACION
     estimacion_ids = fields.Char(string="ID")
@@ -124,7 +122,7 @@ class Estimaciones(models.Model):
     dias_transcurridos = fields.Integer(compute="DiasTrans")
 
     # MONTO PROGRAMADO PARA ESTA ESTIMACION
-    monto_programado_est = fields.Float(digits=(12,2), compute="PenasConvencionales")
+    monto_programado_est = fields.Float(digits=(12, 2), compute="PenasConvencionales")
     # PORCENTAJE LLEVADO DE LA ESTIMACION, VER SI APLICAR REALMENTE, PUEDE SER UTIL
     porcentaje_est = fields.Float(compute="PenasConvencionales")
     # reduccion = fields.Float(compute="MontoProgramadoESt", string='Reduccion')
@@ -133,13 +131,13 @@ class Estimaciones(models.Model):
     montoreal = fields.Float(compute="MontoRealEst", string='MONTO EJECUTADO REAL PARA ESTA ESTIMACION')
     diasdif = fields.Integer(string='Dias de diferencia', compute="PenasConvencionales")
     dias_desfasamiento = fields.Float(string='DIAS DE DESFASAMIENTO', compute="PenasConvencionales")
-    monto_atraso = fields.Float(string='MONTO DE ATRASO', digits=(12,2), compute="PenasConvencionales")
+    monto_atraso = fields.Float(string='MONTO DE ATRASO', digits=(12, 2), compute="PenasConvencionales")
     diasperiodo = fields.Float(string='Dia total del periodo', compute="PenasConvencionales")
     diasest = fields.Float(string='', compute="PenasConvencionales")
     diastransest = fields.Float(string='', compute="PenasConvencionales")
 
     # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
-    total_ret_est = fields.Float(string='', digits=(12,2), compute="PenasConvencionales")
+    total_ret_est = fields.Float(string='', digits=(12, 2), compute="PenasConvencionales")
     # PORCENTAJE DE LA RETENCION TOTAL
     porc_total_ret = fields.Float(string='', compute="PenasConvencionales")
     # RETENIDO ANTERIORMENTE
@@ -150,19 +148,26 @@ class Estimaciones(models.Model):
     # DEVOLUCION A EFECTUAR EN ESTA ESTIMACION
     devolucion_est = fields.Float(string='', compute='devolucion_est_metod')
     # MONTO DIARIO PROGRAMADO
-    montodiario_programado = fields.Float(string='MONTO DIARIO PROGRAMADO', digits=(12,2), compute="PenasConvencionales")
+    montodiario_programado = fields.Float(string='MONTO DIARIO PROGRAMADO', digits=(12, 2),
+                                          compute="PenasConvencionales")
     # DIAS EJECUTADOS REALCES CON RELACION  AL MONTO DIARIO PROGRAMADO
-    diasrealesrelacion = fields.Float(string='DIAS EJECUTADOS REALCES CON RELACION  AL MONTO DIARIO PROGRAMADO', digits=(12,2)
+    diasrealesrelacion = fields.Float(string='DIAS EJECUTADOS REALCES CON RELACION  AL MONTO DIARIO PROGRAMADO',
+                                      digits=(12, 2)
                                       , compute="PenasConvencionales")
 
     # CAMPOS RELACIONADOS DESDE CONTRATO PARA LA RETENCION
-    select = [('diario', 'Diario'),('mensual','Mensual'),('ninguno','Ninguno')]
-    periodicidadretencion = fields.Selection(select, string="Periodicidad Retención", related="obra.numero_contrato.periodicidadretencion")
+    select = [('diario', 'Diario'), ('mensual', 'Mensual'), ('ninguno', 'Ninguno')]
+    periodicidadretencion = fields.Selection(select, string="Periodicidad Retención",
+                                             related="obra.numero_contrato.periodicidadretencion")
     retencion = fields.Float(string="% Retención", related="obra.numero_contrato.retencion")
 
     # EXCEL
     _url = fields.Char(compute="_calc_url", string="Vista de impresión")
     # PRUEBA
+    ultimomonto = fields.Float(compute="PenasConvencionales")
+    x1 = fields.Float(compute="PenasConvencionales")
+    x2 = fields.Float(compute="PenasConvencionales")
+
     xd = fields.Float(compute="computeSeccion")
 
     @api.multi
@@ -207,7 +212,7 @@ class Estimaciones(models.Model):
                 acum = acum + i.estimado
                 self.montoreal = acum
             else:
-                print('se paso de numero estimacion')
+                print('MONTO REAL EST se paso de numero estimacion')
 
     # METODOS DE RESTRICCIONES DE FECHAS
     '''@api.multi
@@ -264,7 +269,7 @@ class Estimaciones(models.Model):
             "target": "new",
         }
 
-    # METODO PARA CALCULOS DE REPORTE DE PENAS CONVENCIONALES
+        # METODO PARA CALCULOS DE REPORTE DE PENAS CONVENCIONALES
     @api.one
     def PenasConvencionales(self):
         # FECHA INICIO ESTIMACION
@@ -285,15 +290,18 @@ class Estimaciones(models.Model):
         # NUMERO DE DIAS DESDE EL INICIO DE LA ESTIMACION HASTA EL TERMINO DE ESTA
         diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
         acum = 0
+        cont = 0
         for i in b_programa.programa_contratos:
+            cont = cont + 1
+            print(cont, '------------------')
             fechatermino = i.fecha_termino
-            # fechainicio = i.fecha_inicio
+            fechainicio = i.fecha_inicio
             # f_termino_dia = datetime.strptime(str(fechatermino), "%Y-%m-%d")
             date_format = "%Y-%m-%d"
             # fecha termino del programa, mes y año
             datem = datetime(fecha_inicio_termino.year, fecha_inicio_termino.month, 1)
             # fecha termino de la estimacion mes y año
-            datem2 = datetime(f_estimacion_inicio.year, f_estimacion_inicio.month, 1)
+            datem2 = datetime(f_estimacion_termino.year, f_estimacion_termino.month, 1)
             # ciclo de fecha termino del programa mes y año
             datem3 = datetime(fechatermino.year, fechatermino.month, 1)
             # fecha termino de estimacion mes y año
@@ -306,7 +314,7 @@ class Estimaciones(models.Model):
                 self.monto_programado_est = m_estimado
             # SI LA FECHA DEL TERMINO DE LA ESTIMACION ES IGUAL A LA DEL PROGRAMA HACER CALCULO FINAL
             elif datem == datem2:
-                print('final')
+                print('FASE FINAL')
                 acum = acum + i.monto
                 f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
                 f2 = datetime.strptime(str(f_estimacion_termino), date_format)
@@ -340,7 +348,15 @@ class Estimaciones(models.Model):
                 # FORMULA: ULTIMO MONTO / DIA INICIO MES ESTIMACION HASTA DIA TERMINO PROGRAMA * DIA TERMINO ESTIMACION
                 # HASTA DIA TERMINO PORGRAMA
 
-                monto_final = (i.monto / ff2) * ff
+                b_programa_c = self.env['programa.programa_obra'].search_count([('obra.id', '=', self.obra.id)])
+                if b_programa_c == 1:
+                    print('solo hay un monto')
+                    monto_final = 0
+                elif self.idobra == 1:
+                    monto_final = 0
+                else:
+                    monto_final = (i.monto / ff2) * ff
+
                 m_estimado = acum - monto_final
 
                 # MONTO PROGRAMADO PARA ESTA ESTIMACION
@@ -351,8 +367,11 @@ class Estimaciones(models.Model):
                 # TOTAL DIAS PERIODO PROGRAMA
                 self.diasperiodo = total_dias_periodo
                 # MONTO DIARIO PROGRAMADO
+
                 self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
                 # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
+                if self.montodiario_programado == 0:
+                    self.montodiario_programado = 1
                 self.diasrealesrelacion = self.montoreal / self.montodiario_programado
 
                 # DIAS DE DESFASAMIENTO
@@ -384,7 +403,7 @@ class Estimaciones(models.Model):
             elif f_est_termino_dia.day == diasest:
                 # FECHA TERMINO PROGRAMA MES Y AÑO ES MAYOR A FECHAR TERMINO ESTIMACION MES Y AÑO TERMINAR CICLO
                 if datem3 > datem4:
-                    print('se paso de fecha')
+                    print('se paso de fecha 1')
                 # SI ES MENOR IGUAL CONTINUAR CICLO
                 elif datem3 <= datem4:
                     acum = acum + i.monto
@@ -419,7 +438,10 @@ class Estimaciones(models.Model):
                     # MONTO DIARIO PROGRAMADO
                     self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
                     # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
-                    self.diasrealesrelacion = self.montoreal / self.montodiario_programado # CAMBIO PARA IMPORTACION QUITAR DESPUES +1
+                    if self.montodiario_programado == 0:
+                        self.montodiario_programado = 1
+
+                    self.diasrealesrelacion = self.montoreal / self.montodiario_programado
                     # DIAS DE DESFASAMIENTO
                     if self.dias_transcurridos <= self.diasrealesrelacion:
                         self.dias_desfasamiento = 0
@@ -446,48 +468,37 @@ class Estimaciones(models.Model):
             # SI EL TERMINO DE LA ESTIMACION ES MENOR AL DIA TOTAL DEL MES ENTONCES SE MODIFICARA EL MONTO ACUMULADO
             # CON UNA FORMULA PARA CALCULAR EL MONTO ACTUAL HASTA LA FECHA DE TERMINO DE LA ESTIMACION
             elif f_est_termino_dia.day < diasest:
-                if datem3 > datem4:
-                    print('se paso de fecha')
+                # # ciclo de fecha termino del programa mes y año
+                #             datem3 = datetime(fechatermino.year, fechatermino.month, 1)
+                #             # fecha termino de estimacion mes y año
+                #             datem4 = datetime(f_estimacion_termino.year, f_estimacion_termino.month, 1)
+
+                # NOTA CAMBIE DE > A < VERIFICAR SI ES CORRECTO JAJA
+                if datem3 < datem4:
+                    print('se paso de fecha 2')
                     # SON MESES DIFERENTES
+
                 elif f_estimacion_inicio.month is not f_estimacion_termino.month:
-                    print('1')
-                    acum = acum + i.monto
-                    f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
-                    f2 = datetime.strptime(str(f_estimacion_termino), date_format)
-                    r = f2 - f1
-                    dias = r.days
-                    f3 = datetime.strptime(str(fecha_inicio_programa), date_format)
-                    f4 = datetime.strptime(str(fecha_inicio_termino), date_format)
-                    r2 = f4 - f3
-                    total_dias_periodo = r2.days
-
-                    # ---------------------
-                    diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
-
-                    f7 = datetime.strptime(str(f_estimacion_termino.replace(day=1)), date_format)
-                    f8 = datetime.strptime(str(f_estimacion_termino), date_format)
-                    r4 = f8 - f7
-                    diastransest = r4.days
-
+                    print('#1 EL MES FECHA EST INICIO ES DIFERENTE AL MES EST TERMINO')
                     # SI EL MES DE ESTIMACION TERMINO COINCIDE CON EL TERMINO DE PROGRAMA FINAL ENTONCES CONTAR DESDE EL DIA
                     # PRIMERO DEL MES ULTIMO DEL PROGRAMA '0' AL DIA FINAL DEL TERMINO DEL PROGRAMA 'DIA-DIA FINAL'
                     # fecha termino de estimacion mes y año
                     # datem4 = datetime(f_estimacion_termino.year, f_estimacion_termino.month, 1)
                     # fecha termino del programa, mes y año
                     # datem = datetime(fecha_inicio_termino.year, fecha_inicio_termino.month, 1)
-
                     # -------------------------
                     esti = self.env['control.estimaciones'].search(
                         [('obra.id', '=', self.obra.id)])
 
                     if datem4 == datem:
-
                         for x in esti:
                             if x.idobra > self.idobra:
-                            # SI NO ES LA ULTIMA ESTIMACION ENTONCES
-                                pass
+                                print('verificar aqui')
+                                # SI NO ES LA ULTIMA ESTIMACION ENTONCES
 
                             elif x.idobra == self.idobra:
+                                print('#2 COINCIDE CON EL ULTIMO MES DEL PROGRAMA')
+
                                 # VERIFICAR SI ES INICIO O TERMINO DE ESTIMACION LOS DIAS ESTIMADOS ENTRE FECHAS diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
                                 diasestx = calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[1]
 
@@ -524,6 +535,7 @@ class Estimaciones(models.Model):
                                 # MONTO DE ATRASO
                                 self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
                                 # PORCENTAJE ESTIMADO
+
                                 self.porcentaje_est = (m_estimado / monto_contrato) * 100
                                 # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
                                 # %
@@ -538,96 +550,156 @@ class Estimaciones(models.Model):
                                 else:
                                     self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
 
-                        # SI ES LA ULTIMa o unica estimacion entonces
-
-                        print(' AHHHHHHHHHHHHHHHHHHHHHHH')
-                        dia_ultimo_prog = datetime.strptime(str(fecha_inicio_termino.replace(day=1)), date_format)
-                        dia_ultimo_prog2 = datetime.strptime(str(fecha_inicio_termino), date_format)
-
-                        dtp = dia_ultimo_prog2 - dia_ultimo_prog
-                        calculo_fecha = dtp.days
-                        ultimo_monto = i.monto
-                        x1 = acum - ultimo_monto
-                        x2 = (i.monto / (calculo_fecha + 1)) * (diastransest + 1)
-                        m_estimado = x1 + x2
-
-                        self.diasest = diasest
-                        self.diastransest = diastransest
-
-                        # MONTO PROGRAMADO PARA ESTA ESTIMACION
-                        self.monto_programado_est = m_estimado
-                        # self.reduccion = monto_final
-                        # DIAS DE DIFERENCIA ENTRE EST
-                        self.diasdif = dias + 1
-                        # TOTAL DIAS PERIODO PROGRAMA
-                        self.diasperiodo = total_dias_periodo
-                        # MONTO DIARIO PROGRAMADO
-                        self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
-                        # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
-                        self.diasrealesrelacion = self.montoreal / self.montodiario_programado
-                        # DIAS DE DESFASAMIENTO
-                        if self.dias_transcurridos <= self.diasrealesrelacion:
-                            self.dias_desfasamiento = 0
-                        else:
-                            self.dias_desfasamiento = self.dias_transcurridos - self.diasrealesrelacion
-                        # MONTO DE ATRASO
-                        self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
-                        # PORCENTAJE ESTIMADO
-                        self.porcentaje_est = (m_estimado / monto_contrato) * 100
-                        # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
-                        # %
-                        self.porc_total_ret = self.retencion * self.dias_desfasamiento
-                        self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
-
-                        if self.ret_neta_est == 0:
-                            self.ret_neta_est = self.total_ret_est - self.retenido_anteriormente
-                        elif self.retenido_anteriormente <= self.total_ret_est:
-                            self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
-                        else:
-                            self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                        print('prosigue')
+                        pass
 
                     else:
-                        print('OHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
-                        ultimo_monto = i.monto
-                        x1 = acum - ultimo_monto
-                        x2 = i.monto / diasest
-                        m_estimado = x1 + x2 * (diastransest + 1)
+                        print('#3 SI ES MAYOR AL TERMINO DEL PROGRAMA LA FECHA EST')
+                        acum = acum + i.monto
+                        f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
+                        f2 = datetime.strptime(str(f_estimacion_termino), date_format)
+                        r = f2 - f1
+                        dias = r.days
+                        f3 = datetime.strptime(str(fecha_inicio_programa), date_format)
+                        f4 = datetime.strptime(str(fecha_inicio_termino), date_format)
+                        r2 = f4 - f3
+                        total_dias_periodo = r2.days
 
-                        self.diasest = diasest
-                        self.diastransest = diastransest
+                        # ---------------------
+                        # VERIFICAR SI ES INICIO O TERMINO DE ESTIMACION LOS DIAS ESTIMADOS ENTRE FECHAS diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
+                        diasest = calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[1]
 
-                        # MONTO PROGRAMADO PARA ESTA ESTIMACION
-                        self.monto_programado_est = m_estimado
-                        # self.reduccion = monto_final
-                        # DIAS DE DIFERENCIA ENTRE EST
-                        self.diasdif = dias + 1
-                        # TOTAL DIAS PERIODO PROGRAMA
-                        self.diasperiodo = total_dias_periodo
-                        # MONTO DIARIO PROGRAMADO
-                        self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
-                        # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
-                        self.diasrealesrelacion = self.montoreal / self.montodiario_programado
-                        # DIAS DE DESFASAMIENTO
-                        if self.dias_transcurridos <= self.diasrealesrelacion:
-                            self.dias_desfasamiento = 0
-                        else:
-                            self.dias_desfasamiento = self.dias_transcurridos - self.diasrealesrelacion
-                        # MONTO DE ATRASO
-                        self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
-                        # PORCENTAJE ESTIMADO
-                        self.porcentaje_est = (m_estimado / monto_contrato) * 100
-                        # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
-                        # %
-                        self.porc_total_ret = self.retencion * self.dias_desfasamiento
+                        f7 = datetime.strptime(str(f_estimacion_inicio),
+                                               date_format)  # CAMBIO DE PRUEBA DE F TERMINO A F INICIO, y quite day
+                        f8 = datetime.strptime(str(f_estimacion_termino), date_format)
+                        r4 = f8 - f7
+                        diastransest = r4.days
 
-                        self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
+                        print(acum)
 
-                        if self.ret_neta_est == 0:
-                            self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
-                        elif self.retenido_anteriormente <= self.total_ret_est:
-                            self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
-                        else:
-                            self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                        dat = datetime(f_estimacion_termino.year, f_estimacion_termino.month, f_estimacion_termino.day)
+                        dat2 = datetime(fechatermino.year, fechatermino.month, fechatermino.day)
+
+                        if dat > dat2:
+                            print('caso 1')
+                            nn = int(self.idobra)
+                            cx = 0
+                            mt = 0
+                            for c in range(nn):
+                                cx = cx + 1
+                                mt = mt + b_programa.programa_contratos[(int(cx) - 1)].monto
+                                print(b_programa.programa_contratos[(int(cx) - 1)].monto)
+
+                            ultimo_monto = b_programa.programa_contratos[(int(self.idobra) - 1) + 1].monto
+
+                            f_pt = datetime.strptime(
+                                str(b_programa.programa_contratos[(int(self.idobra) - 1)].fecha_termino), date_format)
+                            f_et = datetime.strptime(str(f_estimacion_termino), date_format)
+                            ry = f_et - f_pt
+                            d_entre_fecha = ry.days
+                            print(d_entre_fecha)
+                            xx = (ultimo_monto / diastransest) * d_entre_fecha
+                            xxx = mt
+
+                            m_estimado = xxx + xx # * (diastransest + 1)
+
+                            self.x1 = xx
+                            self.x2 = xxx
+                            self.ultimomonto = ultimo_monto
+
+                            self.diasest = diasest
+                            self.diastransest = diastransest
+
+                            # MONTO PROGRAMADO PARA ESTA ESTIMACION
+                            self.monto_programado_est = m_estimado
+                            # self.reduccion = monto_final
+                            # DIAS DE DIFERENCIA ENTRE EST
+                            self.diasdif = dias + 1
+                            # TOTAL DIAS PERIODO PROGRAMA
+                            self.diasperiodo = total_dias_periodo
+                            # MONTO DIARIO PROGRAMADO
+                            self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                            # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
+                            self.diasrealesrelacion = self.montoreal / self.montodiario_programado
+                            # DIAS DE DESFASAMIENTO
+                            if self.dias_transcurridos <= self.diasrealesrelacion:
+                                self.dias_desfasamiento = 0
+                            else:
+                                self.dias_desfasamiento = self.dias_transcurridos - self.diasrealesrelacion
+                            # MONTO DE ATRASO
+                            self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
+                            # PORCENTAJE ESTIMADO
+                            self.porcentaje_est = (m_estimado / monto_contrato) * 100
+                            # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
+                            # %
+                            self.porc_total_ret = self.retencion * self.dias_desfasamiento
+
+                            self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
+
+                            print('retenido_anteriormente', self.retenido_anteriormente)
+                            print('total_ret_est', self.total_ret_est)
+                            print('ret_neta_est', self.ret_neta_est)
+
+                            if self.ret_neta_est == 0:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                            elif self.retenido_anteriormente <= self.total_ret_est:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                            else:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                            print('retencion neta', self.ret_neta_est)
+                        '''else:
+                            print('#5 ES NORMAL')
+                            ultimo_monto = i.monto
+
+                            _programa_cx = self.env['programa.programa_obra'].search_count(
+                                [('obra.id', '=', self.obra.id)])
+                            if _programa_cx == 1:
+                                x1 = acum
+                            else:
+                                x1 = acum - ultimo_monto
+
+                            x2 = x1 / (total_dias_periodo + 1)
+                            m_estimado = x2 * diastransest
+
+                            self.x1 = x1
+                            self.x2 = x2
+                            self.ultimomonto = ultimo_monto
+
+                            self.diasest = diasest
+                            self.diastransest = diastransest
+
+                            # MONTO PROGRAMADO PARA ESTA ESTIMACION
+                            self.monto_programado_est = m_estimado
+                            # self.reduccion = monto_final
+                            # DIAS DE DIFERENCIA ENTRE EST
+                            self.diasdif = dias + 1
+                            # TOTAL DIAS PERIODO PROGRAMA
+                            self.diasperiodo = total_dias_periodo
+                            # MONTO DIARIO PROGRAMADO
+                            self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                            # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
+                            self.diasrealesrelacion = self.montoreal / self.montodiario_programado
+                            # DIAS DE DESFASAMIENTO
+                            if self.dias_transcurridos <= self.diasrealesrelacion:
+                                self.dias_desfasamiento = 0
+                            else:
+                                self.dias_desfasamiento = self.dias_transcurridos - self.diasrealesrelacion
+                            # MONTO DE ATRASO
+                            self.monto_atraso = self.dias_desfasamiento * self.montodiario_programado
+                            # PORCENTAJE ESTIMADO
+                            self.porcentaje_est = (m_estimado / monto_contrato) * 100
+                            # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
+                            # %
+                            self.porc_total_ret = self.retencion * self.dias_desfasamiento
+
+                            self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
+
+                            if self.ret_neta_est == 0:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                            elif self.retenido_anteriormente <= self.total_ret_est:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+                            else:
+                                self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est'''
 
                 elif datem3 <= datem4:
                     acum = acum + i.monto
@@ -665,6 +737,8 @@ class Estimaciones(models.Model):
                     # MONTO DIARIO PROGRAMADO
                     self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
                     # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
+                    if self.montodiario_programado == 0:
+                        self.montodiario_programado = 1
                     self.diasrealesrelacion = self.montoreal / self.montodiario_programado
                     # DIAS DE DESFASAMIENTO
                     if self.dias_transcurridos <= self.diasrealesrelacion:
@@ -678,6 +752,7 @@ class Estimaciones(models.Model):
                     # TOTAL DE LA RETENCION HASTA ESTA ESTIMACION
                     # %
                     self.porc_total_ret = self.retencion * self.dias_desfasamiento
+
                     self.total_ret_est = (self.monto_atraso * self.porc_total_ret) / 100
 
                     if self.ret_neta_est == 0:
@@ -686,6 +761,7 @@ class Estimaciones(models.Model):
                         self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
                     else:
                         self.ret_neta_est = self.retenido_anteriormente - self.total_ret_est
+
                 else:
                     print('no x2')
             else:
@@ -701,10 +777,10 @@ class Estimaciones(models.Model):
         if b_est_count == 0:
             print('AUN NO HAY ESTIMACIONES')
         else:
-            if b_est[int(self.idobra)-1].idobra == b_est[0].idobra:
+            if b_est[int(self.idobra) - 1].idobra == b_est[0].idobra:
                 self.retenido_anteriormente = 0
             else:
-                self.retenido_anteriormente = b_est[int(self.idobra)-2].total_ret_est
+                self.retenido_anteriormente = b_est[int(self.idobra) - 2].total_ret_est
 
     # RETENCION NETA A APLICAR EN ESTA ESTIMACION
 
@@ -713,7 +789,7 @@ class Estimaciones(models.Model):
     @api.depends('retenido_anteriormente')
     def devolucion_est_metod(self):
         if self.retenido_anteriormente >= self.total_ret_est:
-            self.devolucion_est = self.retenido_anteriormente - self.total_ret_est
+            self.devolucion_est = self.retenido_anteriormente - self.ret_neta_est
         else:
             self.devolucion_est = 0
 
@@ -826,7 +902,6 @@ class Estimaciones(models.Model):
 
     # METODO PARA JALAR IMPORTE DE LOS CONCEPTOS DE PARTIDA
     @api.one
-    @api.depends('conceptos_partidas')
     def suma_conceptos(self):
         suma = 0
         for i in self.conceptos_partidas:
@@ -844,7 +919,7 @@ class Estimaciones(models.Model):
             for rec in self:
                 rec.update({
                     'estimacion_subtotal': self.estimado - self.amort_anticipo
-                }) # (self.estimado - self.amort_anticipo) - (self.estimado * self.b_iva)
+                })  # (self.estimado - self.amort_anticipo) - (self.estimado * self.b_iva)
 
     # METODO PARA CALCULAR ESTIMACION IVA.
     @api.one
@@ -861,6 +936,8 @@ class Estimaciones(models.Model):
     def Importe_liquido(self):
         for rec in self:
             if self.retenido_anteriormente <= self.total_ret_est:
+                print('+++++++++++++++++++++++++++++++++', self.ret_neta_est)
+                print('+++++++++++++++++++++++++++++++++', self.total_ret_est)
                 rec.update({
                     'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.ret_neta_est
                 })
@@ -869,7 +946,6 @@ class Estimaciones(models.Model):
                 rec.update({
                     'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est
                 })
-
 
     # METODO PARA CALCULAR ESTIMACION + IVA
     @api.one
@@ -881,8 +957,7 @@ class Estimaciones(models.Model):
             })
 
     # METODO PARA SUMAR DEDUCCIONES
-    @api.multi
-    @api.onchange('estimacion_facturado')
+    @api.one
     def SumaDeducciones(self):
         suma = 0
         for i in self.deducciones:
@@ -928,7 +1003,6 @@ class Estimaciones(models.Model):
                                                'cantidad': conceptos.cantidad}]]
             })
 
-
     @api.one
     def Estimacion(self):
         self.estimacion_id = self.id
@@ -936,7 +1010,6 @@ class Estimaciones(models.Model):
     @api.one
     def obra_enlace(self):
         self.obra_id = self.obra
-
 
 class Detalleconceptos(models.Model):
     _name = 'control.detalle_conceptos'
@@ -1012,38 +1085,33 @@ class Detalleconceptos(models.Model):
                 'importe': rec.cantidad * rec.precio_unitario
             })
 
-
 class Deducciones(models.Model):
     _name = 'control.deducciones'
     # importacion
     id_sideop = fields.Integer()
-    num_esti = fields.Integer()
 
-    # PENDIENTE
     estimacion = fields.Many2one('control.estimaciones', 'id hacia estimaciones para conexion', store=True)
 
     name = fields.Char()
     porcentaje = fields.Float()
     valor = fields.Float(store=True)
 
-
 class Ordenes_Cambio(models.Model):
     _name = 'control.ordenes_cambio'
     _rec_name = 'vinculo_estimaciones'
-    orden_pago = fields.Char(string='Orden de pago',required=True, size=10)
+    orden_pago = fields.Char(string='Orden de pago', required=True, size=10)
     vinculo_estimaciones = fields.Many2one('control.estimaciones', string='Estimación id', store=True)
     numero_contrato = fields.Many2one('proceso.elaboracion_contrato', string='Contrato',
                                       related="vinculo_estimaciones.obra.numero_contrato")
 
-    fecha = fields.Date(string='Fecha',required=True)
-    total_estimado = fields.Float(string='Total estimación',required=True)
-    cuentas_bancos = fields.Many2one('control.cuentasbancos',required=True)
+    fecha = fields.Date(string='Fecha', required=True)
+    total_estimado = fields.Float(string='Total estimación', required=True)
+    cuentas_bancos = fields.Many2one('control.cuentasbancos', required=True)
 
     @api.constrains('orden_pago')
     def _validar_lenorderpago(self):
         if len(str(self.orden_pago)) < 10:
             raise ValidationError("La orden de pago debe de ser de 10 digitos.")
-
 
 class CuentasBanco(models.Model):
     _name = 'control.cuentasbancos'

@@ -114,6 +114,20 @@ class Partidas(models.Model):
     programaInversion = fields.Many2one('generales.programas_inversion', string="Programa de Inversión",
                                         related="numero_contrato.adjudicacion.programas_inversion_adjudicacion")
 
+    # GALERIA DE IMAGENES DE AVANCE FINANCIERO
+    # galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
+
+    _url = fields.Char(compute="_calc_url")
+
+    @api.one
+    def _calc_url(self):
+        original_url = "http://localhost:1269/galeria"
+        self._url = original_url
+
+    @api.multi
+    def imprimir_accion(self):
+        return {"type": "ir.actions.act_url", "url": self._url, "target": "new", }
+
     # METODO DE BUSQUEDA DE DATOS DE ADJUDICACION
     '''@api.one
     @api.depends('id_partida')
@@ -161,6 +175,17 @@ class Partidas(models.Model):
     # NOTA CAMBIAR DESPUES LOS VALORES DE IVA A PERSONALIZADOS NO FIJOS
 
     # CONCEPTOS CONTRATADOS DE PARTIDAS
+    _url_conceptos = fields.Char(compute="_calc_url_conceptos")
+
+    @api.one
+    def _calc_url_conceptos(self):
+        original_url = "http://35.238.206.12:56733/?id=" + str(self.id) + "&partida=" + str(self.num_contrato_related)
+        self._url_conceptos = original_url
+
+    @api.multi
+    def imprimir_accion_concepto(self):
+        return {"type": "ir.actions.act_url", "url": self._url_conceptos, "target": "new", }
+
     conceptos_partidas = fields.Many2many('proceso.conceptos_part', required=True)
 
     conceptos_modificados = fields.Many2many('proceso.conceptos_modificados', required=True)
@@ -174,9 +199,6 @@ class Partidas(models.Model):
     diferencia = fields.Float(string="Diferencia:", compute="Diferencia", required=True)
 
     # ANTICIPOS
-    # VERIFICAR PARA IMPORTACION DE ANTICIPO SI ROW[ID] SERA NECESARIA PARA POSTERIORES IMPORTACIONES
-    # id_sideop_anticipo = fields.Integer()
-
     fecha_anticipos = fields.Date(string="Fecha Anticipo", )
     porcentaje_anticipo = fields.Float(string="Anticipo Inicio", default="0.30", )
     total_anticipo_porcentaje = fields.Float(string="Total Anticipo", compute="anticipo_por")
@@ -217,6 +239,14 @@ class Partidas(models.Model):
     ret_dev = fields.Float(string="Retención/Devolución:", required=False, )
     sancion = fields.Float(string="Sanción por Incump. de plazo:", required=False, )
     a_pagar = fields.Float(string="Importe liquido:", required=False, )
+
+    porcentaje_est = fields.Float('% Programado', compute='por_programado')
+
+    @api.one
+    def por_programado(self):
+        b_esti = self.env['control.estimaciones'].search([('obra.id', '=', self.id)])
+        for i in b_esti:
+            self.porcentaje_est = i.porcentaje_est
 
     # PENAS CONVENCIONALES
     menos_clau_retraso = fields.Float(string="Menos Clausula Retraso:", required=False, )

@@ -116,6 +116,12 @@
                                     <field name="total_ret_est"/>
                                     <field name="ret_neta_est" force_save="1"/>
                                     <field name="devolucion_est" force_save="1"/>
+
+                                    <field name="x1" />
+                                    <field name="x2" />
+                                    <field name="ultimomonto" />
+                                    <field name="diastransest" />
+                                    <field name="diasest" />
                                     <br/>
                                     <field name="tipo_estimacion" widget="radio"/>
                                 </group>
@@ -328,7 +334,7 @@
                 <field name="estimacion_iva" string="I.V.A" sum="Total I.V.A"/>
                 <field name="estimacion_facturado" string="Facturado" sum="Total Facturado"/>
                 <field name="estimado_deducciones" string="Deducciones" sum="Total Deducciones"/>
-                <field name="total_ret_est" string="Ret/Dev." sum="Total Ret/Dev"/>
+                <!-- field name="total_ret_est" string="Ret/Dev." sum="Total Ret/Dev"/ -->
                 <field name="ret_neta_est" string="Ret/Dev." sum="Total Ret/Dev"/>
                 <field name="sancion" string="Sanción" sum="Total Sanción"/>
                 <field name="a_pagar" string="A pagar" sum="Total Importe Liquido"/>
@@ -363,8 +369,9 @@
       <field name="arch" type="xml">
         <tree create="false">
             <field name="fecha" string="Fecha"/>
-            <field name="num_contrato_related" string="# Contrato"/>
+            <field name="numero_contrato" string="# Contrato"/>
             <field name="objeto" string="Objeto" />
+            <field name="porcentaje_est" />
             <field name="contratista" string="Contratista" />
             <field name="obra" string="Obra"/>
             <field name="residente_obra" string="Residente"/>
@@ -382,27 +389,26 @@
           </xpath -->
             <form string="" >
                 <sheet>
-                    <button string="Estado de Cuenta" type="action" name="%(estimacion_reporte_estado_cuenta1)d" class="oe_highlight"
-                              help="Imprimir Estado de Cuenta"
-                              icon="fa-print"/>
 
                   <div class="oe_button_box oe_read_only" name="button_box" attrs="{'invisible': [('verif_programa', '=', False)]}">
 
-                  <button type="action" name="%(action_estimaciones1)d" class="oe_stat_button" string="Estimaciones /" context="{
+                  <button type="action" name="%(action_estimaciones1)d" class="oe_stat_button" string="ESTIMACIONES " context="{
                        'search_default_obra': active_id,
                        'default_obra': active_id
                        }" attrs="{'invisible': [('contar_estimaciones', '&gt;', 0)]}" icon="fa-usd">
-                      <field string="Estimaciones" name="contar_estimaciones" widget="statinfo" />
+                      <field name="contar_estimaciones" widget="statinfo" string="Estimaciones"/>
                   </button>
 
-                  <button type="action" name="%(action_estimaciones2)d" class="oe_stat_button" string="Estimaciones /" context="{
+                  <button type="action" name="%(action_estimaciones2)d" class="oe_stat_button" string="ESTIMACIONES " context="{
                        'search_default_obra': active_id,
                        'default_obra': active_id
                        }" attrs="{'invisible': [('contar_estimaciones', '=', 0)]}" icon="fa-usd">
-                      <field string="Estimaciones" name="contar_estimaciones" widget="statinfo" />
+                      <field name="contar_estimaciones" widget="statinfo" string="Estimaciones"/>
                   </button>
 
-
+                      <button string="Estado de Cuenta" type="action" name="%(estimacion_reporte_estado_cuenta1)d" class="oe_highlight"
+                              help="Imprimir Estado de Cuenta"
+                              icon="fa-print"/>
 
                       <!-- <button type="action" icon="fa-list" string="Estado de Cuenta"></button> -->
 
@@ -462,7 +468,9 @@
                             <field name="a_pagar"/>
                         </tree>
                     </field>
-                    <field name="num_contrato_related"/>
+
+                    <field name="porcentaje_est"/>
+
 
                     <notebook>
                         <page string="Residencia">

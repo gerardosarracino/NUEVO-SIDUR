@@ -282,7 +282,7 @@
                         </group>
                      <hr/>
 
-                  <group colspan="2" col="6">
+                  <group colspan="2" col="7">
                       <h2 colspan="2" align="left"> Catálogo de Niveles/Conceptos del Contrato: <field name="numero_contrato" nolabel="1"/></h2>
 
                       <button name="CategoriasForm" type="object"
@@ -295,6 +295,9 @@
 
                       <button string="Ver Conceptos" type="action" name="%(conceptos_tree_action2)d" class="oe_highlight" context="{
                        'search_default_id_partida': active_id}" icon="fa-book"/>
+
+                      <button string="Importar" type="object" name="imprimir_accion_concepto" class="oe_highlight"  icon="fa-file"/>
+
                   </group>
 
                       <group>

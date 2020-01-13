@@ -5,7 +5,7 @@
             id="estimacion_report"
             model="control.estimaciones"
             string="Control de Estimaciones"
-            report_type="qweb-pdf"
+            report_type="qweb-html"
             paperformat="paperformat_estimacion"
             name="report_estimaciones.report_estimaciones"
         />

@@ -12,7 +12,7 @@
                             <t t-esc="foo"/>
 
                           <div class="page text-center">
-                               <h2>GOBIERNO DEL ESTADO DE SONORA</h2>
+                               <h5>GOBIERNO DEL ESTADO DE SONORA</h5>
                           </div>
 
                             <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
@@ -20,7 +20,7 @@
 
 
 
-                         <div class="text-center">
+                         <div class="text-center" style="font-size: 9px;">
                              <table class="table table-sm table-striped">
                                  <thead>
                                      <tr>
@@ -34,13 +34,13 @@
 
                                  <tbody>
                                     <tr>
-                                        <th><span t-field="o.obra"/></th>
-                                        <th><span t-field="o.fecha_inicio_estimacion"/>
-                                        <strong>AL</strong>
-                                        <span t-field="o.fecha_termino_estimacion"/></th>
-                                        <th><p> LICITACION XXXX</p></th>
-                                        <th><span t-field="o.obra"/></th>
-                                        <th><span t-field="o.contratista_contrato"/></th>
+                                        <td><span t-field="o.obra"/></td>
+                                        <td><span t-field="o.fecha_inicio_estimacion"/>
+                                        <strong> AL </strong>
+                                        <span t-field="o.fecha_termino_estimacion"/> </td>
+                                        <td><span t-field="o.obra"/></td>
+                                        <td><span t-field="o.obra"/></td>
+                                        <td><span t-field="o.contratista_contrato"/></td>
                                     </tr>
                                 </tbody>
                              </table>
@@ -52,55 +52,143 @@
                          <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
                             <t t-esc="foo"/>
 
-                         <div class="text-center">
+                         <div class="text-center" style="font-size: 9px;">
                              <table class="table table-sm table-striped">
-                                 <thead>
-                                     <tr>
-                                         <th>CLAVE</th>
-                                         <th>GRUPO</th>
-                                         <th>CONCEPTO</th>
-                                         <th>MEDIDA</th>
-                                         <th>P.U.</th>
-                                         <th>CANTIDAD</th>
-                                         <th>ESTIMACION ANTERIOR</th>
-                                         <th>ESTIMACION</th>
-                                         <th>IMPORTE</th>
-                                     </tr>
-                                 </thead>
-
-                                 <tbody>
-                                     <tr t-foreach="o.conceptos_partidas" t-as="l">
-                                       <td>
-                                             <span t-field="l.categoria"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.clave_linea"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.concepto"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.medida"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.precio_unitario"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.cantidad"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.est_ant"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.estimacion"/>
-                                       </td>
-                                         <td>
-                                             <span t-field="l.importe_ejecutado"/>
-                                       </td>
-
+                                <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td colspan="4">CONTRATO</td>
+                                        <td colspan="2">ESTIMACION ANTERIOR</td>
+                                        <td colspan="2">ESTIMACION No 2</td>
+                                        <td colspan="3">ACUMULADO</td>
                                     </tr>
+                                    <tr>
+                                        <td>CLAVE</td>
+                                        <td>CONCEPTO</td>
+                                        <td>UNIDAD</td>
+                                        <td>CANTIDAD</td>
+                                        <td>P.U.	</td>
+                                        <td>IMPORTE</td>
+                                        <td>CANTIDAD</td>
+                                        <td>IMPORTE</td>
+                                        <td>CANTIDAD</td>
+                                        <td>IMPORTE</td>
+                                        <td>SUBTOTAL</td>
+                                        <td>P.U.</td>
+                                        <td>TOTAL</td>
+                                    </tr>
+                                    <tr t-foreach="o.conceptos_partidas" t-as="l" t-if="l.estimacion > 0.0">
+                                        <td><span t-field="l.clave_linea"/></td>
+                                        <td><span t-field="l.concepto" class="table-active"/></td>
+                                        <td><span t-field="l.medida"/></td>
+                                        <td><span t-field="l.cantidad"/></td>
+                                        <td><span t-field="l.precio_unitario"/></td>
+                                        <td> <span t-field="l.importe_ejecutado"/></td>
+
+                                        <td><span t-field="l.est_ant"/></td>
+                                        <td><span t-field="l.importe_ejecutado"/></td>
+
+                                        <td><span t-field="l.estimacion"/></td>
+                                        <td><span t-field="l.importe_ejecutado"/></td>
+
+                                        <td>
+                                            <t t-set="suma" t-value="0" />
+                                            <t t-set="suma" t-value="suma + l.est_ant + l.estimacion" />
+                                            <p><t t-esc="suma"/></p>
+                                        </td>
+
+                                        <td><span t-field="l.precio_unitario"/></td>
+
+                                        <td>
+                                            <t t-set="multi" t-value="0" />
+                                            <t t-set="multi" t-value="multi + suma * l.precio_unitario" />
+                                            <p><t t-esc="multi"/></p>
+                                        </td>
+
+                                        <tr>
+                                            <span t-field="l.concepto" class="table-active"/>
+                                        </tr>
+                                    </tr>
+
+                                    <tr class="table-active">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+
+                                        <td>
+                                            <t t-set="suma" t-value="0" />
+                                            <t t-foreach="o.conceptos_partidas" t-as="x">
+                                            <t t-set="suma" t-value="suma + x.importe_ejecutado" />
+                                            </t>
+                                            <strong><t t-esc="suma" t-options='{"widget": "float", "precision": 2}'/></strong>
+                                        </td>
+                                        <td></td>
+                                        <td>x</td>
+                                        <td></td>
+                                        <td>
+                                            <t t-set="suma" t-value="0" />
+                                            <t t-foreach="o.conceptos_partidas" t-as="x">
+                                            <t t-set="suma" t-value="suma + x.importe_ejecutado" />
+                                            </t>
+                                            <strong><t t-esc="suma" t-options='{"widget": "float", "precision": 2}'/></strong>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            <t t-set="suma" t-value="0" />
+                                            <t t-foreach="o.conceptos_partidas" t-as="x">
+                                            <t t-set="suma" t-value="suma + x.importe_ejecutado" />
+                                            </t>
+                                            <strong><t t-esc="suma" t-options='{"widget": "float", "precision": 2}'/></strong>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+
+                                        <t t-set="categoria" t-value="[]"/>
+                                        <t t-foreach="o.conceptos_partidas" t-as="l">
+                                            <t t-set="categoria" t-value="categoria+[l.categoria]"/>
+                                        </t>
+                                        <t t-foreach="set(categoria)" t-as="category">
+                                            <div><strong t-esc="category.name"/></div>
+                                            <t t-foreach="o.conceptos_partidas" t-as="l">
+                                                <t t-if="category.id==l.categoria.id">
+                                                    <div><span t-field="l.clave_linea"/></div>
+                                                </t>
+                                            </t>
+                                        </t>
+
+                                        </td>
+                                        <td>
+
+                                            <t t-set="categoria" t-value="[]"/>
+                                        <t t-foreach="o.conceptos_partidas" t-as="l">
+                                            <t t-set="categoria" t-value="categoria+[l.categoria]"/>
+                                        </t>
+                                        <t t-foreach="set(categoria)" t-as="category">
+                                            <div><strong t-esc="category.name"/></div>
+                                            <t t-foreach="o.conceptos_partidas" t-as="l">
+                                                <t t-if="category.id==l.categoria.id">
+                                                    <div><span t-field="l.concepto"/></div>
+                                                </t>
+                                            </t>
+                                        </t>
+
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+
                                 </tbody>
-                             </table>
+                            </table>
+
                          </div>
                      </t>
                  </t>

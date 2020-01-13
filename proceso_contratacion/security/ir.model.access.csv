@@ -34,6 +34,10 @@ access_proceso_propuesta_lic,proceso.propuesta_lic,model_proceso_propuesta_lic,,
 access_proceso_datos_fallo,proceso.datos_fallo,model_proceso_datos_fallo,,1,1,1,1
 access_proceso_frente,proceso.frente,model_proceso_frente,,1,1,1,1
 access_control_expediente,control.expediente,model_control_expediente,,1,1,1,1
+access_control_estimaciones,control.estimaciones,model_control_estimaciones,,1,1,1,1
+access_control_detalle_conceptos,control.detalle_conceptos,model_control_detalle_conceptos,,1,1,1,1
+access_control_deducciones,control.deducciones,model_control_deducciones,,1,1,1,1
+
 
 
 

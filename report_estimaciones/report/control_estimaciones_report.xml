@@ -24,15 +24,15 @@
                             <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
                             <t t-esc="foo"/>
 
-                         <div class="text-center">
+                         <div class="text-center" style="font-size: 9px;">
                              <table class="table table-sm table-bordered">
                                  <tbody>
                                     <tr>
                                         <td colspan="2" rowspan="2" style="width:7%"><strong>OBRA:</strong></td>
-                                        <td colspan="2" rowspan="2" style="width:61%"><span t-field="o.obra"/></td>
+                                        <td colspan="2" rowspan="2" style="width:40%"><span t-field="o.obra"/></td>
                                         <td rowspan="2" style="width:7%"><strong>LUGAR:</strong></td>
-                                        <td rowspan="2" style="width:15%" class="text-left"><span t-field="o.municipio_contrato"/></td>
-                                        <td style="width:10%"><strong>FECHA:</strong></td>
+                                        <td rowspan="2" style="width:25%" class="text-left"><span t-field="o.municipio_contrato"/></td>
+                                        <td style="width:21%"><strong>FECHA:</strong></td>
                                     </tr>
                                     <tr>
                                         <td><span t-field="o.fecha_contrato"/></td>
@@ -56,7 +56,7 @@
                          <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
                             <t t-esc="foo"/>
 
-                         <div class="text-center">
+                         <div class="text-center" style="font-size: 9px;">
                              <table class="table table-sm table-bordered">
                                  <thead>
                                      <tr>
@@ -101,13 +101,13 @@
                              </table>
                          </div>
 
-                         <div>
+                         <div style="font-size: 9px;">
                          <table class="table table-sm table-bordered">
                              <tr>
-                                 <th class="text-center">ESTADO DE CUENTA ANTICIPO</th>
-                                 <th class="text-center">ESTADO CUENTA DE OBRA</th>
-                                 <th class="text-center">LIQUIDACIÓN</th>
-                                 <th></th>
+                                 <th class="text-center" style="width:20%">ESTADO DE CUENTA ANTICIPO</th>
+                                 <th class="text-center" style="width:60%">LIQUIDACIÓN</th>
+                                 <th class="text-center" style="width:20%">ESTADO CUENTA DE OBRA</th>
+
                              </tr>
                             <tr>
                                 <td class="text-center">
@@ -123,6 +123,30 @@
                                     <p>0.00 </p>
                                 </td>
 
+                                <td class="table-active">
+                                    <p>IMPORTE ESTIMACIÓN  <span t-field="o.estimado" class="float-right mt8"/> </p>
+                                    <p>AMORTIZACIÓN ANTICIPO  <span t-field="o.amort_anticipo" class="float-right mt8"/> </p>
+                                    <p>SUBTOTAL <span t-field="o.estimacion_subtotal" class="float-right mt8"/> </p>
+                                    <p>16 % I.V.A. <span t-field="o.estimacion_iva" class="float-right mt8"/> </p>
+                                    <p>TOTAL <span t-field="o.estimacion_facturado" class="float-right mt8"/></p>
+
+                                    <p><strong>DEDUCCIONES: </strong></p>
+
+                                    <p t-foreach="o.deducciones" t-as="l" >
+
+                                    <span t-field="l.name" class="float-left"/>
+                                    <span t-field="l.valor" class="float-right mt8"/>
+                                        <br/>
+                                    </p>
+
+                                    <p>SANCIÓN POR INCUMPLIMIENTO DE PLAZO <span t-field="o.ret_dev" class="float-right mt8"/> </p>
+                                    <p>RETENCIÓN/DEVOLUCIÓN POR ATRASO <span t-field="o.sancion" class="float-right mt8"/> </p>
+
+                                    <p><strong>ALCANCE LIQUIDO</strong>	<span t-field="o.a_pagar" class="float-right mt8"/></p>
+
+
+                                </td>
+
                                 <td class="text-center">
                                     <p>ESTA ESTIMACION  </p>
                                     <p>105,417.62  </p>
@@ -136,37 +160,7 @@
                                     <p>97,185.14 </p>
                                 </td>
 
-                                <td >
-                                    <p>IMPORTE ESTIMACIÓN  </p>
-                                    <p>AMORTIZACIÓN ANTICIPO  </p>
-                                    <p>SUBTOTAL </p>
-                                    <p>16 % I.V.A. </p>
-                                    <p>TOTAL </p>
-                                    <p><strong>DEDUCCIONES: </strong>  </p>
-                                    <p t-foreach="o.deducciones" t-as="l">
-                                        <p><span t-field="l.name"/></p>
-                                    </p>
 
-                                    <p>SANCIÓN POR INCUMPLIMIENTO DE PLAZO </p>
-                                    <p>RETENCIÓN/DEVOLUCIÓN POR ATRASO </p>
-                                    <p><strong>ALCANCE LIQUIDO</strong>	</p>
-                                </td>
-
-                                <td class="table-active text-right">
-                                    <p><span t-field="o.estimado"/> </p>
-                                    <p><span t-field="o.amort_anticipo"/> </p>
-                                    <p><span t-field="o.estimacion_subtotal"/></p>
-                                    <p><span t-field="o.estimacion_iva"/></p>
-                                    <p><span t-field="o.estimacion_facturado"/></p>
-                                    <br/>
-                                    <p t-foreach="o.deducciones" t-as="l">
-                                        <p><span t-field="l.valor"/></p>
-                                    </p>
-
-                                    <p><span t-field="o.ret_dev"/></p>
-                                    <p><span t-field="o.sancion"/></p>
-                                    <b><span t-field="o.a_pagar"/></b>
-                                </td>
                             </tr>
                          </table>
                      </div>
@@ -174,7 +168,7 @@
                          <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
                             <t t-esc="foo"/>
 
-                     <div class="text-center">
+                     <div class="text-center" style="font-size: 9px;">
                          <table class="table table-condensed">
                              <tr>
                                  <th>FORMULO</th>
