@@ -32,8 +32,6 @@
         'report/penas_convencionales_report.xml',
         'report/estimacion_concentrado_report.xml',
         'report/estimacion_concentrado.xml',
-        'report/estado_de_cuenta.xml',
-        'report/estado_cuenta_report.xml',
     ],
     # only loaded in demonstration mode
    'installable': True,

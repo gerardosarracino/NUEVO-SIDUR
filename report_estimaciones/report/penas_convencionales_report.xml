@@ -6,7 +6,8 @@
                  <t t-foreach="docs" t-as="o">
                      <t t-call="web.external_layout">
 
-                     <div class="page">
+
+                     <div class="page" >
 
                          <div class="text-center" style="font-size: 11px;">
                               <div class="oe_structure">
@@ -28,7 +29,7 @@
                                         </td>
                                         <td class="text-left" style="width:50%">
                                             <span class="float-left mt8">
-                                                <p >PROGRAMA:    <span t-field="o.programa"/></p>
+                                                    <p >PROGRAMA:    <span t-field="o.programa"/></p>
                                                 <p>PERIODO DEL:    <span t-field="o.fecha_inicio_estimacion"/> </p>
                                                 <p>FORMULADA EL:    <span t-field="o.fecha_contrato"/></p>
                                             </span>
@@ -45,9 +46,9 @@
 
                           <div class="text-center" style="font-size: 9px;">
                              <table class="table table-sm table-bordered">
-                                 <thead>
-                                     <tr>
-                                         <th class="table-active" colspan="9">DATOS DE CONTRATACIÓN</th>
+                                 <thead  class="col" style="width:100%;">
+                                     <tr class="text-center">
+                                         <th class="table-active" style="width:85%" colspan="6">DATOS DE CONTRATACIÓN</th>
                                      </tr>
                                  </thead>
                                  <tbody>
@@ -77,9 +78,9 @@
                                      </tr>
                                  </thead>
 
-                                  <tbody>
+                                  <tbody style=" p margin-top: 0; margin-bottom: 0rem !important;">
                                         <tr class="text-left">
-                                            <td style="width:60%">MONTO PROGRAMADO PARA ESTA ESTIMACION</td>
+                                            <td style="width:50%">MONTO PROGRAMADO PARA ESTA ESTIMACION</td>
                                             <td style="width:13.33%"><p t-field="o.monto_programado_est"/></td>
                                             <td style="width:13.33%"><p> <span t-field="o.dias_transcurridos"/>(Días)</p></td>
                                             <td style="width:13.33%"><p>-</p></td>

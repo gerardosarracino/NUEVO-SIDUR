@@ -11,189 +11,328 @@
                          <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
                             <t t-esc="foo"/>
 
-                         <div class="page text-center" >
-                              <div class="oe_structure">
-                               <h4><b>GOBIERNO DEL ESTADO DE SONORA</b></h4>
-                               <h5><b>DIRECCIÓN DE EJECUCIÓN DE OBRA</b></h5>
-                               <h6><b>ESTIMACION CONCENTRADO</b></h6>
-                              </div>
-                          </div>
+                         <style>
+		body {
+			font-size: 12px;
+			font-family: Arial, Helvetica, sans-serif;
+		}
 
-                            <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
-                            <t t-esc="foo"/>
+		#header {
+			text-align: center;
+			border-bottom: 1px solid #666;
+			padding-bottom: 3px;
+		}
 
-                            <hr/>
+		h3,
+		h4,
+		h5 {
+			margin: 0;
+			line-height: 25px;
+		}
 
-                         <div class="text-left">
-                             <table class="table table-sm table-bordered">
-                                 <tbody>
-                                    <tr>
-                                        <td colspan="2" rowspan="2" style="width:50%">
-                                            <p>LOCALIDAD:    <span t-field="o.municipio_contrato"/></p>
-                                            <p>CONTRATO:    <span t-field="o.obra"/></p>
-                                            <p>CONTRATISTA:    <span t-field="o.contratista_contrato"/></p>
-                                        </td>
+		table,
+		td,
+		th {
+			border-color: #eee;
+			font-size: 9px;
+		}
 
-                                        <td style="width:25%" class="noborders">
-                                            <p>PROGRAMA:    <span t-field="o.programa"/></p>
+		caption {
+			font-weight: 700;
+			margin-bottom: 20px;
+			margin-top: 10px;
+		}
 
-                                            <p>PERIODO DEL:    <span t-field="o.fechainicio_contrato"/> </p>
+		#footer h5 {
+			text-align: center;
+			border-bottom: 1px solid #eee;
+		}
 
-                                        </td>
-                                        <td style="width:25%" class="noborders">
-                                            <p>ESTIMACIÓN:    <span t-field="o.idobra"/></p>
-                                            <br/>
-                                            <p>AL
-                                            <span t-field="o.fecha_termino_estimacion"/></p>
-                                        </td>
-                                    </tr>
+		#opciones {
+			position: fixed;
+			top: 0;
+			background-color: #999;
+			padding: 5px;
+			right: 0;
+			z-index: 99999;
+			margin-right: 8px;
+			display: inline-block;
+			-moz-box-shadow: 0 0 3px #999;
+			-webkit-box-shadow: 0 0 3px #999;
+			box-shadow: 0 0 3px #999;
+		}
 
-                                    <tr>
-                                        <td>
-                                             <p>FORMULADA EL:    <span t-field="o.fecha_contrato"/></p>
+		#opciones a {
+			border-right: 1px solid #ccc;
+			padding-right: 5px;
+			color: #fff;
+			text-decoration: none;
+		}
 
-                                        </td>
-                                        <td>
+		#opciones a:last-child {
+			border: none;
+		}
 
-                                        </td>
-                                    </tr>
-                                </tbody>
-                             </table>
-                         </div>
+		#opciones a:before {
+			content: " ";
+		}
+	</style>
 
-                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
-                            <t t-esc="foo"/>
+         <div id="header" style="position:relative;">
 
-                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
-                            <t t-esc="foo"/>
-
-                          <div class="text-center">
-
-                             <table class="table table-sm table-bordered">
-                                 <thead>
-                                     <tr>
-                                         <th class="table-active" style="width:15%">HOJA DE DETALLE</th>
-                                         <th class="table-active" style="width:32%">TIPO DE TRABAJO</th>
-                                         <th class="table-active" style="width:20%">IMPORTE</th>
-                                         <th class="table-active" style="width:32%">OBSERVACIONES</th>
-                                     </tr>
-                                 </thead>
-                                 <tbody>
-                                    <t t-set="i" t-value="1"/>
-                                    <tr t-foreach="o.conceptos_partidas" t-as="l">
-                                        <!-- CONDICION DE SECCIONES -->
-                                        <t t-if="not l.categoria.parent_id">
-                                        <td class="text-left" >
-                                            <!-- CONTADOR -->
-                                            <span t-esc="i"/>
-                                        </td> <t t-set="i" t-value="i+1"/>
-
-                                        <td class="text-left" >
-                                            <span t-field="l.categoria"/>
-                                        </td>
-
-                                        <td class="text-right" >
-                                            <span t-field="l.importe_ejecutado"/>
-                                        </td>
-
-                                        <td class="text-left" >
-                                            <span t-field="l.descripcion"/>
-                                        </td></t>
-                                    </tr>
-
-                                     <tr>
-                                         <td></td>
-                                         <td></td>
-                                         <td></td>
-                                         <td></td>
-                                     </tr>
-
-                                     <tr>
-                                         <td></td>
-                                         <td class="text-left">SUMA</td>
-                                         <td class="text-right"><span t-field="o.estimado"/></td>
-                                         <td></td>
-                                     </tr>
-                                </tbody>
-                             </table>
-                        </div>
-
-                              <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
-                              <t t-esc="foo"/>
-
-                        <div>
-                             <table class="table table-sm table-bordered" >
-                                 <tbody>
-                                        <td class="text-left" style="width:50%">
-                                            <p>IMPORTE ESTIMACION</p>
-                                            <p>AMORTIZACION DE ANTICIPO</p>
-                                            <p>SUBTOTAL	</p>
-                                            <p>16 % I.V.A.</p>
-                                            <p>TOTAL</p>
-                                            <p>TOTAL DEDUCCIONES</p>
-                                            <p>ALCANCE LIQUIDO</p>
-                                        </td>
-                                        <td class="text-right" style="width:50%">
-                                            <p><span t-field="o.estimado"/></p>
-                                            <p><span t-field="o.amort_anticipo"/></p>
-                                            <p><span t-field="o.estimacion_subtotal"/></p>
-                                            <p><span t-field="o.estimacion_iva"/></p>
-                                            <p><span t-field="o.estimacion_facturado"/></p>
-                                            <p><span t-field="o.estimado_deducciones"/></p>
-                                            <p><span t-field="o.a_pagar"/></p>
-                                        </td>
-                                </tbody>
-                            </table>
-                        </div>
-
-                     <div class="text-center">
-
-                         <table class="table table-sm table-bordered">
-                              <tbody>
-                                  <tr>
-                                   <td><b>REVISO</b>
-                                   <p>ING. GERMAN MARTINEZ SAUCEDO	</p>
-                                   <p>SUPERVISOR SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO</p>
-                                   </td>
-                                  </tr>
-                              </tbody>
-                         </table>
-
-                         <t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
-                              <t t-esc="foo"/>
+            <h3>GOBIERNO DEL ESTADO DE SONORA</h3>
+            <h4>
+                SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO		</h4>
+            <h5>ESTIMACION CONCENTRADO</h5>
+        </div>
 
 
-                         <table class="table table-condensed">
-                                 <thead>
-                                     <tr>
-                                         <th style="width:50%">CONFORME</th>
-                                         <th style="width:50%">APROBO</th>
-                                     </tr>
-                                 </thead>
-                                  <tbody>
+        <div style="font-size: 9px;">
+	<div id="datosObra" style="margin-top:10px; border:1px solid #eee;">
+		<div style="float:left; width:50%; border-right:1px solid #eee;">
+			<table width="100%" border="0" cellpadding="3" cellspacing="0">
+				<tbody><tr>
+					<td width="21%">LOCALIDAD:</td>
+					<td>
+						<span t-field="o.municipio_contrato"/>					</td>
+				</tr>
+				<tr>
+					<td>CONTRATO:</td>
+					<td>
+						<span t-field="o.obra"/>					</td>
+				</tr>
+				<tr>
+					<td>CONTRATISTA:</td>
+					<td>
+						<span t-field="o.contratista_contrato"/>.					</td>
+				</tr>
+			</tbody></table>
+		</div>
+		<div style="float:left; width:49.8%;">
+			<table width="100%" border="0" cellpadding="3" cellspacing="0">
+				<tbody><tr>
+					<td width="21%">PROGRAMA:</td>
+					<td width="33%">
+						<span t-field="o.programa"/>					</td>
+					<td width="16%">ESTIMACIÓN No
+											</td>
+					<td width="30%" style="font-size:16px;">
+						<span t-field="o.idobra"/>					</td>
+				</tr>
+				<tr>
+					<td>PERIODO DEL:</td>
+					<td>
+						<span t-field="o.fechainicio_contrato"/>					</td>
+					<td>AL:</td>
+					<td>
+						<span t-field="o.fecha_termino_estimacion"/>					</td>
+				</tr>
+				<tr>
+					<td>FORMULADA EL:</td>
+					<td>
+						<span t-field="o.fecha_contrato"/>					</td>
+					<td>.</td>
+					<td>.</td>
+				</tr>
+			</tbody></table>
+		</div>
+		<div style="clear:both; height:1%;"></div>
+	</div>
+	<div style="margin-top:15px;">
+		<table width="100%" border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;">
+			<tbody><tr>
+				<th width="5%">HOJA DE DETALLE</th>
+				<th width="45%">TIPO DE TRABAJO</th>
+				<th width="15%">IMPORTE</th>
+				<th>OBSERVACIONES</th>
+			</tr>
 
-                                      <tr>
-                                        <td><span t-field="o.contratista_contrato"/><br/>
-                                        <p style="font-size: 11px;">CONTRATISTA</p>
-                                        </td>
+                <t t-set="i" t-value="1"/>
 
-                                        <td><span t-field="o.subdirector_contrato"/><br/>
-                                        <p style="font-size: 11px;">DIRECTOR DE OBRAS SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO</p></td>
-                                    </tr>
-                                      <tr>
-                                        <td>xxxxxxx<br/>
-                                        <p style="font-size: 11px;">SUPERVISIÓN EXTERNA</p></td>
-
-                                        <td><span t-field="o.subdirector_contrato"/><br/>
-                                        <p style="font-size: 11px;">DIRECTOR GENERAL DE EJECUCIÓN DE OBRA SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO
-                                        </p></td>
-
-                                    </tr>
+                <t t-set="categoria" t-value="[]"/>
+                <t t-foreach="o.conceptos_partidas" t-as="l">
+                   <t t-set="categoria" t-value="categoria+[l.categoria]"/>
+                </t>
+                <t t-foreach="set(categoria)" t-as="category">
+			<tr>
 
 
-                                  </tbody>
-                        </table>
-                         </div>
+                    <td class="text-left" >
+                        <!-- CONTADOR -->
+                        <span t-esc="i"/>
+                    </td>
+
+                 <td class="text-left">
+                        <span><strong t-esc="category.name"/></span>
+                        <t t-set="y" t-value="0"/>
+
+                        <t t-foreach="o.conceptos_partidas" t-as="l" > <!-- t-if="str(l.categoria) == str(category.name)" -->
+
+                        <t t-if="category in l.categoria" t-set="y" t-value="y + l.importe_ejecutado" /> </t>
+
+                </td><t t-set="i" t-value="i+1"/>
+
+
+                <td class="text-right" >
+                     <span t-esc="y"/>
+                </td>
+
+                <td class="text-left" >
+                    &#160;
+                </td>
+
+            </tr></t>
+
+                <tr>
+				<td align="center"></td>
+				<td></td>
+				<td align="right"></td>
+				<td>
+									</td>
+			</tr>
+			<tr>
+				<td>.</td>
+				<td align="right">SUMA</td>
+                <td class="text-right"><t t-set="x" t-value="0"/>
+                    <t t-foreach="o.conceptos_partidas" t-as="l">
+                        <t t-set="x" t-value="x + l.importe_ejecutado" />
+                    </t> <span t-esc="x"/>
+                </td>
+				<td>.</td>
+			</tr>
+		</tbody></table>
+	</div>
+
+        <div style="margin-top:15px;">
+            <div style="float:left; width:50%;">
+                <div style="border:1px solid #eee; margin-bottom:10px;">
+                    <table width="100%" border="0" cellpadding="3" cellspacing="0">
+                        <tbody><tr>
+                            <td width="61%">IMPORTE ESTIMACION</td>
+                            <td width="39%" align="right" valign="middle">
+                                <span t-field="o.estimado"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>AMORTIZACION DE ANTICIPO</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.amort_anticipo"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>SUBTOTAL</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.estimacion_subtotal"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>16 % I.V.A.</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.estimacion_iva"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>TOTAL</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.estimacion_facturado"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>TOTAL DEDUCCIONES</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.estimado_deducciones"/>						</td>
+                        </tr>
+                        <tr>
+                            <td>ALCANCE LIQUIDO</td>
+                            <td align="right" valign="middle">
+                                <span t-field="o.a_pagar"/>						</td>
+                        </tr>
+                    </tbody></table>
+                </div>
+
+                <div style="border:1px solid #eee;">
+                    <table width="100%" border="0" cellpadding="3" cellspacing="0">
+                        <strong align="center">REVISO</strong>
+                        <tbody><tr>
+                            <td></td>
+                            <!-- <td>.</td> -->
+                        </tr>
+                        <tr>
+                            <td width="50%" align="center">
+                                VICTOR MANUEL MEDINA MOLINA						</td>
+                            <!--<td align="center">ING. GERARDO TOGAWA ESPINOZA</td> -->
+                        </tr>
+                        <tr>
+                            <td align="center">SUPERVISOR
+                                <br/>
+                                SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO						</td>
+                            <!--<td align="center">DIRECTOR GENERAL DE EJECUCIÓN DE OBRA</td> -->
+                        </tr>
+                    </tbody></table>
+                </div>
+            </div>
+            <div style="float:left; width:49%; margin-left:5px; height:260px; border:1px solid #eee;">
+                <table width="100%" border="0" cellpadding="3" cellspacing="0">
+                    <tbody><tr>
+                        <td align="center" style="font-size:10px; font-weight:700;">CONFORME</td>
+                        <td align="center" style="font-size:10px; font-weight:700;">APROBO</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>.</td>
+                        <td>.</td>
+                    </tr>
+                    <tr>
+                        <td width="50%">.</td>
+                        <td>.</td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                            <span t-field="o.contratista_contrato"/>					</td>
+                        <td align="center">
+                            JUVENTINO QUINTANA AMAYA					</td>
+                    </tr>
+                    <tr>
+                        <td align="center">CONTRATISTA</td>
+                        <td align="center">DIRECTOR DE OBRAS
+                            <br/> SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO</td>
+                    </tr>
+                    <tr>
+                        <td align="center">.</td>
+                        <td align="center">.</td>
+                    </tr>
+                    <tr>
+                        <td align="center"><t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                                <t t-esc="foo"/></td>
+                        <td align="center"><t t-set="foo" t-value=" '     '.replace(' ',u'\xa0').encode('utf-8') "/>
+                                <t t-esc="foo"/></td>
+                    </tr>
+                    <tr>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                    </tr>
+                    <tr>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                                                </td>
+                        <td align="center">
+                            ING. GERARDO TOGAWA ESPINOZA					</td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                            <br/>SUPERVISIÓN EXTERNA					</td>
+                        <td align="center">
+                            DIRECTOR GENERAL DE EJECUCIÓN DE OBRA<br/> SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO					</td>
+                    </tr>
+                </tbody></table>
+            </div>
+            <div style="clear:both; height:1%;"></div>
+
+        </div>
+                     </div>
+                         
+
                      </t>
                  </t>
             </t>
