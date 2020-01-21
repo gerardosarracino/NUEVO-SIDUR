@@ -41,18 +41,18 @@
                         </group>
                         <hr/>
                                <!-- PLAZO -->
-                           <group string="Plazo" attrs="{'invisible': [('tipo_convenio','!=', '1')]}" colspan="2" col="2">
+                           <group string="Plazo" attrs="{'invisible': [('tipo_convenio','!=', 'PL')]}" colspan="2" col="2">
                            <field name="plazo_fecha_inicio" class="oe_inline"/>
                            <field name="plazo_fecha_termino" class="oe_inline"/>
                            </group>
 
                                 <!-- OBJETO -->
-                           <group string="Objeto" attrs="{'invisible': [('tipo_convenio','!=', '2')]}" colspan="2" col="2">
+                           <group string="Objeto" attrs="{'invisible': [('tipo_convenio','!=', 'OB')]}" colspan="2" col="2">
                            <field name="objeto_nuevo_objeto" nolabel="1" class="oe_inline"/>
                            </group>
 
                            <!-- MONTO -->
-                           <group string="Monto" attrs="{'invisible': [('tipo_convenio','!=', '3')]}" colspan="2" col="2">
+                           <group string="Monto" attrs="{'invisible': [('tipo_convenio','!=', 'MT')]}" colspan="2" col="2">
                            <field name="tipo_monto" class="oe_inline"/>
                            <field name="monto_importe" class="oe_inline" />
                            <field name="monto_iva" />
@@ -60,16 +60,16 @@
                            </group>
 
                            <!-- MONTO/PLAZO -->
-                           <group string="Monto/Plazo" attrs="{'invisible': [('tipo_convenio','!=', '4')]}" >
+                           <group string="Monto/Plazo" attrs="{'invisible': [('tipo_convenio','!=', 'BOTH')]}" >
                                <group colspan="2" col="4">
-                                    <field name="monto_plazo_fecha_inicio" class="oe_inline"/>
-                                    <field name="monto_plazo_fecha_termino" class="oe_inline" />
+                                    <field name="plazo_fecha_inicio" class="oe_inline"/>
+                                    <field name="plazo_fecha_termino" class="oe_inline"/>
                                </group>
                                <group colspan="2" col="2">
-                                   <field name="tipo_monto_plazo" class="oe_inline" />
-                                   <field name="monto_plazo_importe" class="oe_inline"/>
-                                   <field name="monto_plazo_iva" class="oe_inline"/>
-                                   <field name="monto_plazo_total" class="oe_inline" />
+                                   <field name="tipo_monto" class="oe_inline"/>
+                                   <field name="monto_importe" class="oe_inline" />
+                                   <field name="monto_iva" />
+                                   <field name="monto_total" />
                                </group>
                            </group>
                 </sheet>
@@ -165,23 +165,31 @@
       <field name="arch" type="xml">
         <form>
             <sheet>
-                    <div  class="oe_button_box oe_read_only" name="button_box">
+                    <div class="text-center"> <!-- class="oe_button_box oe_read_only" name="button_box" -->
                          <button  type="action" name="%(proc_convenios_action_window)d" icon="fa-list-alt"
-                         context="{'default_contrato': active_id, 'search_default_contrato': active_id}">
+                         context="{'default_contrato': active_id, 'search_default_contrato': active_id}"
+                         class="btn btn-outline-primary btn-lg btn-block">
                             <span><field name="count_convenios_modif"/> Convenios modificatorios</span>
                          </button>
                      </div>
+                <p>&#160;</p>
+                <p>&#160;</p>
+                <p>&#160;</p>
 
-                  <group string="Nombre de la Obra:">
-                            <field name="obra" nolabel="1"/>
+                        <div>
+                            <b>Nombre de la Obra: </b>
+                        </div>
+                        <group>
+
+                            <field name="obra" nolabel="1" readonly="1"/>
                         </group>
                             <hr/>
                         <group colspan="2" col="5" context="{'default_ejercicio': obra.id}">
-                            <separator string="Programa"/>
-                            <separator string="Ejercicio" />
-                            <separator string="Monto"/>
-                            <separator string="Municipio"/>
-                            <separator string="Localidad"/>
+                            <b>Programa</b>
+                            <b>Ejercicio</b>
+                            <b>Monto</b>
+                            <b>Municipio</b>
+                            <b>Localidad</b>
                         </group>
                         <group colspan="2" col="6">
                             <field name="programaInversion" readonly="True" string="" nolabel="1"/>
@@ -192,19 +200,20 @@
                         </group>
                           <hr/>
                         <group colspan="2" col="5">
-                           <separator string="Fecha del Anticipo"/>
-                           <separator string="Fecha del contrato"/>
-                           <separator string="Fecha de Inicio Contractual"/>
-                           <separator string="Fecha de Termino Contractual"/>
-                           <separator string="Supervision Externa"/>
+                            <b>Fecha del Anticipo</b>
+                            <b>Fecha del contrato</b>
+                            <b>Fecha de Inicio Contractual</b>
+                            <b>Fecha de Termino Contractual</b>
+                            <b>Supervision Externa</b>
                         </group>
+
                         <group colspan="2" col="6">
                           <field name="fecha_anticipos" readonly="1" string="" nolabel="1"/>
                           <field name="fecha" string="" nolabel="1"/>
                           <field name="fechainicio" string="" nolabel="1"/>
                           <field name="fechatermino" string="" nolabel="1"/>
                           <field name="supervisionexterna1" string="" nolabel="1"/>
-                        </group>
+                  </group>
               </sheet>
             </form>
           </field>

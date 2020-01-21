@@ -13,6 +13,9 @@ class CatalogoNivel(models.Model):
     id_partida = fields.Many2one(comodel_name="partidas.partidas", string="Numero de partida", readonly=True,
                                  store=True)
 
+    # clave pedida por alan
+    clave_linea = fields.Char('Clave')
+
     name = fields.Char('Categoria', index=True, translate=True)
     descripcion = fields.Text('Descripción', )
     parent_id = fields.Many2one('catalogo.categoria', 'Categoria Padre', index=True, ondelete='cascade')

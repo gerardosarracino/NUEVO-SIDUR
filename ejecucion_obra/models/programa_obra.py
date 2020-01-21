@@ -7,6 +7,7 @@ class ProgramaObra(models.Model):
 
     # IMPORTACION
     id_prog = fields.Integer(string="ID PROGRAMA", required=False, )
+
     # TERMINA IMPORTACION
     obra = fields.Many2one('partidas.partidas', string='Obra:', readonly=True)
 
@@ -16,7 +17,8 @@ class ProgramaObra(models.Model):
 
     fecha_inicio_programa = fields.Date('Fecha Inicio:', related="programa_contratos.fecha_inicio")
     fecha_termino_programa = fields.Date('Fecha Término:', compute="fechaTermino")
-    monto_programa_aux = fields.Float(compute='SumaProgramas')
+
+    # monto_programa_aux = fields.Float(compute='SumaProgramas')
 
     restante_programa = fields.Float(string="Restante:", compute='DiferenciaPrograma')
 
@@ -25,13 +27,14 @@ class ProgramaObra(models.Model):
     razon = fields.Text(string="Versión:", required=False, default="")
     # MONTO DE LA PARTIDA
     monto_sinconvenio = fields.Float(string="Total Contrato sin Convenio", compute="BmontoContrato")
+
     # TOTAL DEL PROGRAMA CON O SIN CONVENIO
-    total_partida = fields.Float(string="Total", compute="total_programa_convenio") # related="obra.total_catalogo"
+    total_partida = fields.Float(string="Total", related="obra.total") # related="obra.total_catalogo" compute="total_programa_convenio"
 
     select_tipo = [('Monto', 'Monto'), ('2', 'Plazo'), ('3', 'Ambos')]
     tipo = fields.Selection(select_tipo, string="Tipo:", store=True)
     # VERIFICAR SI EXISTE CONVENIO MODIFICATORIO
-    count_convenio = fields.Integer(compute="total_programa_convenio")
+    # count_convenio = fields.Integer(compute="total_programa_convenio")
 
     total_programa = fields.Float(compute="totalPrograma",)
 
@@ -45,7 +48,6 @@ class ProgramaObra(models.Model):
         for i in self.programa_contratos:
             acum = acum + i.monto
             self.total_programa = acum
-            print(self.total_programa)
 
     '''@api.multi
     def write(self, values):
@@ -98,14 +100,13 @@ class ProgramaObra(models.Model):
     def partidaEnlaceId(self):
         self.obra_id2 = self.obraid
 
-    @api.multi
+    '''@api.multi
     @api.onchange('total_partida')
     def BmontoContrato(self):
         b_partida = self.env['partidas.partidas'].search([('id', '=', self.obra.id)])
-        self.monto_sinconvenio = b_partida.monto_sin_iva
+        self.monto_sinconvenio = b_partida.monto_sin_iva'''
 
-    @api.one
-    @api.depends('total_partida', 'programa_contratos')
+    '''@api.one
     def total_programa_convenio(self):
         count_convenio = self.env['proceso.convenios_modificado'].search_count([('contrato.id', '=', self.obra.id)])
         self.count_convenio = count_convenio
@@ -117,16 +118,16 @@ class ProgramaObra(models.Model):
             for i in importe_convenio:
                 self.total_partida = i.monto_importe
         else:
-            self.total_partida = self.monto_sinconvenio
+            self.total_partida = self.monto_sinconvenio'''
 
-    @api.multi
+    '''@api.multi
     @api.onchange('programa_contratos')
     def SumaProgramas(self):
         suma = 0
         for i in self.programa_contratos:
             resultado = i.monto
             suma = suma + resultado
-            self.monto_programa_aux = suma
+            self.monto_programa_aux = suma'''
 
     # METODO PARA SACAR LA FECHA DEL M2M
     @api.one
@@ -137,15 +138,8 @@ class ProgramaObra(models.Model):
             self.fecha_termino_programa = str(resultado)
 
     @api.one
-    @api.depends('monto_programa_aux')
     def DiferenciaPrograma(self):
-        if self.count_convenio >= 1:
-            importe_convenio = self.env['proceso.convenios_modificado'].search([('contrato.id', '=', self.obra.id)])
-            for i in importe_convenio:
-                monto_convenio = i.monto_importe
-                self.restante_programa = (self.total_programa + monto_convenio) - self.monto_programa_aux
-        else:
-            self.restante_programa = (self.total_programa) - self.monto_programa_aux
+        self.restante_programa = self.total_partida - self.total_programa
 
 
 # CLASE NUEVA

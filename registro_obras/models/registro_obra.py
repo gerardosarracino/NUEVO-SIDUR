@@ -1,6 +1,7 @@
 from odoo import models, fields, api, exceptions
 from datetime import datetime
 from odoo.tools.safe_eval import safe_eval
+from odoo.exceptions import ValidationError
 
 
 class ejercicio(models.Model):
@@ -102,11 +103,12 @@ class registro_obra(models.Model):
 
 	proyecto_ejecutivo = fields.Integer(compute='contar')
 	seguimientoc = fields.Integer(compute='contar1')
+
 	programada = fields.Integer(related="programada_sideop") # compute='contar2'
 
 	programada_sideop = fields.Integer('programada')
 
-	# estate = fields.Selection([('planeada', 'Planeada'),('programada', 'Programada'),], default='planeada')
+	estate = fields.Selection([('planeada', 'Planeada'),('programada', 'Programada'),], default='planeada')
 	estado_obra = fields.Char(compute="contar_programada")
 
 	estatus_obra = fields.Selection([('borrador', 'Borrador'), ('confirmado', 'Confirmado'), ('validado', 'Validado'), ],
@@ -134,10 +136,11 @@ class registro_obra(models.Model):
 
 	@api.one
 	def contar_programada(self):
-		# count = self.env['registro.programarobra'].search_count([('name', '=', self.id),('estate2','!=','cancelado')])
-		count = self.programada_sideop
-		# count2 = self.env['registro.programarobra'].search_count([('name', '=', self.id),('estate2','=','cancelado')])
-		count2 = self.programada_sideop
+		count = self.env['registro.programarobra'].search_count([('obra_planeada', '=', self.id),('estate2','!=','cancelado')])
+		# count = self.programada_sideop
+		count2 = self.env['registro.programarobra'].search_count([('obra_planeada', '=', self.id),('estate2','=','cancelado')])
+		# count2 = self.programada_sideop
+
 		if count == 0 and count2 == 0:
 			self.estado_obra = 'Planeada'
 		elif count > 0 and count2==0:
@@ -205,9 +208,19 @@ class ProgramarObra(models.Model):
 	obra_planeada = fields.Many2one('registro.obra')
 
 	programaInversion = fields.Many2one('generales.programas_inversion', )
+
 	categoriaProgramatica = fields.Many2one('generales.modalidades', )
+
 	fechaProbInicio = fields.Date(string="Fecha probable de inicio", )
 	fechaProbTermino = fields.Date(string="Fecha Probable de termino", )
+
+	@api.constrains('fechaProbInicio', 'fechaProbTermino' )
+	def fechas_constrain(self):
+		if self.fechaProbInicio > self.fechaProbTermino:
+			raise ValidationError("La fecha de inicio no puede ser mayor a la de termino")
+		elif self.fechaProbTermino < self.fechaProbInicio:
+			raise ValidationError("La fecha de termino no puede ser menor a la de inicio")
+
 	descripTotalObra = fields.Text(string="Descripción de la totalidad de la obra")
 	conceptoEjecutar = fields.Text(string="Conceptos a ejecutar")
 	select = [('1', 'Contrato'), ('2', 'Administracion directa'), ('3', 'Mixta')]

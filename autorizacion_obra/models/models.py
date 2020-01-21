@@ -1,10 +1,11 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, tools
 from datetime import datetime
+from odoo.exceptions import ValidationError
 
 
 class AutorizacionDeObra(models.Model):
     _name = 'autorizacion_obra.oficios_de_autorizacion'
-    _rec_name = 'id_sideop'
+    _rec_name = 'name'
 
     id_sideop = fields.Integer('id sideop')
 
@@ -12,7 +13,7 @@ class AutorizacionDeObra(models.Model):
     fecha_actual = fields.Date(string='Fecha',default=fields.Date.today(), )
     fecha_de_recibido = fields.Date(string='Fecha de recibido', )
     fecha_de_vencimiento = fields.Date(string='Fecha de vencimiento', )
-    importe = fields.Float(string='Importe', )
+    importe = fields.Float(string='Importe')
     anexo_tec = fields.Integer(compute='contar')
     total_at = fields.Float(compute='suma_total_anexos')
     anexos = fields.One2many('autorizacion_obra.anexo_tecnico', 'name')
@@ -44,7 +45,9 @@ class AutorizacionDeObra(models.Model):
 
 class AnexoTecnico(models.Model):
     _name = 'autorizacion_obra.anexo_tecnico'
-    _rec_name = 'id'
+    _rec_name = 'nombre_lista'
+    # _parent_name = "prog_lista"
+    # _parent_store = True
 
     id_anexo_sideop = fields.Integer('id anexo sideop')
     id_partida_sideop = fields.Integer('id partida sideop')
@@ -52,12 +55,42 @@ class AnexoTecnico(models.Model):
 
     name = fields.Many2one('autorizacion_obra.oficios_de_autorizacion', ondelete="cascade")
 
-    # PROGRAMA DE INVERSION AUXILIAR
-    # p_inv = fields.Many2one('generales.programas_inversion', related="concepto.programaInversion")
-
     claveobra = fields.Char(string='Clave de obra', )
     clave_presupuestal = fields.Char(string='Clave presupuestal', )
+
+    # nombre = fields.Char('Programa Inversion', index=True, translate=True)
+    # parent_path = fields.Char(index=True, readonly=True)
+
+    nombre_lista = fields.Char('Nombre', compute='_compute_complete_name', store=True, readonly=True)
+
+    # prog_lista = fields.Many2one('autorizacion_obra.anexo_tecnico', 'Programa Inversion', index=True, ondelete='cascade')
+
     concepto = fields.Many2one('registro.programarobra', )
+
+    # PROGRAMA DE INVERSION AUXILIAR
+    p_inv2 = fields.Many2one('generales.programas_inversion', related="concepto.programaInversion", store=True, readonly=True)
+
+    nombre_prog = fields.Char(string='Programa de Inversión')
+
+    @api.depends('concepto', 'claveobra')
+    def _compute_complete_name(self):
+        for i in self:
+            if i.concepto:
+                i.nombre_lista = '%s - %s' % (i.claveobra, str(i.concepto.descripcion))
+            else:
+                i.nombre_lista = i.claveobra
+
+    @api.onchange('concepto', 'claveobra')
+    def p_inv(self):
+        for i in self:
+            self.nombre_prog = str(i.p_inv2.name)
+
+    @api.constrains('prog_lista')
+    def _check_category_recursion(self):
+        if not self._check_recursion():
+            raise ValidationError(_('You cannot create recursive categories.'))
+        return True
+
     federal = fields.Float(string='Federal')
     estatal = fields.Float(string='Estatal')
     municipal = fields.Float(string='Municipal')

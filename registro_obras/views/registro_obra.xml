@@ -191,6 +191,7 @@
       <field name="model">registro.obra</field>
       <field name="arch" type="xml">
         <search>
+          <field name="numero_obra"/>
           <field name="name"/>
           <field name="descripcion" string="Descripcion"/>
           <field name="tipoObra" string="Tipo obra"/>
@@ -207,7 +208,8 @@
       <field name="model">registro.obra</field>
       <field name="arch" type="xml">
         <tree>
-          <field name="name"/>
+          <field name="numero_obra"/>
+          <field name="name" invisible="1"/>
           <field name="tipoObra" string="Tipo de obra"/>
           <field name="descripcion"/>
           <field name="estado_obra" string="Estatus"/>
@@ -241,21 +243,29 @@
           <field name="estate" widget="statusbar"/>
          </header-->
           <sheet>
-          	<div class="oe_button_box oe_read_only" name="button_box">
+          	<div class="text-right">
           		<button type="action" name="%(registro_obras.proyectoej_action_window)d" icon="fa-file" context="{
                        'search_default_name': active_id,
                        'default_name': active_id
-                       }"><field string="Proy. Ejecutivo" name="proyecto_ejecutivo" widget="statinfo"/></button>
+                       }" class="btn btn-outline-primary btn-lg">
+                  <field string="Proy. Ejecutivo" name="proyecto_ejecutivo" widget="statinfo"/></button>
+
               <button type="action" name="%(registro_obras.seguimientoobra_action)d" icon="fa-calendar" context="{
                        'search_default_name': active_id,
                        'default_name': active_id
-                       }"><field string="Seg. Obra" name="seguimientoc" widget="statinfo"/></button>
+                       }" class="btn btn-outline-primary btn-lg">
+                <field string="Seg. Obra" name="seguimientoc" widget="statinfo"/></button>
 
               <button type="action" name="%(registro_obras.programarobra_action)d" icon="fa-clock-o" context="{
                        'search_default_name': active_id,
-                       'default_name': active_id
-                       }" attrs="{'invisible': [('estado_obra', '=', 'Programada')]}"><field string="Progr. Obra" name="programada" widget="statinfo"/></button>
+                       'default_name': active_id,
+                       'default_obra_planeada': active_id
+                       }" attrs="{'invisible': [('estado_obra', '=', 'Programada')]}"
+              class="btn btn-outline-primary btn-lg">
+
+                <field string="Progr. Obra" name="programada" widget="statinfo"/></button>
           	</div>
+
             <div class="oe_title">
                             <label for="numero_obra" class="oe_edit_only"/>
                             <h1>
@@ -305,8 +315,8 @@
             <group string="Ubicación de la obra" colspan="1" col="6">
               <field name="ubicacion" string="Ubicación" />
               <field name="localidad" string="Localidad" />
-              <field name="estado" string="Estado" />
-              <field name="municipio" string="Municipio"/>
+              <field name="estado" string="Estado" widget='selection'/>
+              <field name="municipio" string="Municipio" widget='selection'/>
               <field name="cabeceraMunicipal"/>
               <field name="tipolocalidad"/>
 

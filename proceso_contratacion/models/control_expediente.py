@@ -4,6 +4,9 @@ from odoo import models, fields, api, exceptions
 class ControlExpediente(models.Model):
     _name = 'control.expediente'
 
+    id_sideop = fields.Integer()
+    id_expediente = fields.Integer()
+
     # PARTIDA ENLACE
     p_id = fields.Many2one(comodel_name="partidas.partidas", string="ENLACE A PARTIDAS", required=False, store=True)
 

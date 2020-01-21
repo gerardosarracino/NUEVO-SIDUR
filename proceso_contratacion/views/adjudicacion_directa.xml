@@ -58,17 +58,17 @@
 
 
                 <!-- BOTON HACIA RECURSOS -->
-          <div class="oe_button_box oe_read_only" name="button_box">
-                <button name="recursos" type="object" string="Recursos Específicos" class="oe_highlight" icon="fa-pencil-square-o"/>
+          <div class="text-right">
+                <button name="recursos" type="object" string="Recursos Específicos" class="btn btn-outline-primary btn-lg"
+                        icon="fa-pencil-square-o"
+                />
           </div>
 
 
           <group string="Agregar nueva adjudicación directa" >
                 <!-- PROGRAMAS DE INVERSION -->
-                <field name="programas_inversion_adjudicacion" string="Programa de inversión"/>
+                <field name="programas_inversion_adjudicacion" string="Programa de inversión" placeholder="Seleccionar Programa de Inversión"/>
                 <field name="contratado" force_save="1" invisible="1"/>
-
-
           </group>
 
 
@@ -96,12 +96,12 @@
                 </field>
           </group>
           <group>
-                 <field name="name"/>
+                 <field name="name" placeholder="Descripción/Meta	"/>
                  <field name="importe_adjudicacion" readonly="1" force_save="1" invisible="1"/>
           </group>
 
           <group colspan="1" col="4">
-                <field name="numerocontrato"/>
+                <field name="numerocontrato" placeholder="Numero del Contrato"/>
                 <field name="fechaadjudicacion"/>
           </group>
           <group colspan="1" col="4">
@@ -114,7 +114,7 @@
                 <field name="fechainicio" />
                 <field name="fechatermino" />
                 <field name="plazodias"/>
-                <field name="contratista" class="oe_inline"/>
+                <field name="contratista" class="oe_inline" placeholder="Seleccionar Contratista"/>
           </group>
           </sheet>
         </form>

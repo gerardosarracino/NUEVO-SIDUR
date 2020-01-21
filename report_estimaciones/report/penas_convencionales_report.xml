@@ -5,199 +5,440 @@
             <t t-call="web.html_container">
                  <t t-foreach="docs" t-as="o">
                      <t t-call="web.external_layout">
+        
+					<div class="page">
+					<style>
+					body {
+						font-size: 12px;
+						font-family: Arial, Helvetica, sans-serif;
+					}
+
+					#header {
+						text-align: center;
+						border-bottom: 1px solid #666;
+						padding-bottom: 3px;
+					}
+
+					h3,
+					h4,
+					h5 {
+						margin: 0;
+						line-height: 25px;
+					}
+
+					table,
+					td,
+					th {
+						border-color: #eee;
+						font-size: 9px;
+						border-collapse: collapse;
+					}
+
+					caption {
+						font-weight: 700;
+						margin-bottom: 20px;
+						margin-top: 10px;
+					}
+
+					#footer h5 {
+						text-align: center;
+						border-bottom: 1px solid #eee;
+					}
+
+					#opciones {
+						position: fixed;
+						top: 0;
+						background-color: #999;
+						padding: 5px;
+						right: 0;
+						z-index: 99999;
+						margin-right: 8px;
+						display: inline-block;
+						-moz-box-shadow: 0 0 3px #999;
+						-webkit-box-shadow: 0 0 3px #999;
+						box-shadow: 0 0 3px #999;
+					}
+
+					#opciones a {
+						border-right: 1px solid #ccc;
+						padding-right: 5px;
+						color: #fff;
+						text-decoration: none;
+					}
+
+					#opciones a:last-child {
+						border: none;
+					}
+
+					#opciones a:before {
+						content: " ";
+					}
+				</style>
+			</div>
+   
+
+    <div id="header" style="position:relative;">
+
+        <h3>GOBIERNO DEL ESTADO DE SONORA</h3>
+        <h4>
+            SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO			</h4>
+        <h5>PENAS CONVENCIONALES</h5>
+    </div>
+
+    <div style="float:left; width:50%; border-right:1px solid #eee;">
+        <table width="100%" border="0" cellpadding="3" cellspacing="0">
+            <tbody><tr>
+                <td width="21%">CONTRATO:</td>
+                <td rowspan="2" valign="top">
+                    <span t-field="o.descripcion_contrato"/> <br/> <span t-field="o.nombre_partida"/> 			</td>
+            </tr>
+            <tr>
+                <td>&#160;</td>
+            </tr>
+            <tr>
+                <td>CONTRATISTA:</td>
+                <td>
+                    <span t-field="o.contratista_contrato"/>					</td>
+            </tr>
+        </tbody></table>
+    </div>
 
 
-                     <div class="page" >
 
-                         <div class="text-center" style="font-size: 11px;">
-                              <div class="oe_structure">
-                               <p><b>GOBIERNO DEL ESTADO DE SONORA</b></p>
-                               <p><b>DIRECCIÓN DE EJECUCIÓN DE OBRA</b></p>
-                               <p><b>PENAS CONVENCIONALES</b></p>
-                              </div>
-                          </div>
+    <div style="float:left; width:49.8%;">
+        <table width="100%" border="0" cellpadding="3" cellspacing="0">
+            <tbody><tr>
+                <td width="21%" valign="top">PROGRAMA:</td>
+                <td width="33%">
+                    <span t-field="o.programa"/>					</td>
+                <td width="16%">ESTIMACION:</td>
+                <td width="30%" style="font-size:16px;">
+                    <span t-field="o.idobra"/>					</td>
+            </tr>
+            <tr>
+                <td>PERIODO DEL:</td>
+                <td>
+                    <span t-field="o.fecha_inicio_estimacion"/>					</td>
+                <td>AL:</td>
+                <td>
+                    <span t-field="o.fecha_termino_estimacion"/>				</td>
+            </tr>
+            <tr>
+                <td>FORMULADA EL:</td>
+                <td>
+                    <span t-field="o.fecha_contrato"/>			</td>
+                <td>&#160;</td>
+                <td>&#160;</td>
+            </tr>
+        </tbody></table>
+    </div>
 
-                         <div style="font-size: 9px;">
 
-                             <table class="table table-sm table-bordered">
-                                 <tbody>
-                                    <tr>
-                                        <td class="text-left" colspan="2" style="width:50%">
-                                            <p>CONTRATO:    <span t-field="o.descripcion_contrato"/></p>
-                                            <p>             <span t-field="o.nombre_partida"/></p>
-                                            <p> CONTRATISTA:    <span t-field="o.contratista_contrato"/></p>
-                                        </td>
-                                        <td class="text-left" style="width:50%">
-                                            <span class="float-left mt8">
-                                                    <p >PROGRAMA:    <span t-field="o.programa"/></p>
-                                                <p>PERIODO DEL:    <span t-field="o.fecha_inicio_estimacion"/> </p>
-                                                <p>FORMULADA EL:    <span t-field="o.fecha_contrato"/></p>
-                                            </span>
-                                            <span class="float-right mt8">
-                                                <p>ESTIMACIÓN:    <span t-field="o.idobra"/></p>
-                                                <p> Al <span t-field="o.fecha_termino_estimacion"/></p>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                             </table>
+    <div style="margin-top:25px;">
+		<table width="100%" border="1" cellpadding="3" cellspacing="0">
+			<tbody><tr>
+				<th colspan="6" bgcolor="#CCCCCC">DATOS DE CONTRATACIÓN</th>
+			</tr>
+			<tr>
+				<th bgcolor="#CCCCCC">CONTRATO</th>
+				<th bgcolor="#CCCCCC">DE LA FECHA</th>
+				<th bgcolor="#CCCCCC">IMPORTE TOTAL SIN I.V.A</th>
+				<th bgcolor="#CCCCCC">ANTICIPO SIN I.V.A</th>
+				<th bgcolor="#CCCCCC">FECHA INICIO DEL PROGRAMA</th>
+				<th bgcolor="#CCCCCC">FECHA TERMINO DEL PROGRAMA</th>
+			</tr>
+			<tr>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.numero_contrato"/>				</td>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.fecha_contrato"/>					</td>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.estimacion_facturado"/>					</td>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.anticipo_contrato"/>					</td>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.fecha_inicio_programa"/>					</td>
+				<td align="center" nowrap="nowrap" bgcolor="#CCCCCC">
+					<span t-field="o.fecha_termino_programa"/>					</td>
+			</tr>
+			<tr>
+				<th colspan="6">&#160;</th>
+			</tr>
+			<tr>
+				<th colspan="6" bgcolor="#CCCCCC">ESTIMACIÓN DENTRO DE PROGRAMA</th>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">MONTO PROGRAMADO PARA ESTA ESTIMACION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.monto_programado_est"/>					</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.dias_transcurridos"/> (Días)</span>
+				</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">MONTO EJECUTADO REAL PARA ESTA ESTIMACION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.montoreal"/>					</span>
+				</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">MONTO DIARIO PROGRAMADO</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.monto_programado_est"/>						</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">/
+						<span t-field="o.dias_transcurridos"/> (Días)</span>
+					<span class="dentroPrograma" style="float:right;">=</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.montodiario_programado"/>					</span>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.montoreal"/>					</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">/
+						<span t-field="o.montodiario_programado"/> 					</span>
+					<span class="dentroPrograma" style="float:right;">=</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.diasrealesrelacion"/> (Días)</span>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">DIAS DE DESFASAMIENTO</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.dias_transcurridos"/>(Días)</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">-
+						<span t-field="o.diasrealesrelacion"/> (Días)</span>
+					<span class="dentroPrograma" style="float:right;">=</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.dias_desfasamiento"/> (Días)</span>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">MONTO DE ATRASO</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.dias_desfasamiento"/> (Días)</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">*
+						<span t-field="o.montodiario_programado"/>					</span>
+					<span class="dentroPrograma" style="float:right;">=</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.monto_atraso"/>					</span>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">PORCENTAJE DE RETENCION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.retencion"/> %
+						<span t-field="o.periodicidadretencion"/>					</span>
+				</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">TOTAL DE LA RETENCION HASTA ESTA ESTIMACION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.monto_atraso"/>					</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">*
+						<span t-field="o.porc_total_ret"/>%</span>
+					<span class="dentroPrograma" style="float:right;">=</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.total_ret_est"/>					</span>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">RETENIDO ANTERIORMENTE</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.retenido_anteriormente"/>					</span>
+				</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">RETENCION NETA A APLICAR EN ESTA ESTIMACION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.ret_neta_est"/>					</span>
+				</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<span class="dentroPrograma">DEVOLUCION A EFECTUAR EN ESTA ESTIMACION</span>
+				</td>
+				<td>
+					<span class="dentroPrograma">
+						<span t-field="o.devolucion_est"/>					</span>
+				</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<th colspan="3" bgcolor="#CCCCCC">FIN DE PROGRAMA</th>
+				<th colspan="4" bgcolor="#CCCCCC">FUERA DE PROGRAMA</th>
+			</tr>
+			<tr>
+				<td colspan="3" align="left" valign="middle" class="finalp">Sanción por incumplimiento de plazo:
+									</td>
+				<td colspan="4" align="left" valign="middle">
+					<table width="100%" border="0" cellpadding="3" cellspacing="0">
+						<tbody><tr>
+							<td>
+								<span class="fueraProgra">
+									<strong>Periodicidad sanción: </strong>
+								</span>
+							</td>
+							<td>
+								<span class="fueraProgra">
+									MENSUAL								</span>
+							</td>
+							<td>
+								<span class="fueraProgra">
+									<strong>Porcentaje:</strong>
+								</span>
+							</td>
+							<td>
+								<span class="fueraProgra">
+									3 %								</span>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<span class="fueraProgra">
+									<strong>Porcentaje diario sanción: </strong>
+								</span>
+							</td>
+							<td colspan="3">
+								<span class="fueraProgra">
+									0.1 %								</span>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<span class="fueraProgra">
+									<strong>Días de atraso:</strong>
+								</span>
+							</td>
+							<td>
+								<span class="fueraProgra">
+									0								</span>
+							</td>
+							<td colspan="2">
+								<span class="fueraProgra">
+									x								</span>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<span class="fueraProgra">
+									<strong>Sanción =</strong>
+								</span>
+							</td>
+							<td colspan="3">
+								<span class="fueraProgra">
+									0.00								</span>
+							</td>
+						</tr>
+					</tbody></table>
+				</td>
+			</tr>
+		</tbody></table>
+	</div>
 
-                         </div>
+<div style="border:1px solid #eee; margin-top:5px;">
+		<table width="100%" border="0" cellpadding="3" cellspacing="0">
+			<tbody><tr>
+				<th width="20%" style="border-right:1px solid #eee;">CONTRATISTA</th>
+				<td width="26%">&#160;</td>
+				<td width="26%">&#160;</td>
+				<td width="26%">&#160;</td>
+			</tr>
+			<tr>
+				<td style="border-right:1px solid #eee;">&#160;</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td style="border-right:1px solid #eee;">&#160;</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+				<td>&#160;</td>
+			</tr>
+			<tr>
+				<td align="center" style="border-right:1px solid #eee;">
+					ARQ. MIGUEL ANGEL JUAREZ LOPEZ				</td>
+				<td align="center">
+					VICTOR MANUEL MEDINA MOLINA				</td>
+				<td align="center">&#160;</td>
+				<td align="center">&#160;</td>
+			</tr>
+			<tr>
+				<td align="center" style="border-right:1px solid #eee;">
+					PARTICIPACION EN PROYECTOS GA. VA., S. A. DE C. V.				</td>
+				<td align="center">
+					JEFE DE DEPARTAMENTO				</td>
+				<td align="center">&#160;</td>
+				<td align="center">&#160;</td>
+			</tr>
+		</tbody></table>
+	</div>
+           
 
-                          <div class="text-center" style="font-size: 9px;">
-                             <table class="table table-sm table-bordered">
-                                 <thead  class="col" style="width:100%;">
-                                     <tr class="text-center">
-                                         <th class="table-active" style="width:85%" colspan="6">DATOS DE CONTRATACIÓN</th>
-                                     </tr>
-                                 </thead>
-                                 <tbody>
-                                     <tr>
-                                         <th class="table-active">CONTRATO</th>
-                                         <th class="table-active">DE LA FECHA</th>
-                                         <th class="table-active">IMPORTE TOTAL SIN I.V.A</th>
-                                         <th class="table-active">ANTICIPO SIN I.V.A</th>
-                                         <th class="table-active">FECHA INICIO DEL PROGRAMA</th>
-                                         <th class="table-active">FECHA TERMINO DEL PROGRAMA</th>
-                                     </tr>
-                                    <tr class="table-active">
-                                        <td><p class="m-0" t-field="o.numero_contrato"/></td>
-                                        <td><p t-field="o.fecha_contrato"/></td>
-                                        <td><p t-field="o.estimacion_facturado"/></td>
-                                        <td><p t-field="o.anticipo_contrato"/></td>
-                                        <td><p t-field="o.fecha_inicio_programa"/></td>
-                                        <td><p t-field="o.fecha_termino_programa"/></td>
-                                    </tr>
-                                </tbody>
-                             </table>
-
-                              <table class="table table-sm"> <!--class="table table-sm table-bordered"  class="table table-sm table-striped" cellpadding="7" cellspacing="7" -->
-                                 <thead>
-                                     <tr>
-                                         <th colspan="4" class="table-active">ESTIMACIÓN DENTRO DE PROGRAMA</th>
-                                     </tr>
-                                 </thead>
-
-                                  <tbody style=" p margin-top: 0; margin-bottom: 0rem !important;">
-                                        <tr class="text-left">
-                                            <td style="width:50%">MONTO PROGRAMADO PARA ESTA ESTIMACION</td>
-                                            <td style="width:13.33%"><p t-field="o.monto_programado_est"/></td>
-                                            <td style="width:13.33%"><p> <span t-field="o.dias_transcurridos"/>(Días)</p></td>
-                                            <td style="width:13.33%"><p>-</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>MONTO EJECUTADO REAL PARA ESTA ESTIMACION</td>
-                                            <td><p t-field="o.montoreal"/></td>
-                                            <td><p>-</p></td>
-                                            <td><p>-</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>MONTO DIARIO PROGRAMADO</td>
-                                            <td><p t-field="o.monto_programado_est"/></td>
-                                            <td><p>/ <span t-field="o.dias_transcurridos"/> (Días) <span style="width:50%">=</span></p></td>
-                                            <td><p t-field="o.montodiario_programado"/></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO</td>
-                                            <td><p t-field="o.montoreal"/></td>
-                                            <td><p>/  <span t-field="o.montodiario_programado"/> </p></td>
-                                            <td><p><span t-field="o.diasrealesrelacion"/> (Días)</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>DIAS DE DESFASAMIENTO</td>
-                                            <td><p> <span t-field="o.dias_transcurridos"/> (Días)</p></td>
-                                            <td><p> - <span t-field="o.diasrealesrelacion"/> (Días)</p></td>
-                                            <td><p><span t-field="o.dias_desfasamiento"/> (Días)</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>MONTO DE ATRASO</td>
-                                            <td><p><span t-field="o.dias_desfasamiento"/> (Días)</p></td>
-                                            <td><p>	* <span t-field="o.montodiario_programado"/> </p></td>
-                                            <td><p><span t-field="o.monto_atraso"/></p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>PORCENTAJE DE RETENCION</td>
-                                            <td><p><span t-field="o.retencion"/>% <span t-field="o.periodicidadretencion"/></p></td>
-                                            <td><p>-</p></td>
-                                            <td><p>-</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>TOTAL DE LA RETENCION HASTA ESTA ESTIMACION</td>
-                                            <td><p><span t-field="o.monto_atraso"/></p></td>
-                                            <td><p>* <span t-field="o.porc_total_ret"/>%</p></td>
-                                            <td><p><span t-field="o.total_ret_est"/></p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>RETENIDO ANTERIORMENTE</td>
-                                            <td><p><span t-field="o.retenido_anteriormente"/></p></td>
-                                            <td><p>-</p></td>
-                                            <td><p>-</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>RETENCION NETA A APLICAR EN ESTA ESTIMACION</td>
-                                            <td><p><span t-field="o.ret_neta_est"/></p></td>
-                                            <td><p>-</p></td>
-                                            <td><p>-</p></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td>DEVOLUCION A EFECTUAR EN ESTA ESTIMACION</td>
-                                            <td><p><span t-field="o.devolucion_est"/></p></td>
-                                            <td><p>-</p></td>
-                                            <td><p>-</p></td>
-                                        </tr>
-                                    </tbody>
-
-                             </table> <!-- class="table table-sm table-striped" -->
-
-                              <table class="table table-sm o_main_table" > <!-- cellpadding="7" cellspacing="7" -->
-                                  <tbody>
-                                        <tr class="text-center">
-                                            <th class="table-active" style="width:50%" colspan="5">FUERA DE PROGRAMA</th>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td><b>Periodicidad sanción:</b></td>
-                                            <td><span t-field="o.periodicidadretencion"/></td>
-                                            <td><b>Porcentaje:</b></td>
-                                            <td><span t-field="o.retencion"/></td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td><b>Porcentaje diario sanción:</b></td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td><b>Días de atraso:</b></td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                        </tr>
-                                        <tr class="text-left">
-                                            <td><b>Sanción =</b></td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                            <td>x</td>
-                                        </tr>
-                                    </tbody>
-                             </table>
-
-                              <table class="table table-sm table-bordered">
-                                  <tbody>
-                                      <tr>
-                                       <td style="width:30%">
-                                           <b>CONTRATISTA</b> <br/>
-                                       <p>ING. GERMAN MARTINEZ SAUCEDO	</p>
-                                       <p>GERMAN MARTINEZ SAUCEDO	</p>
-                                       </td>
-                                       <td style="width:70%"><br/>
-                                           <p>DÃMASO JESUS CRUZ BORBÃN</p>
-                                           <p>SUPERVISOR DE OBRA</p>
-                                       </td>
-                                      </tr>
-                                  </tbody>
-                             </table>
-                         </div>
-                     </div>
                      </t>
                  </t>
             </t>

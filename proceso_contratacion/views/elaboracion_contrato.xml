@@ -149,24 +149,28 @@
           </header>
 
           <sheet>
-              <div class="oe_button_box oe_read_only" name="button_box">
+              <div colspan="2" col="2" class="text-right">
                  <!-- FINIQUITAR CONTRATO ANTICIPADAMENTE BUTTONS -->
-                   <button string="Fin. Contrato Anticipadamente" type="object" name="finiquitarContrato1" class="oe_highlight" context="{
+                   <button string="Fin. Contrato Anticipadamente" type="object" name="finiquitarContrato1" context="{
                        'search_default_contrato': active_id,
                        'default_contrato': active_id
-                       }" attrs="{'invisible': [('contar_finiquito', '=', 1)]}" icon="fa-clock-o"/>
-                    <button string="Fin. Contrato Anticipadamente" type="object" name="finiquitarContrato2" class="oe_highlight" context="{
-                       'search_default_contrato': active_id,
-                       'default_contrato': active_id
-                       }" attrs="{'invisible': [('contar_finiquito', '=', 0)]}" icon="fa-clock-o"/>
+                       }" attrs="{'invisible': [('contar_finiquito', '=', 1)]}" icon="fa-clock-o"
+                   class="btn btn-outline-primary btn-lg"/>
 
-                    <button string="Descargar documento" type="object" name="imprimir_accion" class="oe_highlight"  icon="fa-file"/>
+                    <button string="Fin. Contrato Anticipadamente" type="object" name="finiquitarContrato2" context="{
+                       'search_default_contrato': active_id,
+                       'default_contrato': active_id
+                       }" attrs="{'invisible': [('contar_finiquito', '=', 0)]}" icon="fa-clock-o"
+                    class="btn btn-outline-primary btn-lg "/>
+
+                    <button string="Descargar documento" type="object" name="imprimir_accion" icon="fa-file"
+                    class="btn btn-outline-dark btn-lg "/>
                 </div>
 
+
             <notebook >
-
-
                 <page string="Datos Generales" icon="fa-bitbucket">
+                    <field name="contrato_contador" invisible="1"/>
                      <group string="Contrato Datos Generales"  >
                          <field name="tipo_contrato" widget="radio" attrs="{'readonly': ['|',('obra','!=', False),('adjudicacion','!=', False)]}"/>
                      </group>
@@ -275,7 +279,7 @@
                     </page>
 
                     <!-- PAGINA FIANZAS -->
-                    <page string="Fianzas"  >
+                    <page string="Fianzas"  attrs="{'invisible': [('contrato_contador','=', 0)]}">
                         <separator string="Fianzas"/>
                         <field name="fianzas" widget="one2many" string="">
                             <tree editable="bottom">
@@ -292,7 +296,7 @@
                     </page>
 
                     <!-- PAGINA DEDUCCIONES -->
-                     <page string="Deducciones" >
+                     <page string="Deducciones" attrs="{'invisible': [('contrato_contador','=', 0)]}">
                         <group string="Deducciones">
                         </group>
                          <field name="deducciones" string="" options="{'no_create': True, 'no_create_edit':True, 'not_delete': True}">
@@ -306,7 +310,7 @@
                          </field>
                     </page>
                     <!-- LISTA DE RECURSOS -->
-                    <page string="Lista De Recursos">
+                    <page string="Lista De Recursos" attrs="{'invisible': [('contrato_contador','=', 0)]}">
                         <separator string="Lista De Recursos" />
                         <field name="anexos" readonly="1" string="" force_save="1"
                                context="{'form_view_ref': 'proceso_contratacion.anexos_form'}">

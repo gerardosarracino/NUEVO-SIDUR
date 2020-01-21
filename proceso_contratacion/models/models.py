@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 from odoo import models, fields, api
+from datetime import datetime
 
 
 class Licitacion(models.Model):
@@ -10,12 +10,13 @@ class Licitacion(models.Model):
     licitacion_id = fields.Char(compute="nombre", store=True)
 
     # PROGRAMA DE INVERSION
+    # programa_inversion_licitacion = fields.Many2one('generales.programas_inversion', 'Programa de Inversión')
     programa_inversion_licitacion = fields.Many2one('generales.programas_inversion', 'Programa de Inversión')
 
     # OBRA / RECURSO A LICITAR
     programar_obra_licitacion = fields.Many2many("partidas.licitacion", string="Partida(s):", ondelete="cascade")
 
-    name = fields.Text(string="Objeto De La Licitación", )
+    name = fields.Text(string="Objeto De La Licitación", related="programar_obra_licitacion.recursos.concepto.descripcion")
     select = [('1', 'Licitación publica'), ('2', 'Licitación simplificada/Por invitación')]
     tipolicitacion = fields.Selection(select, string="Tipo de Licitación", default="1", )
 
@@ -30,7 +31,10 @@ class Licitacion(models.Model):
     caracter = fields.Selection(select1, string="Carácter", default="1", )
     select2 = [('1', 'Federal'), ('2', 'Estatal')]
     normatividad = fields.Selection(select2, string="Normatividad", required=True )
-    funcionariopresideactos = fields.Char(string="Funcionario que preside actos", )
+    # funcionariopresideactos = fields.Char(string="Funcionario que preside actos", )
+    funcionariopresideactos = fields.Many2one(
+        comodel_name='res.users',
+        string='Funcionario que preside actos')
     puesto = fields.Text(string="Puesto", )
     numerooficio = fields.Char(string="Numero oficio", )
     fechaoficio = fields.Date(string="Fecha oficio", )
@@ -43,7 +47,20 @@ class Licitacion(models.Model):
     costocompranetbanco = fields.Float(string="Costo CompraNET/Banco",)
     fechaestimadainicio = fields.Date(string="Fecha Estimada de Inicio", )
     fechaestimadatermino = fields.Date(string="Fecha Estimada de Termino", )
-    plazodias = fields.Integer(string="Plazo de Días", )
+
+    plazodias = fields.Integer(string="Plazo de Días", compute="calcular_dias")
+
+    @api.one
+    @api.depends('fechaestimadainicio', 'fechaestimadatermino')
+    def calcular_dias(self):
+        if self.fechaestimadainicio and self.fechaestimadatermino is False:
+            self.plazodias = 0
+        elif self.fechaestimadainicio and self.fechaestimadatermino:
+            f1 = datetime.strptime(str(self.fechaestimadainicio), "%Y-%m-%d")
+            f2 = datetime.strptime(str(self.fechaestimadatermino), "%Y-%m-%d")
+            r = f2 - f1
+            self.plazodias = r.days
+
     capitalcontable = fields.Float(string="Capital Contable",)
     anticipomaterial = fields.Float(string="Anticipo Material %")
     anticipoinicio = fields.Float(string="Anticipo Inicio %")
@@ -108,7 +125,7 @@ class Licitacion(models.Model):
                 'name': 'Eventos',
                 'res_model': 'proceso.eventos_licitacion',
                 'view_mode': 'form',
-                'target': 'new',
+                'target': 'self',
                 'view_id': view.id,
             }
 
@@ -165,8 +182,11 @@ class Licitacion(models.Model):
     # METODO CONTADOR DE PARTICIPANTES
     @api.one
     def contar(self):
-        count = self.env['proceso.participante'].search_count([('numerolicitacion', '=', self.id)])
-        self.variable_count = count
+        b = self.env['proceso.participante'].search([('numerolicitacion', '=', self.id)])
+        acum = 0
+        for i in b.contratista_participantes:
+            acum = acum + 1
+        self.variable_count = acum
 
     # METODO DE OBRA DESIERTA
     @api.one
@@ -198,7 +218,7 @@ class Eventos(models.Model):
 
     contratista_participantes = fields.Many2many('proceso.contra_participantev', store=True)
     contratista_aclaraciones = fields.Many2many('proceso.contra_aclaraciones', store=True)
-    contratista_propuesta = fields.Many2many('proceso.contra_propuestas', compute="llenar_propuesta", store=True)
+    contratista_propuesta = fields.Many2many('proceso.contra_propuestas', store=True)
     contratista_fallo = fields.Many2many('proceso.contra_fallo', compute="llenar_fallo", store=True)
 
     # AUXILIAR PARA ACCIONAR METODO
@@ -268,12 +288,12 @@ class Eventos(models.Model):
             self.update({
                 'contratista_aclaraciones': [
                     [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante,
-                            'correo': i.correo}]]
+                            'correo': i.correo, 'licitacion_id': self.numerolicitacion_evento.id}]]
             })
 
     # METODO PARA LLENAR TABLA CON DATOS DE LOS PARTICIPANTES APERTURA DE PROPUESTA
-    @api.one
-    @api.depends('aux')
+    @api.multi
+    @api.onchange('aux')
     def llenar_propuesta(self):
         b_participante = self.env['proceso.participante'].search(
             [('numerolicitacion.id', '=', self.numerolicitacion_evento.id)])
@@ -284,8 +304,10 @@ class Eventos(models.Model):
         for i in b_participante.contratista_participantes:
             self.update({
                 'contratista_propuesta': [
-                    [0, 0, {'name': i.name, 'numerolicitacion': id_lic}]]
+                    [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante, 'numerolicitacion': id_lic}]]
             })
+
+
 
     # METODO PARA LLENAR TABLA CON DATOS DE LOS PARTICIPANTES FALLO DE LICITACION
     @api.one
@@ -318,6 +340,7 @@ class ContratistaParticipanteV(models.Model):
 class JuntaAclaraciones(models.Model):
     _name = 'proceso.contra_aclaraciones'
 
+    licitacion_id = fields.Many2one('proceso.licitacion', readonly=True)
     name = fields.Char(string="Licitante:")
     nombre_representante = fields.Char(string="Nombre del Representante:")
     correo = fields.Char(string="Correo:")
@@ -371,7 +394,8 @@ class AperturaPropuestas(models.Model):
 
     numerolicitacion = fields.Many2one('proceso.licitacion', string='Numero Licitación:')
 
-    name = fields.Char(string="Licitante:")
+    name = fields.Char(string="Licitante:", )
+
     monto = fields.Float(string="Monto:", readonly=True)
     asiste = fields.Boolean('Asiste')
     completa = fields.Boolean('Completa')
@@ -384,7 +408,7 @@ class AperturaPropuestas(models.Model):
 
     programar_obra_licitacion2 = fields.Many2many("proceso.propuesta_lic", string="Partida(s):")
 
-    aux = fields.Integer()
+    aux = fields.Float(string="aux", required=False, )
 
     observaciones = fields.Text(string="Observaciones:", required=False, )
 
@@ -402,7 +426,7 @@ class AperturaPropuestas(models.Model):
     # METODO PARA TRAER LA OBRA DE LA LICITACION PARA ASIGNAR RECURSO
     @api.multi
     @api.onchange('aux')
-    def llenar_licitacion(self):
+    def llenar_licitacion_r(self):
         b_lic = self.env['proceso.licitacion'].search(
             [('id', '=', self.numerolicitacion.id)])
         self.update({
@@ -410,7 +434,8 @@ class AperturaPropuestas(models.Model):
         })
         for i in b_lic.programar_obra_licitacion:
             self.update({
-                'programar_obra_licitacion2': [[0, 0, {'recursos': i.recursos}]]
+                'programar_obra_licitacion2': [[0, 0, {'recursos': i.recursos,
+                                                       'licitacion_id': self.numerolicitacion.id}]]
             })
 
     # METODO PARA INGRESAR A PROPUESTAS BOTON
@@ -455,17 +480,24 @@ class Fallo(models.Model):
     name = fields.Char(string="Licitante:")
     monto = fields.Float(string="Monto Fallado A/I.V.A:", compute="b_monto")
     posicion = fields.Selection([('1', 'Posición #1')], 'Posición', compute="b_monto")
+    nombre_representante = fields.Char(string="Nombre del Representante:")
 
     # METODO PARA TRAER LOS DATOS DEL MONTO Y POSICION DE LA PROPUESTA
     @api.one
     def b_monto(self):
         b_mont = self.env['proceso.contra_propuestas'].search([('numerolicitacion.id', '=', self.numerolicitacion.id)])
+        acum = 0
         for i in b_mont:
-            if i.name == self.name:
-                self.monto = i.programar_obra_licitacion2.monto_partida
-                self.posicion = i.posicion
+            if str(i.name) == str(self.name):
+                if i.posicion:
+                    for x in i.programar_obra_licitacion2:
+                        acum += x.monto_partida
+                    self.monto = acum
+                    self.posicion = i.posicion
+                else:
+                    print('No se encontró monto de propuesta')
             else:
-                print('No se encontró monto de propuesta')
+                print('no')
 
     asiste = fields.Boolean('Asistió')
     ganador = fields.Boolean('Ganador')
@@ -477,8 +509,9 @@ class Fallo(models.Model):
     contador_ganador = fields.Integer(compute="ganador_count")
 
     # METODO PARA VERIFICAR SI YA HAY GANADOR, PARA ATRIBUTO READONLY EN LA VISTA
-    @api.multi
+    @api.one
     def ganador_count(self):
+        print('GANADOR ALV')
         b_fallo = self.env['proceso.contra_fallo'].search([('numerolicitacion.id', '=', self.numerolicitacion.id)])
         for i in b_fallo:
             print(i.ganador)
@@ -566,6 +599,7 @@ class DatosFallo(models.Model):
 class PropuestaLic(models.Model):
     _name = 'proceso.propuesta_lic'
 
+    licitacion_id = fields.Many2one('proceso.licitacion')
     recursos = fields.Many2one('autorizacion_obra.anexo_tecnico', 'Recursos')
     monto_partida = fields.Float(string="" )
 

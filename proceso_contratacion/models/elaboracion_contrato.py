@@ -8,9 +8,17 @@ class ElaboracionContratos(models.Model):
     _name = "proceso.elaboracion_contrato"
     _rec_name = 'contrato'
 
+    # contador para esconder los pages
+    contrato_contador = fields.Integer(compute="contar_contrato")
+
+    @api.one
+    def contar_contrato(self):
+        b_contrato = self.env['proceso.elaboracion_contrato'].search_count([('id', '=', self.id)])
+        self.contrato_contador = b_contrato
+
+    # IMPORTACION
     id_contratista = fields.Char('id contratista')
     id_residente = fields.Char('id _residente')
-
     num_contrato_sideop = fields.Char('numero contrato sideop')
     id_sideop_partida = fields.Integer('ID SIDEOP part')
 
@@ -32,7 +40,7 @@ class ElaboracionContratos(models.Model):
     contar_convenio = fields.Integer(compute='contar2', string="PRUEBA")
     fecha = fields.Date(string="Fecha",  default=fields.Date.today())
 
-    contrato = fields.Char(string="Contrato", )
+    contrato = fields.Char(string="Contrato", related="adjudicacion.numerocontrato", readonly=False, store=True)
     name = fields.Text(string="Descripción/Meta", )
 
     descripciontrabajos = fields.Text(string="Descripción trabajos:", )
@@ -52,12 +60,18 @@ class ElaboracionContratos(models.Model):
     deducciones = fields.Many2many("generales.deducciones", string="Deducciones")
     # RECURSOS ANEXOS
     anexos = fields.Many2many('proceso.anexos', string="Anexos:", compute="llenar_anexo", store=True)
+
     enlace_oficio = fields.Many2one('autorizacion_obra.oficios_de_autorizacion', string="Enlace a Oficio",)
     recurso_autorizado = fields.Float(string='Recursos Autorizados:', related="anexos.name.total_at")
     importe_cancelado = fields.Float(string='Recursos Cancelados:', related="anexos.total_ca")
     total_recurso_aut = fields.Float(string='Total de Recursos Autorizados:', compute="recurso_total")
+
+    # TOTAL DEL CONTRAO Y NUEVO CAMPO TOTAL PARA CONVENIO
     convenios_escalatorias = fields.Float(string="Convenios y Escalatorias:", readonly="True")
+
     total_contratado = fields.Float(string="Total Contratado:", compute="contratado_total")
+    total_contratado_modificado = fields.Float(string="Total Contratado:", compute="contratado_total_modi")
+
     saldo = fields.Float(string="Saldo:", compute="saldo_total")
 
     # RELATED CON LA OBRA DE LA PARTIDA PARA RELACIONARLA CON EL ANEXO TECNICO
@@ -200,8 +214,17 @@ class ElaboracionContratos(models.Model):
                 'saldo': rec.total_recurso_aut - rec.total_contratado
             })
 
-    @api.depends('impcontra', 'convenios_escalatorias')
+    @api.depends('impcontra')
     def contratado_total(self):
+        for rec in self:
+            rec.update({
+                'total_contratado': rec.impcontra
+            })
+
+
+
+    @api.depends('impcontra', 'convenios_escalatorias')
+    def contratado_total_modi(self):
         for rec in self:
             rec.update({
                 'total_contratado': rec.impcontra + rec.convenios_escalatorias
@@ -223,7 +246,6 @@ class ElaboracionContratos(models.Model):
     @api.multi
     @api.onchange('adjudicacion')  # if these fields are changed, call method
     def check_change_adjudicacion(self):
-        print('xd')
         adirecta_id = self.env['proceso.adjudicacion_directa'].browse(self.adjudicacion.id)
         self.update({
             'contrato_partida_adjudicacion': [[5]]
@@ -242,17 +264,6 @@ class ElaboracionContratos(models.Model):
                                                           'id_contrato_relacion': str(self.id_ad),
                                                           }]]
                      })
-
-    # NO FUNCIONA METODO PARA INSERTAR NUMERO DEL CONTRATO
-    '''@api.multi
-    def write(self, values):
-        b_contador = self.env['proceso.adjudicacion_directa'].search([('numerocontrato', '=', self.contrato)])
-        contador = self.env['proceso.adjudicacion_directa'].search_count([('numerocontrato', '=', self.contrato)])
-        values[str(b_contador.contratado)] = contador
-        b_contador.contratado = contador
-        return super(ElaboracionContratos, self).write(values)'''
-
-
 
     # METODO DE LAS PARTIDAS LICITACION
     @api.multi

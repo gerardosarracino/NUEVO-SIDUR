@@ -115,13 +115,13 @@ class Partidas(models.Model):
                                         related="numero_contrato.adjudicacion.programas_inversion_adjudicacion")
 
     # GALERIA DE IMAGENES DE AVANCE FINANCIERO
-    # galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
+    galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
 
     _url = fields.Char(compute="_calc_url")
 
     @api.one
     def _calc_url(self):
-        original_url = "http://localhost:1269/galeria"
+        original_url = "http://sidur.galartec.com:56733/galeria/?id=" + str(self.id)
         self._url = original_url
 
     @api.multi
@@ -167,7 +167,7 @@ class Partidas(models.Model):
     monto_partida = fields.Float(string="Monto", )
     iva_partida = fields.Float(string="Iva", compute="iva", store=True)
     total_partida = fields.Float(string="Total", compute="SumaContrato", store=True)
-    monto_sin_iva = fields.Float(string="Total", compute="SumaContrato")
+
 
     # SUMA DE LAS PARTIDAS
     total_contrato = fields.Float(related="numero_contrato.impcontra")
@@ -194,15 +194,74 @@ class Partidas(models.Model):
     tipo = fields.Selection(select_tipo, string="Tipo:")
 
     name = fields.Many2one('proceso.elaboracion_contrato', readonly=True)
-    total = fields.Float(string="Monto Total Contratado:", readonly=True, compute="totalContrato", required=True)
+
+    # TOTAL DE LA PARTIDA MONTO CONTRATADO SIN IVA, ESTE USA SIDEOP
+    monto_sin_iva = fields.Float(string="Total:", compute="SumaContrato")
+    # total con convenio
+    monto_sin_iva_modi = fields.Float(string="Total Modificado", compute="nuevo_total_partida")
+    # TOTAL DE LA PARTIDA
+    total = fields.Float(string="Monto Total Contratado:", compute="totalContrato")
+
+    # METODO PARA ASIGNAR EL TOTAL DEL CONTRATO
+    @api.one
+    def totalContrato(self):
+        _search_cove = self.env['proceso.convenios_modificado'].search_count([("contrato.id", "=", self.id)])
+        if _search_cove == 0:
+            self.total = self.monto_sin_iva
+        else:
+            self.total = self.monto_sin_iva_modi
+
+    # BUSQUEDA DE CONVENIOS PARA ESTA PARTIDA
+    # FIELD CON EL TOTAL DEL CONVENIO INCLUYE LA SUMA Y RESTA
+    convenios_ = fields.Float(string="",  compute="b_convenios" )
+
+    # METODO PARA BUSCAR SI HAY CONVENIO CON REDUCCION O AMPLIACION
+    @api.one
+    def b_convenios(self):
+        _search_cove = self.env['proceso.convenios_modificado'].search([("contrato.id", "=", self.id)])
+        acum = 0
+        acum2 = 0
+        for i in _search_cove:
+            if i.tipo_monto == 'AM':
+                acum = acum + i.monto_total
+            elif i.tipo_monto == 'RE':
+                acum2 = acum2 + i.monto_total
+            ampliacion = acum
+            reduccion = acum2
+            total = ampliacion - reduccion
+            self.convenios_ = total
+
+    # APLICA EL CALCULO DEL CONVENIO AL MONTO DEL CONTRATO DE LA PARTIDA SI ES QUE EXISTE UNO
+    @api.one
+    @api.depends('convenios_')
+    def nuevo_total_partida(self):
+        _search_cove = self.env['proceso.convenios_modificado'].search_count([("contrato.id", "=", self.id)])
+        if _search_cove == 0:
+            self.monto_sin_iva_modi = 0
+        else:
+            self.monto_sin_iva_modi = self.monto_sin_iva + self.convenios_
+
     total_catalogo = fields.Float(string="Monto Total del Catálogo:", compute="SumaImporte", required=True)
-    diferencia = fields.Float(string="Diferencia:", compute="Diferencia", required=True)
+
+    diferencia = fields.Float(string="Diferencia:", compute="Diferencia")
 
     # ANTICIPOS
     fecha_anticipos = fields.Date(string="Fecha Anticipo", )
-    porcentaje_anticipo = fields.Float(string="Anticipo Inicio", default="0.30", )
+    porcentaje_anticipo = fields.Float(string="Anticipo Inicio", compute="b_anticipo")
+    anticipo_material = fields.Float(string="Anticipo Material", compute="b_anticipo")
+
+    @api.one
+    def b_anticipo(self):
+        print('contrato')
+        b_contrato = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
+        if b_contrato.tipo_contrato == '1':
+            self.porcentaje_anticipo = b_contrato.adjudicacion.anticipoinicio
+            self.anticipo_material = b_contrato.adjudicacion.anticipomaterial
+        elif b_contrato.tipo_contrato == '2':
+            self.porcentaje_anticipo = b_contrato.obra.anticipoinicio
+            self.anticipo_material = b_contrato.obra.anticipomaterial
+
     total_anticipo_porcentaje = fields.Float(string="Total Anticipo", compute="anticipo_por")
-    anticipo_material = fields.Float(string="Anticipo Material", )
     importe = fields.Float(string="Importe Contratado")
     anticipo_a = fields.Integer(string="Anticipo", compute="anticipo_inicio")
     iva_anticipo = fields.Float(string="I.V.A", compute="anticipo_iva")
@@ -424,6 +483,8 @@ class Partidas(models.Model):
         else:
             return super(Partidas, self).write(values)
 
+    programa_id = fields.Many2one('programa.programa_obra', string="ID DE LA VENTANA DEL PROGRAMA PARA ESTA PARTIDA", compute="programas")
+
     # METODO PARA INGRESAR A RECURSOS BOTON
     @api.multi
     def programas(self):
@@ -433,6 +494,10 @@ class Partidas(models.Model):
         count = self.env['programa.programa_obra'].search_count([('obra.id', '=', self.id)])
         # BUSCAR VISTA
         search = self.env['programa.programa_obra'].search([('obra.id', '=', self.id)])
+        if count == 0:
+            self.programa_id = []
+        else:
+            self.programa_id = search[0].id
         # SI YA FUE CREADA LA VISTA, ABRIR LA VISTA YA CREADA
         if count == 1:
             return {
@@ -595,19 +660,19 @@ class Partidas(models.Model):
         count = self.env['proceso.convenios_modificado'].search_count([('contrato.id', '=', self.id)])
         self.count_convenios_modif = count
 
-    # METODO PARA ASIGNAR EL TOTAL DEL CONTRATO
-    @api.one
-    def totalContrato(self):
-        self.total = self.total_partida
-
     # METODO CALCULAR DIFERENCIA ENTRE PARTIDA Y CONCEPTOS
     @api.one
-    @api.depends('total_partida', 'total_catalogo')
     def Diferencia(self):
+        _search_cove = self.env['proceso.convenios_modificado'].search_count([("contrato.id", "=", self.id)])
         for rec in self:
-            rec.update({
-                'diferencia': self.monto_sin_iva - self.total_catalogo
-            })
+            if _search_cove == 0:
+                rec.update({
+                    'diferencia': self.total_catalogo - self.monto_sin_iva
+                })
+            else:
+                rec.update({
+                    'diferencia': self.total_catalogo - self.monto_sin_iva_modi
+                })
 
     # METODO CALCULAR TOTAL PARTIDA UNICA
     @api.one

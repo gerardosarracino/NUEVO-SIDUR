@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from odoo import api, fields, models, exceptions
+from datetime import datetime
+from odoo.tools.safe_eval import safe_eval
+from odoo.exceptions import ValidationError
 
 
 class AdjudicacionDirecta(models.Model):
@@ -33,7 +35,26 @@ class AdjudicacionDirecta(models.Model):
     anticipomaterial = fields.Float(string="Anticipo Material %")
     fechainicio = fields.Date(string="Fecha de Inicio", default=fields.Date.today())
     fechatermino = fields.Date(string="Fecha termino", )
-    plazodias = fields.Integer(string="Plazo/Días", )
+
+    @api.constrains('fechainicio', 'fechatermino')
+    def fechas_constrain(self):
+        if self.fechainicio > self.fechatermino:
+            raise ValidationError("La fecha de inicio no puede ser mayor a la de termino")
+        elif self.fechatermino < self.fechainicio:
+            raise ValidationError("La fecha de termino no puede ser menor a la de inicio")
+
+    @api.one
+    @api.depends('fechainicio', 'fechatermino')
+    def calcular_dias(self):
+        if self.fechainicio and self.fechatermino is False:
+            self.plazodias = 0
+        elif self.fechainicio and self.fechatermino:
+            f1 = datetime.strptime(str(self.fechainicio), "%Y-%m-%d")
+            f2 = datetime.strptime(str(self.fechatermino), "%Y-%m-%d")
+            r = f2 - f1
+            self.plazodias = r.days
+
+    plazodias = fields.Integer(string="Plazo/Días", compute="calcular_dias" )
     contratista = fields.Many2one('contratista.contratista', string='Contratista', )
     # RECURSOS
     recurso_federal = fields.Float(string="Federal")
@@ -102,16 +123,6 @@ class AdjudicacionDirecta(models.Model):
             'view_id': view.id,
             'res_id': self.id,
         }
-
-    # METODO DE EXCEPCION DE LA FECHA ANTERIOR
-    @api.one
-    @api.depends('fechatermino', 'fechainicio')
-    def onchange_date(self):
-        if str(self.fechatermino) < str(self.fechainicio):
-            raise exceptions.Warning('No se puede seleccionar una Fecha anterior a la actual, '
-                                     'por favor seleccione una fecha actual o posterior')
-        else:
-            return False
 
     # METODO PARA SUMA DE RECURSOS
     @api.one

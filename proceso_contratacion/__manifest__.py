@@ -30,9 +30,10 @@
         'views/adjudicacion_directa.xml',
         'views/elaboracion_contrato.xml',
         'views/catalogo_conceptos.xml',
-        'views/convenios.xml',
+        'views/convenios_x.xml',
         'views/finiquitar_contrato_anticipadamente.xml',
         'views/anticipo.xml',
+        'views/convenios.xml',
     ],
 
 

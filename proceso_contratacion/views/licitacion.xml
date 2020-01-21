@@ -38,7 +38,7 @@
                           <field name="correo" readonly="1"/>
                       </group>
                       <group>
-                          <field name="preguntas" widget="one2many">
+                          <field name="preguntas" widget="one2many" >
                               <tree editable="bottom">
                                   <control>
                                       <create string="Agregar Preguntas" />
@@ -61,7 +61,8 @@
               <form string="">
                   <div class="panel panel-default">
                       <div class="panel-body">
-                        <h3 colspan="2" align="center"> Propuesta del Licitante: </h3>
+                        <h3 colspan="2" align="center"> Propuesta del Licitante:
+                            <field name="name" readonly="1"/> </h3>
                       </div>
                   </div>
                   <sheet>
@@ -75,10 +76,11 @@
                             <field name="revision"/>
                       </group>
                       <group>
-                          <field name="programar_obra_licitacion2" nolabel="1" >
-                                <tree create="false" editable="bottom" >
+                          <field name="programar_obra_licitacion2" nolabel="1" widget="one2many" force_save="1" >
+                                <tree create="false" editable="bottom" force_save="1">
+                                    <field name="licitacion_id" force_save="1"/>
                                     <field name="recursos" string="Obras que pertenecen a esta licitación" readonly="1" force_save="1"/>
-                                    <field name="monto_partida"/>
+                                    <field name="monto_partida" force_save="1"/>
                                 </tree>
                           </field>
                       </group>
@@ -104,9 +106,10 @@
               <form string="">
                   <div class="panel panel-default">
                       <div class="panel-body">
-                        <h3 colspan="2" align="center"> Fallo</h3>
+                        <h3 colspan="2" align="center"> Fallo:  <field name="name" readonly="1"/> </h3>
                       </div>
                   </div>
+
                   <sheet>
                       <group colspan="2" col="4">
                           <field name="numerolicitacion" readonly="1"/>
@@ -496,53 +499,68 @@
           </header>
 
           <sheet>
-            <div class="oe_button_box oe_read_only" name="button_box">
-              <button type="action" icon="fa-clipboard" string="Convocatoria / Bases"></button>
 
-              <button type="action" icon="fa-list-ol" string="Ev. Puntos"></button>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-5" style="text-align: left;">
+                         <!-- BOTONES DE CANCELAR -->
+                  <button string="Cancelar" type="action" name="%(action_cancelar1)d" class="btn btn-outline-danger btn-lg"
+                          context="{
+                           'search_default_numerolicitacion': active_id,
+                           'default_numerolicitacion': active_id
+                           }" attrs="{'invisible': ['|',('estado_obra_cancelar', '=', 1), ('estado_obra_desierta','>=', '1') ]}" icon="fa-times-circle"/>
+                  <button string="Cancelar" type="action" name="%(action_cancelar2)d" class="btn btn-outline-danger btn-lg"
+                          context="{
+                           'search_default_numerolicitacion': active_id,
+                           'default_numerolicitacion': active_id
+                           }" attrs="{'invisible': ['|',('estado_obra_cancelar', '=', 0), ('estado_obra_desierta','>=', '1') ]}" icon="fa-times-circle"/>
+                    <!-- BOTONES DE DESIERTA -->
 
-                <!-- BOTONES DE PARTICIPANTES -->
-              <button type="object" name="VentanaParticipantes" class="oe_highlight" context="{
-                       'search_default_numerolicitacion': active_id,
-                       'default_numerolicitacion': active_id
-                       }" icon="fa-users">
-                  <field name="variable_count" string=' Participantes' widget="statinfo" />
-              </button>
-
-                <!-- BOTON DE EVENTOS -->
-              <button type="object" name="VentanaEventos" icon="fa-calendar" string="Eventos"
-              context="{
-                       'search_default_numerolicitacion_evento': active_id,
-                       'default_numerolicitacion_evento': active_id
-                       }" />
-
-                <!-- BOTONES DE CANCELAR -->
-              <button string="Cancelar" type="action" name="%(action_cancelar1)d" class="oe_highlight" context="{
-                       'search_default_numerolicitacion': active_id,
-                       'default_numerolicitacion': active_id
-                       }" attrs="{'invisible': ['|',('estado_obra_cancelar', '=', 1), ('estado_obra_desierta','>=', '1') ]}" icon="fa-times-circle"/>
-              <button string="Cancelar" type="action" name="%(action_cancelar2)d" class="oe_highlight" context="{
-                       'search_default_numerolicitacion': active_id,
-                       'default_numerolicitacion': active_id
-                       }" attrs="{'invisible': ['|',('estado_obra_cancelar', '=', 0), ('estado_obra_desierta','>=', '1') ]}" icon="fa-times-circle"/>
-                <!-- BOTONES DE DESIERTA -->
-              <button string="Desierta" type="action" name="%(action_desierta1)d" class="oe_highlight" context="{
-                       'search_default_numerolicitacion': active_id,
-                       'default_numerolicitacion': active_id
-                       }"
-                      icon="fa-bitbucket" attrs="{'invisible': ['|',('estado_obra_desierta', '=', 1), ('estado_obra_cancelar','>=', '1') ]}"/>
-              <button string="Desierta" type="action" name="%(action_desierta2)d" class="oe_highlight" context="{
+                  <button string="Desierta" type="action" name="%(action_desierta1)d" class="btn btn-outline-warning btn-lg"
+                          context="{
+                           'search_default_numerolicitacion': active_id,
+                           'default_numerolicitacion': active_id
+                           }"
+                          icon="fa-bitbucket" attrs="{'invisible': ['|',('estado_obra_desierta', '=', 1), ('estado_obra_cancelar','>=', '1') ]}"/>
+                   <button string="Desierta" type="action" name="%(action_desierta2)d" class="btn btn-outline-warning btn-lg"
+                      context="{
                        'search_default_numerolicitacion': active_id,
                        'default_numerolicitacion': active_id
                        }"
                       icon="fa-bitbucket" attrs="{'invisible': ['|',('estado_obra_desierta', '=', 0), ('estado_obra_cancelar','>=', '1') ]}"/>
+                    </div>
 
+                    <div class="col-sm-7" style="text-align: right;">
+                        <button type="action" icon="fa-list-ol" string="Ev. Puntos"
+                      class="btn btn-outline-primary btn-lg"></button>
+                       <button type="action" icon="fa-clipboard" string=" Convocatoria / Bases"
+                          class="btn btn-outline-primary btn-lg"></button>
+
+                            <!-- BOTONES DE PARTICIPANTES -->
+                          <button type="object" name="VentanaParticipantes" class="btn btn-outline-primary btn-lg" context="{
+                                   'search_default_numerolicitacion': active_id,
+                                   'default_numerolicitacion': active_id
+                                   }" icon="fa-users">
+                              <field name="variable_count" string=' Participantes' widget="statinfo" />
+                          </button>
+
+
+                        <button type="object" name="VentanaEventos" icon="fa-calendar" string="Eventos"
+                        context="{
+                       'search_default_numerolicitacion_evento': active_id,
+                       'default_numerolicitacion_evento': active_id
+                       }" class="btn btn-outline-primary btn-lg" />
+                    </div>
+                </div>
             </div>
+
               <!-- FORMULARIO LICITACION -->
               <group string="Seleccionar Obra" colspan="1" col="2" >
                 <field name="programa_inversion_licitacion" string="Programa de Inversión"
-                       attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
+                       attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"
+                        placeholder="Seleccionar Programa de Inversión" />
               </group>
+
               <group>
                   <!-- INSERTAR PARTIDAS LICITACION -->
                 <field name="programar_obra_licitacion" widget='one2many'
@@ -553,59 +571,70 @@
                         <control>
                              <create string="Agregar Partida"/>
                         </control>
-                            <field name="recursos" string="Listado de obras por licitar"/>
+
+                            <field name="recursos" string="Listado de obras por licitar" context="{'search_default_group_nombre_prog': True}"
+                            />
+
                             <!-- field name="obra" domain="[('programaInversion', '=', parent.programa_inversion_licitacion)]"/ -->
                             <field name="programaInversion" invisible="1" force_save="1"/>
-                            <!-- field name="monto_partida" sum="Monto" widget="monetary"/>
-                            <field name="iva_partida" readonly="True" sum="I.V.A" widget="monetary" force_save="1"/>
-                            <field name="total_partida" readonly="True" sum="Total" widget="monetary"/ -->
+
+                            <field name="monto_partida" sum="Monto" widget="monetary" invisible="1"/>
+                            <field name="iva_partida" readonly="True" sum="I.V.A" widget="monetary" force_save="1" invisible="1"/>
+                            <field name="total_partida" readonly="True" sum="Total" widget="monetary" invisible="1"/>
                     </tree>
                 </field>
               </group>
+
               <group>
-                <field name="name" class="oe_inline" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
+                <field name="name" class="oe_inline" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"
+                placeholder="Escribir Objeto de la licitación"/>
+
                 <field name="estatus" />
+
                 <field name="estado_obra_desierta" widget="statinfo" invisible="1"/>
                 <field name="estado_obra_cancelar" widget="statinfo" invisible="1"/>
               </group>
 
-              <group >
-              <group string="Datos De La Licitación" colspan="1" col="2">
-                <field name="tipolicitacion" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="numerolicitacion" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="convocatoria" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="fechaconinv" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="caracter" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="normatividad" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-              </group>
+              <group colspan="1" col="2">
+                  <group string="Datos De La Licitación" colspan="1" col="1">
+                      <group><field name="tipolicitacion" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}" class="oe_inline"/></group>
+                      <group><field name="numerolicitacion" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"
+                          placeholder="NUMERO DE LICITACION" /></group>
+                      <group><field name="convocatoria" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="fechaconinv" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="caracter" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="normatividad" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                  </group>
 
-              <group string="Presiden Actos" colspan="1" col="2">
-                <field name="funcionariopresideactos" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="puesto" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="numerooficio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="fechaoficio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="oficioinvitacioncontraloria" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="fechaoficio2" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                <field name="notariopublico" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-              </group>
+                  <group string="Presiden Actos" colspan="1" col="1">
+                      <group><field name="funcionariopresideactos" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="puesto" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="numerooficio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="fechaoficio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="oficioinvitacioncontraloria" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="fechaoficio2" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="notariopublico" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                  </group>
               </group>
 
               <group string="Datos Generales" colspan="1" col="2">
-                  <group>
-                    <field name="fechalimiteentregabases" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1),
-                    ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="costobasesdependencia" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="fechaestimadainicio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="plazodias" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="anticipomaterial" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="puntosminimospropuestatecnica" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
+                  <group colspan="1" col="1">
+                      <group><field name="fechalimiteentregabases" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1),
+                    ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="costobasesdependencia" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"
+                      invisible="1"/></group>
+                      <group><field name="fechaestimadainicio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="plazodias" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="anticipomaterial" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="puntosminimospropuestatecnica" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
                   </group>
-                  <group>
-                    <field name="fecharegistrocompranet" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="costocompranetbanco" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="fechaestimadatermino" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="capitalcontable" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"/>
-                    <field name="anticipoinicio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/>
+                  <group colspan="1" col="1">
+                      <group><field name="fecharegistrocompranet" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="costocompranetbanco" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="fechaestimadatermino" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="capitalcontable" attrs="{'readonly': ['|', ('normatividad','=', '1'), ('estado_obra_cancelar','>=', 1), '|', ('estado_obra_desierta','>=', 1)]}"/></group>
+                      <group><field name="anticipoinicio" attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"
+                       /></group>
                   </group>
               </group>
 
@@ -635,6 +664,7 @@
         </form>
       </field>
     </record>
+
 
     <!-- TREE VIEW LICITACION-->
     <record model="ir.ui.view" id="proc_contratacion_licitacion_tree2">
@@ -702,7 +732,7 @@
         <field name="view_ids" eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'tree', 'view_id': ref('proc_contratacion_licitacion_tree')}),
         (0, 0, {'view_mode': 'form', 'view_id': ref('proc_contratacion_licitacion_form')})]"/>
-    </record>S
+    </record>
 
     <!-- MENUS -->
     <menuitem name="Proceso de contratación" id="proc_contratacion_menu_root" sequence="0" web_icon="proceso_contratacion,static/description/icon.png"/>

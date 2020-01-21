@@ -7,3 +7,4 @@ access_programa_programa_version,programa.programa_version,model_programa_progra
 access_control_ordenes_cambio,control.ordenes_cambio,model_control_ordenes_cambio,,1,1,1,1
 access_control_cuentasbancos,control.cuentasbancos,model_control_cuentasbancos,,1,1,1,1
 access_control_detalle_conceptos,control.detalle_conceptos,model_control_detalle_conceptos,,1,1,1,1
+

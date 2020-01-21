@@ -37,7 +37,8 @@ access_control_expediente,control.expediente,model_control_expediente,,1,1,1,1
 access_control_estimaciones,control.estimaciones,model_control_estimaciones,,1,1,1,1
 access_control_detalle_conceptos,control.detalle_conceptos,model_control_detalle_conceptos,,1,1,1,1
 access_control_deducciones,control.deducciones,model_control_deducciones,,1,1,1,1
-
+access_proceso_preguntas,proceso.preguntas,model_proceso_preguntas,,1,1,1,1
+access_avance_avance_fisico,avance.avance_fisico,model_avance_avance_fisico,,1,1,1,1
 
 
 

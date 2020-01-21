@@ -61,34 +61,30 @@
               </header>
                 <sheet>
                     <group>
-                       <field name="count_convenio" invisible="1"/>
-
+                         <field name="id_prog" invisible="1"/>
                        <field name="obra" string="Partida:"/>
 
-                         <field name="total_partida" readonly="True" widget="monetary" string="Monto del Contrato"/>
-                           <p attrs="{'invisible': [('count_convenio','&lt;=', '1')]}" style="color: #EE8121;">
-                              Con Convenio Modificatorio*</p>
-
-                       <field name="obraid" string="Partida:" invisible="1"/>
+                       <field name="total_programa" string="Total programa:" force_save="1"/>
                    </group>
                    <group>
                        <group colspan="1" col="4">
                           <field name="fecha_inicio_programa" readonly="1"/>
                           <field name="fecha_termino_programa" readonly="1"/>
 
-                         <field name="total_programa" string="Total programa:" force_save="1"/>
+                          <field name="total_partida" readonly="True" widget="monetary"/>
 
                           <field name="restante_programa" readonly="1"/>
                        </group>
 
-                       <field name="id_prog"/>
+
 
                            <field name="programa_contratos" widget='one2many'>
                              <control>
                                 <create string="Agregar Periodo"/>
                              </control>
                              <tree editable="bottom">
-                                 <field name="id_prog"/>
+                                 <field name="id_prog" invisible="1"/> <!-- de importacion -->
+
                                  <field name="obra"/>
                                  <field name="fecha_inicio"/>
                                  <field name="fecha_termino"/>
@@ -101,7 +97,6 @@
                         force_save="1"/>
                         <field name="razon" string="Modificación" attrs="{'invisible': [('programa_contratos', '=', [])]}"
                         force_save="1"/>
-                        <field name="count_convenio" invisible="1"/>
                     </group>
 
                 </sheet>
@@ -177,19 +172,23 @@
 
                         <button name="%(programa_action)d" class="oe_highlight" type="action"
                              string="Historial de Cambios"
-                             icon="fa-hdd-o" context="{'search_default_programa': obra, 'default_programa': obra}"/>
+                             icon="fa-hdd-o" context="{'search_default_programa': programa_id}"/>
                      </div>
+                    <field name="programa_id" invisible="1"/>
+                        <div>
+                            <b>Nombre de la Obra: </b>
+                        </div>
+                        <group>
 
-                  <group string="Nombre de la Obra:">
                             <field name="obra" nolabel="1" readonly="1"/>
                         </group>
                             <hr/>
                         <group colspan="2" col="5" context="{'default_ejercicio': obra.id}">
-                            <separator string="Programa"/>
-                            <separator string="Ejercicio" />
-                            <separator string="Monto"/>
-                            <separator string="Municipio"/>
-                            <separator string="Localidad"/>
+                            <b>Programa</b>
+                            <b>Ejercicio</b>
+                            <b>Monto</b>
+                            <b>Municipio</b>
+                            <b>Localidad</b>
                         </group>
                         <group colspan="2" col="6">
                             <field name="programaInversion" readonly="True" string="" nolabel="1"/>
@@ -200,12 +199,15 @@
                         </group>
                           <hr/>
                         <group colspan="2" col="5">
-                           <separator string="Fecha del Anticipo"/>
-                           <separator string="Fecha del contrato"/>
-                           <separator string="Fecha de Inicio Contractual"/>
-                           <separator string="Fecha de Termino Contractual"/>
-                           <separator string="Supervision Externa"/>
+                            <b>Fecha del Anticipo</b>
+                            <b>Fecha del contrato</b>
+                            <b>Fecha de Inicio Contractual</b>
+                            <b>Fecha de Termino Contractual</b>
+                            <b>Supervision Externa</b>
                         </group>
+
+
+
                         <group colspan="2" col="6">
                           <field name="fecha_anticipos" readonly="1" string="" nolabel="1"/>
                           <field name="fecha" string="" nolabel="1"/>
@@ -274,11 +276,11 @@
      <menuitem name="Programa de obra" id="programa_obra" parent="ejecucion_obra.menu_root"
               action="programa_record" sequence="0"/>
 
-        <menuitem name="Programa IMPORT" id="programa_obra_import" parent="ejecucion_obra.menu_root"
+        <!--menuitem name="Programa IMPORT" id="programa_obra_import" parent="ejecucion_obra.menu_root"
               action="programa_import_action" sequence="4"/>
 
         <menuitem name="prog part IMPORT" id="programa_obra_import_part" parent="ejecucion_obra.menu_root"
-              action="programa_parti_action" sequence="5"/>
+              action="programa_parti_action" sequence="5"/-->
 
     </data>
 </odoo>

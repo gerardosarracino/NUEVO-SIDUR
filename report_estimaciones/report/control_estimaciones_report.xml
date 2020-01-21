@@ -139,7 +139,7 @@
                                         <br/>
                                     </p>
 
-                                    <p>SANCIÓN POR INCUMPLIMIENTO DE PLAZO <span t-field="o.ret_dev" class="float-right mt8"/> </p>
+                                    <p>SANCIÓN POR INCUMPLIMIENTO DE PLAZO <span t-field="o.ret_neta_est" class="float-right mt8"/> </p>
                                     <p>RETENCIÓN/DEVOLUCIÓN POR ATRASO <span t-field="o.sancion" class="float-right mt8"/> </p>
 
                                     <p><strong>ALCANCE LIQUIDO</strong>	<span t-field="o.a_pagar" class="float-right mt8"/></p>

@@ -174,16 +174,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr bgcolor="#DDDDDD"  class="text-center" t-foreach="o.conceptos_partidas" t-as="c">
+
+
+                                    <t t-set="categoria" t-value="[]"/>
+                                        <t t-foreach="o.conceptos_partidas" t-as="l">
+                                           <t t-set="categoria" t-value="categoria+[l.categoria]"/>
+                                        </t>
+                                        <t t-foreach="set(categoria)" t-as="category">
+
+                                    <tr bgcolor="#DDDDDD"  class="text-center" >
                                         <td class="text-center">
-                                            <span t-field="c.clave_linea"/>
+                                            <span><strong t-esc="category.name"/></span>
                                         </td>
-                                        <td colspan="12"><span t-field="c.categoria"/></td>
+
+                                        <td colspan="12">x</td>
                                     </tr>
-                                    <tr t-foreach="docs" t-as="o">
-                                        <td>3.04</td>
-                                        <td>JUNTA LONGITUDINAL CON BARRAS DE AMARRE DE 1/2" DE DIAMETRO, DE 71 cm DE LONGITUD Y COLOCADAS A CADA 76 cm, INCLUYE: SUMINISTRO Y COLOCACIN DE VARILLAS CORRUGADAS; CORTE CON DISCO A CADA 4.00 M PARA DAR UN ANCHO DE CORTE DE 6 mm (1/4") HASTA UNA PROFUNDIDAD DE 28 mm; COLOCACION DE CORDON DE RESPALDO (BACKER ROD DE 3/8"); COLOCACIN DE SELLADOR AUTONIVELANTE, SUMINISTRO DE MATERIALES, DESPERDICIOS, ACARREOS, HERRAMIENTA, EQUIPO Y MANO DE OBRA.</td>
-                                        <td align="center">ML</td>
+
+                                    <tr t-foreach="o.conceptos_partidas" t-as="x" t-if="category in x.categoria">
+
+                                        <td><span t-field="x.clave_linea"/></td>
+                                        <td><span t-field="x.concepto"/></td>
+                                        <td align="center"><span t-field="x.concepto"/></td>
                                         <td align="center">11.96</td>
                                         <td align="right">139.06</td>
                                         <td align="right">1,663.16</td>
@@ -195,6 +206,17 @@
                                         <td align="right">139.06</td>
                                         <td align="right">1,404.51</td>
                                     </tr>
+
+                                    <tr>
+                                        <td>SUBTOTAL</td>
+                                        <td colspan="12">x</td>
+                                    </tr>
+                                        </t>
+
+
+
+
+
                                 </tbody>
                                 <tbody>
                                     <tr>

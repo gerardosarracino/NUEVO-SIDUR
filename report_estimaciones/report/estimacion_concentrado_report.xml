@@ -164,6 +164,7 @@
 
                  <td class="text-left">
                         <span><strong t-esc="category.name"/></span>
+
                         <t t-set="y" t-value="0"/>
 
                         <t t-foreach="o.conceptos_partidas" t-as="l" > <!-- t-if="str(l.categoria) == str(category.name)" -->
