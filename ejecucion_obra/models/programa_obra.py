@@ -15,8 +15,15 @@ class ProgramaObra(models.Model):
     obra_id = fields.Char(compute="partidaEnlace", store=True)
     obra_id2 = fields.Char(compute="partidaEnlaceId", store=True)
 
-    fecha_inicio_programa = fields.Date('Fecha Inicio:', related="programa_contratos.fecha_inicio")
-    fecha_termino_programa = fields.Date('Fecha Término:', compute="fechaTermino")
+    fecha_inicio_programa = fields.Date('Fecha Inicio:', related="obra.numero_contrato.fechainicio")
+    fecha_termino_programa = fields.Date('Fecha Término:', related="obra.numero_contrato.fechatermino")
+
+    # fecha_inicio_programa = fields.Date('Fecha Inicio:', related="programa_contratos.fecha_inicio")
+    # fecha_termino_programa = fields.Date('Fecha Término:', compute="fechaTermino")
+
+    # CUANDO HAYA CONVENIO DE PLAZO MOSTRAR ESTAS FECHAS
+    fecha_inicio_convenida = fields.Date('Fecha Inicio:', compute="b_convenio_plazo")
+    fecha_termino_convenida = fields.Date('Fecha Inicio:', compute="b_convenio_plazo")
 
     # monto_programa_aux = fields.Float(compute='SumaProgramas')
 
@@ -41,6 +48,19 @@ class ProgramaObra(models.Model):
     estatus_programa = fields.Selection(
         [('borrador', 'Borrador'), ('confirmado', 'Confirmado'), ('validado', 'Validado'), ],
         default='borrador')
+
+    conv_contador = fields.Integer(compute="b_convenio_plazo")
+
+    # BUSCAR SI HAY CONVENIO MODIFICATORIO DE PLAZO
+    @api.one
+    def b_convenio_plazo(self):
+        b_convenio_contador = self.env['proceso.convenios_modificado'].search_count([('contrato.id', '=', self.obra.id)])
+        self.conv_contador = b_convenio_contador
+        b_convenio = self.env['proceso.convenios_modificado'].search([('contrato.id', '=', self.obra.id)])
+        if b_convenio_contador > 0:
+            for i in b_convenio:
+                self.fecha_inicio_convenida = i.plazo_fecha_inicio
+                self.fecha_termino_convenida = i.plazo_fecha_termino
 
     @api.one
     def totalPrograma(self):

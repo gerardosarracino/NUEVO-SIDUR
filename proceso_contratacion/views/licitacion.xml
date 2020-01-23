@@ -109,7 +109,7 @@
                         <h3 colspan="2" align="center"> Fallo:  <field name="name" readonly="1"/> </h3>
                       </div>
                   </div>
-
+                <field name="id_eventos" readonly="1" />
                   <sheet>
                       <group colspan="2" col="4">
                           <field name="numerolicitacion" readonly="1"/>
@@ -146,7 +146,7 @@
                       </div>
                   </div>
                   <sheet>
-                          <field name="id_eventos" readonly="1" invisible="1"/>
+                          <field name="id_eventos" force_save="1" />
 
                       <group string="Datos Generales Del Fallo" colspan="2" col="4">
                           <field name="ganador"/>
@@ -160,7 +160,7 @@
                           <field name="fecha_fcontrato"/>
                       </group>
 
-                      <field name="relacion_concepto_ofi" invisible="1"/>
+                      <field name="relacion_concepto_ofi" />
                       <group colspan="2" col="4">
                           <field name="importe_ganador"/>
                           <field name="iva"/>
@@ -177,7 +177,7 @@
                                   <field name="municipal"/>
                                   <field name="otros"/>
                                   <field name="total_ca"/>
-                                  <field name="total1"/>
+                                  <field name="total1" sum="Ttotal"/>
                               </tree>
                           </field>
                       </group>
@@ -242,7 +242,6 @@
                                 <group colspan="2" col="2">
                                     <field name="contratista_propuesta" nolabel="1">
                                        <tree create="false" delete="false">
-
                                            <field name="numerolicitacion" invisible="1"/>
                                            <field name="name"/>
                                            <field name="monto"/>
@@ -252,6 +251,7 @@
                                            <field name="puntos_tecnicos"/>
                                            <field name="puntos_economicos"/>
                                            <field name="paso"/>
+                                           <field name="aux" invisible="1" force_save="1"/>
                                            <field name="posicion"/>
                                            <button name="propuestas" type="object" string="Propuesta del Licitante"
                                            class="btn btn-primary"/>
@@ -277,7 +277,7 @@
 
                                </group>
                                 <group>
-                                    <button name="dato_fallo" type="object" string="Datos Generales Del Fallo"
+                                    <button name="dato_fallo" type="object" string="Datos Generales Del Fallo" class="btn btn-primary"
                                             context="{'default_id_eventos': active_id,
                                             'default_numerolicitacion': numerolicitacion_evento}"/>
                                 </group>

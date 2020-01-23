@@ -23,7 +23,7 @@ class ElaboracionContratos(models.Model):
     id_sideop_partida = fields.Integer('ID SIDEOP part')
 
     radio_adj_lic = [('1', "Licitación"), ('2', "Adjudicación")]
-    tipo_contrato = fields.Selection(radio_adj_lic, string="Tipo de Contrato:")
+    tipo_contrato = fields.Selection(radio_adj_lic, string="Tipo de Contrato:", store=True)
 
     contrato_partida_licitacion = fields.Many2many('partidas.partidas', ondelete="cascade")
 
@@ -279,6 +279,7 @@ class ElaboracionContratos(models.Model):
             self.update({
                 'contrato_partida_licitacion': [[0, 0, {'recursos': partidas.recursos,
                                                           'programaInversion': partidas.programaInversion,
+                                                          'obra': partidas.obra,
                                                           'monto_partida': partidas.monto_partida,
                                                           'iva_partida': partidas.iva_partida,
                                                           'total_partida': partidas.total_partida,

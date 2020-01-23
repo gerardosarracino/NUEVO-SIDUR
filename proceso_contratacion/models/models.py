@@ -209,7 +209,7 @@ class Licitacion(models.Model):
 # EVENTOS DE LICITACION
 class Eventos(models.Model):
     _name = 'proceso.eventos_licitacion'
-    _rec_name = 'id'
+    _rec_name = 'numerolicitacion_evento'
 
     licitacion_id = fields.Char(compute="nombre", store=True)
 
@@ -304,7 +304,8 @@ class Eventos(models.Model):
         for i in b_participante.contratista_participantes:
             self.update({
                 'contratista_propuesta': [
-                    [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante, 'numerolicitacion': id_lic}]]
+                    [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante, 'numerolicitacion': id_lic,
+                            'aux': '1'}]]
             })
 
 
@@ -555,7 +556,7 @@ class DatosFallo(models.Model):
     _name = 'proceso.datos_fallo'
 
     numerolicitacion = fields.Many2one('proceso.licitacion', string='Numero Licitación:', readonly=True, store=True)
-    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:')
+    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:', required=True)
 
     ganador = fields.Char(string="Ganador:", compute="b_ganador")
 
@@ -563,7 +564,7 @@ class DatosFallo(models.Model):
     def b_ganador(self):
         b_ganador = self.env['proceso.contra_fallo'].search([('numerolicitacion.id', '=', self.numerolicitacion.id)])
         for i in b_ganador:
-            if i.ganador == 1:
+            if i.ganador is True:
                 self.importe_ganador = i.monto
                 self.ganador = i.name
             else:
@@ -579,7 +580,7 @@ class DatosFallo(models.Model):
     fecha_fcontrato = fields.Date('Fecha firma contrato:')
 
     importe_ganador = fields.Float('Importe Ganador:', compute="b_ganador")
-    iva = fields.Float('I.V.A')
+    iva = fields.Float('I.V.A', default=0.16)
 
     # CALCULO DEL IVA
     @api.one
@@ -590,9 +591,10 @@ class DatosFallo(models.Model):
     total_contratado = fields.Float('Total Contratado:	', compute="fallo_iva")
 
     # RELACION PARA EL DOMAIN DEL ANEXO TECNICO DEL RECURSO DE LA LICITACION
-    relacion_concepto_ofi = fields.Text(related="numerolicitacion.programar_obra_licitacion.recursos.concepto.descripcion")
+    relacion_concepto_ofi = fields.Text(related="numerolicitacion.programar_obra_licitacion.recursos.concepto.descripcion") #
     # SELECCION DEL RECURSO PARA LA LICITACION
-    recursos = fields.Many2many('autorizacion_obra.anexo_tecnico', string="Seleccione un oficio de autorización")
+    recursos = fields.Many2many('autorizacion_obra.anexo_tecnico', string="Seleccione un oficio de autorización",
+                                )
 
 
 # TABLA DE PROPUESTA DEL LICITANTE

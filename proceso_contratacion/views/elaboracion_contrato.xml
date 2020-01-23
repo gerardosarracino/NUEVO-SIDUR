@@ -172,7 +172,7 @@
                 <page string="Datos Generales" icon="fa-bitbucket">
                     <field name="contrato_contador" invisible="1"/>
                      <group string="Contrato Datos Generales"  >
-                         <field name="tipo_contrato" widget="radio" attrs="{'readonly': ['|',('obra','!=', False),('adjudicacion','!=', False)]}"/>
+                         <field name="tipo_contrato" widget="radio" /> <!-- attrs="{'readonly': ['|',('obra','!=', False),('adjudicacion','!=', False)]}" -->
                      </group>
 
                     <group>
@@ -253,6 +253,7 @@
                             <field name="p_id" invisible="1"/>
                         </tree>
                     </field>
+
                     </group>
                      <!-- CONTADORES -->
                      <field name="contar_finiquito"  invisible="1"/>
@@ -277,6 +278,7 @@
                         <field name="retencion" class="oe_inline"/>
                     </group>
                     </page>
+
 
                     <!-- PAGINA FIANZAS -->
                     <page string="Fianzas"  attrs="{'invisible': [('contrato_contador','=', 0)]}">

@@ -105,7 +105,19 @@ class Estimaciones(models.Model):
 
     # DATOS DEL CONTRATO PARA REPORTE
     fecha_contrato = fields.Date(string="", related="obra.fecha", )
-    monto_contrato = fields.Float(string="", related="obra.total_partida", )
+
+    # monto_contrato = fields.Float(string="", related="obra.total_partida", )
+    monto_contrato = fields.Float(string="", compute="b_monto_contrato", )
+
+    @api.one
+    def b_monto_contrato(self):
+        search = self.env['partidas.partidas'].search([('id', '=', self.obra.id)])
+        _search_cove = self.env['proceso.convenios_modificado'].search_count([("contrato.id", "=", self.obra.id)])
+        if _search_cove >= 1:
+            self.monto_contrato = search.monto_sin_iva_modi
+        elif _search_cove == 0:
+            self.monto_contrato = search.monto_sin_iva
+
     anticipo_contrato = fields.Float(string="", related="obra.total_anticipo", )
     fechainicio_contrato = fields.Date(string="", related="obra.fechainicio", )
     fechatermino_contrato = fields.Date(string="", related="obra.fechatermino", )
@@ -171,6 +183,24 @@ class Estimaciones(models.Model):
     x2 = fields.Float(compute="PenasConvencionales")
 
     xd = fields.Float(compute="computeSeccion")
+
+    # ESTADO DE CUENTA PARA QWEB
+    acum_anterior = fields.Float(compute="estado_cuenta")
+    acum_total = fields.Float(compute="estado_cuenta")
+    saldo_contrato = fields.Float(compute="estado_cuenta")
+
+    @api.one
+    def estado_cuenta(self):
+        search = self.env['control.estimaciones'].search([('obra.id', '=', self.obra.id)])
+        acum = 0
+        for i in search:
+            if self.idobra < i.idobra:
+                pass
+            elif self.idobra > i.idobra:
+                acum += i.estimado
+            self.acum_anterior = acum
+            self.acum_total = acum + self.estimado
+            self.saldo_contrato = self.monto_contrato - self.acum_total
 
     @api.multi
     def OrdenesPago(self):
@@ -282,6 +312,18 @@ class Estimaciones(models.Model):
         f_est_termino_dia = datetime.strptime(str(f_estimacion_termino), "%Y-%m-%d")
         # BUSCAR FECHAS DEL PROGRAMA
         b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
+
+        # VERIFICAR SI EXISTE CONVENIO
+        b_convenio_contador = self.env['proceso.convenios_modificado'].search_count(
+            [('contrato.id', '=', self.obra.id)])
+        if b_convenio_contador >= 1:
+            fecha_inicio_programa = b_programa.fecha_inicio_convenida
+            fecha_inicio_termino = b_programa.fecha_termino_convenida
+        else:
+            # FECHA INICIO DEL PROGRAMA
+            fecha_inicio_programa = b_programa.fecha_inicio_programa
+            # FECHA TERMINO PROGRAMA
+            fecha_inicio_termino = b_programa.fecha_termino_programa
         # FECHA INICIO DEL PROGRAMA
         fecha_inicio_programa = b_programa.fecha_inicio_programa
         # FECHA TERMINO PROGRAMA
@@ -427,6 +469,7 @@ class Estimaciones(models.Model):
             # SANCION
             elif f_estimacion_inicio > fecha_inicio_termino:
                 print('LA OBRA TERMINO DESPUES DEL PROGRAMA, APLICAR SANCION')
+
             # SI EL DIA DE LA FECHA TERMINO DE LA ESTIMACION ES IGUAL AL DIA ULTIMO DEL MES
             elif f_est_termino_dia.day == diasest:
                 # FECHA TERMINO PROGRAMA MES Y AÑO ES MAYOR A FECHAR TERMINO ESTIMACION MES Y AÑO TERMINAR CICLO
@@ -778,10 +821,24 @@ class Estimaciones(models.Model):
                 elif datem3 <= datem4:
                     acum = acum + i.monto
                     print('CUANDO LA ESTIMACION ES MENOS DE 30 DIAS EN EL MES')
-                    f1 = datetime.strptime(str(fecha_inicio_programa), date_format)
-                    f2 = datetime.strptime(str(f_estimacion_termino), date_format)
+                    print(self.obra.id)
+                    print(b_programa.programa_contratos[cont-1].fecha_termino)
+
+                    # fechaterminox = b_programa.programa_contratos[cont].fecha_termino
+
+                    f1 = datetime.strptime(str(f_estimacion_inicio), date_format)
+                    f2 = datetime.strptime(str(fechatermino), date_format)
                     r = f2 - f1
                     dias = r.days
+                    print(dias)
+
+                    fg = datetime.strptime(str(f_estimacion_inicio), date_format)
+                    fh = datetime.strptime(str(f_estimacion_termino), date_format)
+                    rx = fh - fg
+                    diasx = rx.days
+
+                    print(diasx)
+
                     f3 = datetime.strptime(str(fecha_inicio_programa), date_format)
                     f4 = datetime.strptime(str(fecha_inicio_termino), date_format)
                     r2 = f4 - f3
@@ -789,14 +846,24 @@ class Estimaciones(models.Model):
 
                     # ---------------------
                     diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
+
                     f7 = datetime.strptime(str(f_estimacion_termino.replace(day=1)), date_format)
                     f8 = datetime.strptime(str(f_estimacion_termino), date_format)
                     r4 = f8 - f7
                     diastransest = r4.days
                     # -------------------------
                     # MONTO DE ESTA ESTIMACION ENTRE EL NUMERO DE DIAS QUE DURA LA ESTIMACION
-                    monto_est_dias = (i.monto / diasest)
-                    m_estimado = acum - monto_est_dias
+                    # monto_est_dias = (i.monto / diasest)
+                    if fechatermino < f_estimacion_termino:
+                        formula = 1
+                    else:
+                        formula = (i.monto / (dias + 1)) * (diasx + 1)
+
+                    self.x1 = formula
+                    self.x2 = acum - i.monto
+                    self.ultimomonto = i.monto
+
+                    m_estimado = formula + (acum - i.monto)
                     self.diasest = diasest
                     self.diastransest = diastransest
 
@@ -1185,7 +1252,8 @@ class Deducciones(models.Model):
 
     name = fields.Char()
     porcentaje = fields.Float()
-    valor = fields.Float(store=True)
+    valor = fields.Float()
+    # valor = fields.Float(store=True)
 
 class Ordenes_Cambio(models.Model):
     _name = 'control.ordenes_cambio'

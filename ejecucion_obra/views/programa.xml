@@ -66,10 +66,15 @@
 
                        <field name="total_programa" string="Total programa:" force_save="1"/>
                    </group>
+                    <field name="conv_contador" invisible="1"/>
                    <group>
                        <group colspan="1" col="4">
-                          <field name="fecha_inicio_programa" readonly="1"/>
-                          <field name="fecha_termino_programa" readonly="1"/>
+
+                          <field name="fecha_inicio_programa" readonly="1" attrs="{'invisible': [('conv_contador', '>', 1)]}"/>
+                          <field name="fecha_termino_programa" readonly="1" attrs="{'invisible': [('conv_contador', '>', 1)]}"/>
+
+                          <field name="fecha_inicio_convenida" attrs="{'invisible': [('fecha_inicio_convenida', '=', [])]}"/>
+                          <field name="fecha_termino_convenida" attrs="{'invisible': [('fecha_termino_convenida', '=', [])]}"/>
 
                           <field name="total_partida" readonly="True" widget="monetary"/>
 

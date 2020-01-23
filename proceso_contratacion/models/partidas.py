@@ -9,14 +9,11 @@ class PartidasLicitacion(models.Model):
     _name = 'partidas.licitacion'
 
     recursos = fields.Many2one('autorizacion_obra.anexo_tecnico', 'Recursos')
-
-    # obra = fields.Many2one('registro.programarobra', required=True)
+    obra = fields.Many2one('registro.programarobra', related="recursos.concepto")
     programaInversion = fields.Many2one('generales.programas_inversion')
-
     monto_partida = fields.Float(string="Monto", required=True)
     iva_partida = fields.Float(string="Iva", compute="iva")
     total_partida = fields.Float(string="Total", compute="sumaPartidas")
-
     b_iva = fields.Float(string="IVA DESDE CONFIGURACION", compute="BuscarIva")
 
     # METODO BUSCAR IVA EN CONFIGURACION
@@ -48,10 +45,8 @@ class PartidasLicitacion(models.Model):
 # CLASE AUXILIAR DE PARTIDAS ADJUDICACION
 class PartidasAdjudicacion(models.Model):
     _name = 'partidas.adjudicacion'
-    # _inherit = 'res.config.settings'
 
     id_sideop_adjudicacion = fields.Integer('ID SIDEOP')
-
     id_sideop_partida = fields.Integer('ID SIDEOP part')
 
     obra = fields.Many2one('registro.programarobra', required=True)
@@ -59,7 +54,6 @@ class PartidasAdjudicacion(models.Model):
     monto_partida = fields.Float(string="Monto", required=True)
     iva_partida = fields.Float(string="Iva", compute="iva")
     total_partida = fields.Float(string="Total", compute="sumaPartidas")
-
     b_iva = fields.Float(string="IVA DESDE CONFIGURACION", compute="BuscarIva")
 
     # METODO BUSCAR IVA EN CONFIGURACION
@@ -95,13 +89,10 @@ class Partidas(models.Model):
 
     # IMPORTACION
     id_partida = fields.Integer('ID PARTIDA')
-    # num_contrato
-    id_contrato_sideop = fields.Char(string="ID SIDEOP CONTRATO", required=False, )
+    id_contrato_sideop = fields.Char(string="num_contrato SIDEOP", required=False, )
     # numero_contrato
     num_contrato_related = fields.Char(string="RELACION A ID CONTRATO", related="numero_contrato.num_contrato_sideop")
-
     id_contratista = fields.Char('ID CONTRATISTA SIDEOP')
-
     id_contrato_relacion = fields.Char(string="ESTA ES LA ID DEL CONTRATO A LA PARTIDA PARA LA RELACION")
     # TERMINA IMPORTACION
 
@@ -109,10 +100,27 @@ class Partidas(models.Model):
                                       , compute="contrato_metodo")  # compute="nombrePartida"
 
     # OBRA A LA QUE PERTENECE LA PARTIDA
-    obra = fields.Many2one('registro.programarobra',)
+    obra = fields.Many2one('registro.programarobra', )
     # PROGRAMA DE INVERSION
-    programaInversion = fields.Many2one('generales.programas_inversion', string="Programa de Inversión",
-                                        related="numero_contrato.adjudicacion.programas_inversion_adjudicacion")
+    programaInversion = fields.Many2one('generales.programas_inversion', string="Programa de Inversión",)
+
+    '''@api.one
+    def p_obra(self):
+        b_s = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
+        print(b_s.tipo_contrato, 'tipo contrato x1')
+        if b_s.tipo_contrato == '1':
+            self.obra = self.numero_contrato.obra.programar_obra_licitacion.recursos.concepto
+        elif b_s.tipo_contrato == '2':
+            self.obra = self.numero_contrato.adjudicacion.programar_obra_adjudicacion.obra
+
+    @api.one
+    def p_inve(self):
+        b_s = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
+        print(b_s.tipo_contrato, 'tipo contrato x2')
+        if b_s.tipo_contrato == '1':
+            self.programaInversion = self.numero_contrato.obra.programa_inversion_licitacion
+        elif b_s.tipo_contrato == '2':
+            self.programaInversion = self.numero_contrato.adjudicacion.programas_inversion_adjudicacion'''
 
     # GALERIA DE IMAGENES DE AVANCE FINANCIERO
     galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
@@ -142,7 +150,6 @@ class Partidas(models.Model):
         b_id_lic = self.env['proceso.elaboracion_contrato'].search([('id_lic', '=', self.id_contrato_relacion)], limit=1)
 
         if b_id_lic.id_lic >= 1:
-            print('si lic')
             self.numero_contrato = b_id_lic.id
         elif b_id_ad.id_ad >= 1:
             self.numero_contrato = b_id_ad.id
@@ -255,9 +262,11 @@ class Partidas(models.Model):
         print('contrato')
         b_contrato = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
         if b_contrato.tipo_contrato == '1':
+            print('xd1')
             self.porcentaje_anticipo = b_contrato.adjudicacion.anticipoinicio
             self.anticipo_material = b_contrato.adjudicacion.anticipomaterial
         elif b_contrato.tipo_contrato == '2':
+            print('xd2')
             self.porcentaje_anticipo = b_contrato.obra.anticipoinicio
             self.anticipo_material = b_contrato.obra.anticipomaterial
 
@@ -333,11 +342,13 @@ class Partidas(models.Model):
     # VISTA DE INFORMACION DE LA PARTIDA
     ejercicio = fields.Many2one("registro.ejercicio", string="Ejercicio", related="obra.obra_planeada.ejercicio")
     municipio = fields.Many2one('generales.municipios', 'Municipio', related="obra.obra_planeada.municipio")
-    localidad = fields.Text(string="Localidad", readonly="True", related="obra.obra_planeada.ubicacion")
+    localidad = fields.Text(string="Localidad", readonly="True", related="obra.obra_planeada.localidad")
     # localidad = fields.Text(string="Localidad", readonly="True", related="obra.obra_planeada.localidad")
     fecha = fields.Date(string="Fecha", related="numero_contrato.fecha")
+
     fechainicio = fields.Date(string="Fecha de Inicio", related="numero_contrato.fechainicio")
     fechatermino = fields.Date(string="Fecha de Termino", related="numero_contrato.fechatermino")
+
     supervisionexterna1 = fields.Many2one('proceso.elaboracion_contrato', string="Supervisión externa:",
                                           related="numero_contrato.supervisionexterna1")
 
