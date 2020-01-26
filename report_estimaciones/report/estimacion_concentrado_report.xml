@@ -149,49 +149,54 @@
 
                 <t t-set="i" t-value="1"/>
 
+             <t t-foreach="o.conceptos_partidas" t-as="g">
+
                 <t t-set="categoria" t-value="[]"/>
+
                 <t t-foreach="o.conceptos_partidas" t-as="l">
                    <t t-set="categoria" t-value="categoria+[l.categoria]"/>
                 </t>
-                <t t-foreach="set(categoria)" t-as="category">
-			<tr>
 
+            <t t-foreach="set(categoria)" t-as="category">
 
-                    <td class="text-left" >
-                        <!-- CONTADOR -->
-                        <span t-esc="i"/>
-                    </td>
+			<tr t-if="category in g.categoria and g.estimacion > 0">
+
+                <td class="text-left" >
+                    <!-- CONTADOR -->
+                    <span t-esc="i"/>
+                </td>
 
                  <td class="text-left">
-                        <span><strong t-esc="category.name"/></span>
+                    <span><strong t-esc="category.name"/></span>
 
-                        <t t-set="y" t-value="0"/>
+                    <t t-set="y" t-value="0"/>
 
-                        <t t-foreach="o.conceptos_partidas" t-as="l" > <!-- t-if="str(l.categoria) == str(category.name)" -->
+                    <t t-foreach="o.conceptos_partidas" t-as="l" > <!-- t-if="str(l.categoria) == str(category.name)" -->
 
-                        <t t-if="category in l.categoria" t-set="y" t-value="y + l.importe_ejecutado" /> </t>
+                    <t t-if="category in l.categoria" t-set="y" t-value="y + l.importe_ejecutado" /> </t>
 
-                </td><t t-set="i" t-value="i+1"/>
+                </td> <t t-set="i" t-value="i+1"/>
 
 
+                <!-- SUMA -->
                 <td class="text-right" >
-                     <span t-esc="y"/>
+                     <span t-esc="y" t-options='{"widget": "float", "precision": 2}'/>
                 </td>
 
                 <td class="text-left" >
                     &#160;
                 </td>
 
-            </tr></t>
+            </tr>
 
-                <tr>
+                <tr t-if="category in g.categoria and g.estimacion > 0">
 				<td align="center"></td>
 				<td></td>
 				<td align="right"></td>
 				<td>
-									</td>
-			</tr>
-			<tr>
+                </td>
+			    </tr>
+			<tr t-if="category in g.categoria and g.estimacion > 0">
 				<td>.</td>
 				<td align="right">SUMA</td>
                 <td class="text-right"><t t-set="x" t-value="0"/>
@@ -201,7 +206,12 @@
                 </td>
 				<td>.</td>
 			</tr>
-		</tbody></table>
+
+                </t>
+                </t>
+
+		</tbody>
+        </table>
 	</div>
 
         <div style="margin-top:15px;">

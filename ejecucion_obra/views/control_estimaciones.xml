@@ -243,11 +243,13 @@
                                     <tree editable="bottom" delete="false" create="false" force_save="1">
                                         <field name="id_partida" invisible="1" force_save="1" readonly="1"/>
 
+                                        <field name="clave_linea" readonly="1" string="Clave" force_save="1"/>
+
                                         <field name="categoria" readonly="1" force_save="1" class="text-left"/>
 
-                                        <field name="related_categoria_padre" readonly="1"/>
+                                        <field name="related_categoria_padre" readonly="1" invisible="1"/>
 
-                                        <field name="clave_linea" readonly="1" string="Clave" force_save="1"/>
+
 
                                         <field name="concepto" readonly="1" string="Concepto" force_save="1"
                                         attrs="{'invisible': ['|', ('concepto','=', '-'),('concepto','=', '.')]}"/>

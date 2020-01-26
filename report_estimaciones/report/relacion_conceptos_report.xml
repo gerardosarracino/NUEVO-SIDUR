@@ -176,42 +176,54 @@
                                 </thead>
                                 <tbody>
 
+                                <t t-foreach="o.conceptos_partidas" t-as="x">
 
                                     <t t-set="categoria" t-value="[]"/>
                                         <t t-foreach="o.conceptos_partidas" t-as="l">
                                            <t t-set="categoria" t-value="categoria+[l.categoria]"/>
                                         </t>
-                                        <t t-foreach="set(categoria)" t-as="category">
+                                <t t-foreach="set(categoria)" t-as="category" >
 
-                                    <tr bgcolor="#DDDDDD"  class="text-center" >
-                                        <td class="text-center">
+
+
+                                    <tr bgcolor="#DDDDDD"  class="text-center" t-if="category in x.categoria and x.estimacion > 0">
+                                        <td class="text-center" >
                                             <span><strong t-esc="category.name"/></span>
                                         </td>
 
-                                        <td colspan="12">x</td>
+                                        <td colspan="12" >&#160;</td>
+
                                     </tr>
 
-                                    <tr t-foreach="o.conceptos_partidas" t-as="x" t-if="category in x.categoria">
+                                    <tr t-if="category in x.categoria and x.estimacion > 0"
+                                    >
 
                                         <td><span t-field="x.clave_linea"/></td>
                                         <td><span t-field="x.concepto"/></td>
-                                        <td align="center"><span t-field="x.concepto"/></td>
-                                        <td align="center">11.96</td>
-                                        <td align="right">139.06</td>
-                                        <td align="right">1,663.16</td>
+                                        <td align="center"><span t-field="x.medida"/></td>
+                                        <td align="center"><span t-field="x.cantidad"/></td>
+                                        <td align="right"><span t-field="x.precio_unitario"
+                                        /></td>
+                                        <td align="right">
+                                            <t t-set="suma" t-value="0"/>
+                                            <t t-set="suma" t-value="suma + x.cantidad * x.precio_unitario" />
+                                            <t t-esc="suma"/>
+                                        </td>
                                         <td align="center">0.00</td>
                                         <td align="right">0.00</td>
-                                        <td align="center">10.1</td>
-                                        <td align="right">1,404.51</td>
+                                        <td align="center"><span t-field="x.estimacion"/></td>
+                                        <td align="right"><span t-field="x.importe_ejecutado"/></td>
                                         <td align="center">10.1</td>
                                         <td align="right">139.06</td>
                                         <td align="right">1,404.51</td>
                                     </tr>
 
-                                    <tr>
+                                    <tr t-if="category in x.categoria and x.estimacion > 0">
                                         <td>SUBTOTAL</td>
-                                        <td colspan="12">x</td>
+                                        <td colspan="12">&#160;</td>
                                     </tr>
+
+                                        </t>
                                         </t>
 
 

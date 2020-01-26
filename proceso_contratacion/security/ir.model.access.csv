@@ -39,6 +39,8 @@ access_control_detalle_conceptos,control.detalle_conceptos,model_control_detalle
 access_control_deducciones,control.deducciones,model_control_deducciones,,1,1,1,1
 access_proceso_preguntas,proceso.preguntas,model_proceso_preguntas,,1,1,1,1
 access_avance_avance_fisico,avance.avance_fisico,model_avance_avance_fisico,,1,1,1,1
+access_semaforo_estado_obra,semaforo.estado_obra,model_semaforo_estado_obra,,1,1,1,1
+access_semaforo_actividad,semaforo.actividad,model_semaforo_actividad,,1,1,1,1
 
 
 

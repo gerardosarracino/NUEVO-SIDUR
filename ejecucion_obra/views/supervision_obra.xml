@@ -342,9 +342,16 @@
                       </div>
 
                 <group>
-                     <field name="galleria" widget="one2many_list">
-                        <tree editable="bottom">
-                            <field name="imagen" widget="image"/>
+                     <field name="galleria" widget="one2many_list" context="{'default_id_partida': active_id}">
+                        <tree>
+                            <field name="frente" domain="[('frente.one_m2.id_partida.id', '=', id_partida.id)]" />
+
+
+                            <field name="imagen" widget="image_multi" />
+
+
+
+                            <field name="id_partida" invisible="1" />
                         </tree>
                     </field>
                 </group>

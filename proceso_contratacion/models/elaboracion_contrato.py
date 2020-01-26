@@ -48,7 +48,17 @@ class ElaboracionContratos(models.Model):
                                                                                       "ejecución", )
     supervisionexterna = fields.Text(string="Supervisión externa")
     supervisionexterna1 = fields.Many2one('proceso.elaboracion_contrato', string="Supervisión externa:")
-    contratista = fields.Many2one('contratista.contratista', related="adjudicacion.contratista")
+
+    contratista = fields.Many2one('contratista.contratista', compute="b_contratista")
+
+    @api.one
+    @api.depends('obra', 'adjudicacion')
+    def b_contratista(self):
+        if self.tipo_contrato == '2':
+            self.contratista = self.adjudicacion.contratista
+        elif self.tipo_contrato == '1':
+            self.contratista = self.obra.contratista
+
     fechainicio = fields.Date(string="Fecha de Inicio", )
     fechatermino = fields.Date(string="Fecha de Termino", )
     periodicidadretencion = fields.Selection([('DIARIO', 'DIARIO'),('MENSUAL','MENSUAL'),('ninguno','Ninguno')],
@@ -188,6 +198,7 @@ class ElaboracionContratos(models.Model):
         for anexos_b in b_anexo:
             self.update({
                 'anexos': [[0, 0, {'name': anexos_b.name, 'claveobra': anexos_b.claveobra,
+                                   'id_contrato': self.id,
                                    'clave_presupuestal': anexos_b.clave_presupuestal,
                                    'federal': anexos_b.federal,
                                    'concepto': anexos_b.concepto,
@@ -361,7 +372,13 @@ class ElaboracionContratos(models.Model):
 class AnexosAuxiliar(models.Model):
     _name = 'proceso.anexos'
 
+    id_contrato = fields.Many2one('proceso.elaboracion_contrato')
+
     name = fields.Many2one('autorizacion_obra.oficios_de_autorizacion')
+
+    fecha_de_recibido = fields.Date(string='Fecha de recibido', related="name.fecha_de_recibido")
+    fecha_de_vencimiento = fields.Date(string='Fecha de vencimiento', related="name.fecha_de_vencimiento")
+
     concepto = fields.Many2one('registro.programarobra')
     claveobra = fields.Char(string='Clave de obra')
     clave_presupuestal = fields.Char(string='Clave presupuestal')

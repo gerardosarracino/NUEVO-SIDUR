@@ -334,18 +334,21 @@
                         <field name="conceptos_partidas" string="# Concepto de partidas" widget="one2many"
                                context="{'form_view_ref': 'proceso_contratacion.categoria_vista',
                                'default_id_partida': active_id}">
-                            <tree decoration-info="related_categoria_padre == False"> <!-- editable="bottom" decoration-info="name,'==',True" -->
+                            <tree decoration-info="precio_unitario == 0"
+                            decoration-bf="precio_unitario == 0" > <!-- editable="bottom" decoration-info="name,'==',True" -->
                                 <control>
                                     <create string="Agregar Concepto"
                                             context="{'form_view_ref': 'proceso_contratacion.categoria_form_linea'}"/>
                                 </control>
-                                <field name="categoria" context="{'default_id_partida': active_id}" />
-                                <field name="related_categoria_padre"/> <!-- field auxiliar para decorador -->
+
+                                <field name="clave_linea"/>
+                                <field name="related_categoria_padre" string="Grupo"/> <!-- field auxiliar para decorador -->
+
+                                <field name="categoria" context="{'default_id_partida': active_id}" invisible="1"/>
+                                <field name="concepto"/>
 
                                 <field name="id_partida" invisible="1" force_save="1"/>
 
-                                <field name="clave_linea"/>
-                                <field name="concepto"/>
                                 <field name="medida"/>
                                 <field name="cantidad" attrs="{'invisible':[('cantidad','=',0)]}"/>
                                 <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>

@@ -55,6 +55,9 @@ class AnexoTecnico(models.Model):
 
     name = fields.Many2one('autorizacion_obra.oficios_de_autorizacion', ondelete="cascade")
 
+    fecha_de_recibido = fields.Date(string='Fecha de recibido', related="name.fecha_de_recibido")
+    fecha_de_vencimiento = fields.Date(string='Fecha de vencimiento', related="name.fecha_de_vencimiento")
+
     claveobra = fields.Char(string='Clave de obra', )
     clave_presupuestal = fields.Char(string='Clave presupuestal', )
 

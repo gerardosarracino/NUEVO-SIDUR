@@ -317,17 +317,21 @@ class Estimaciones(models.Model):
         b_convenio_contador = self.env['proceso.convenios_modificado'].search_count(
             [('contrato.id', '=', self.obra.id)])
         if b_convenio_contador >= 1:
-            fecha_inicio_programa = b_programa.fecha_inicio_convenida
-            fecha_inicio_termino = b_programa.fecha_termino_convenida
+            if b_programa.fecha_inicio_convenida and b_programa.fecha_termino_convenida:
+                fecha_inicio_programa = b_programa.fecha_inicio_convenida
+                fecha_inicio_termino = b_programa.fecha_termino_convenida
+            else:
+                fecha_inicio_programa = b_programa.fecha_inicio_programa
+                fecha_inicio_termino = b_programa.fecha_termino_programa
         else:
             # FECHA INICIO DEL PROGRAMA
             fecha_inicio_programa = b_programa.fecha_inicio_programa
             # FECHA TERMINO PROGRAMA
             fecha_inicio_termino = b_programa.fecha_termino_programa
         # FECHA INICIO DEL PROGRAMA
-        fecha_inicio_programa = b_programa.fecha_inicio_programa
+        # fecha_inicio_programa = b_programa.fecha_inicio_programa
         # FECHA TERMINO PROGRAMA
-        fecha_inicio_termino = b_programa.fecha_termino_programa
+        # fecha_inicio_termino = b_programa.fecha_termino_programa
 
         monto_contrato = b_programa.total_programa
         # NUMERO DE DIAS DESDE EL INICIO DE LA ESTIMACION HASTA EL TERMINO DE ESTA
@@ -434,7 +438,7 @@ class Estimaciones(models.Model):
                 self.diasperiodo = total_dias_periodo
                 # MONTO DIARIO PROGRAMADO
 
-                self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                self.montodiario_programado = self.monto_programado_est / self.diasdif
                 # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
                 if self.montodiario_programado == 0:
                     self.montodiario_programado = 1
@@ -507,7 +511,7 @@ class Estimaciones(models.Model):
                     # TOTAL DIAS PERIODO PROGRAMA
                     self.diasperiodo = total_dias_periodo
                     # MONTO DIARIO PROGRAMADO
-                    self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                    self.montodiario_programado = self.monto_programado_est / self.diasdif
                     # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
                     if self.montodiario_programado == 0:
                         self.montodiario_programado = 1
@@ -604,7 +608,7 @@ class Estimaciones(models.Model):
                                 # TOTAL DIAS PERIODO PROGRAMA
                                 self.diasperiodo = total_dias_periodo
                                 # MONTO DIARIO PROGRAMADO
-                                self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                                self.montodiario_programado = self.monto_programado_est / self.diasdif
                                 # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
                                 self.diasrealesrelacion = self.montoreal / self.montodiario_programado
                                 # DIAS DE DESFASAMIENTO
@@ -726,7 +730,7 @@ class Estimaciones(models.Model):
                             self.diasperiodo = total_dias_periodo
                             # MONTO DIARIO PROGRAMADO
 
-                            self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                            self.montodiario_programado = self.monto_programado_est / self.diasdif
                             if self.montodiario_programado == 0:
                                 self.montodiario_programado = 1
                             # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
@@ -791,7 +795,7 @@ class Estimaciones(models.Model):
                             # TOTAL DIAS PERIODO PROGRAMA
                             self.diasperiodo = total_dias_periodo
                             # MONTO DIARIO PROGRAMADO
-                            self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                            self.montodiario_programado = self.monto_programado_est / self.diasdif
                             if self.montodiario_programado == 0:
                                 self.montodiario_programado = 1
                             # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
@@ -867,15 +871,21 @@ class Estimaciones(models.Model):
                     self.diasest = diasest
                     self.diastransest = diastransest
 
+                    fv = datetime.strptime(str(fecha_inicio_programa), date_format)
+                    fvv = datetime.strptime(str(f_estimacion_termino), date_format)
+                    rxx = fvv - fv
+                    diasf = rxx.days
+
                     # MONTO PROGRAMADO PARA ESTA ESTIMACION
                     self.monto_programado_est = m_estimado
                     # self.reduccion = monto_final
                     # DIAS DE DIFERENCIA ENTRE EST
-                    self.diasdif = dias + 1
+                    self.diasdif = diasf + 1
                     # TOTAL DIAS PERIODO PROGRAMA
                     self.diasperiodo = total_dias_periodo
+
                     # MONTO DIARIO PROGRAMADO
-                    self.montodiario_programado = self.monto_programado_est / self.dias_transcurridos
+                    self.montodiario_programado = self.monto_programado_est / self.diasdif
                     # DIAS EJECUTADOS REALES CON RELACION AL MONTO DIARIO PROGRAMADO
                     if self.montodiario_programado == 0:
                         self.montodiario_programado = 1

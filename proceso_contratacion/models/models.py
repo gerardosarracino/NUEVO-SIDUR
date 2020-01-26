@@ -9,8 +9,18 @@ class Licitacion(models.Model):
 
     licitacion_id = fields.Char(compute="nombre", store=True)
 
+    contratista = fields.Many2one('contratista.contratista', 'Contratista Ganador', compute="b_ganador")
+
+    @api.one
+    def b_ganador(self):
+        b_ganador = self.env['proceso.contra_fallo'].search([('numerolicitacion.id', '=', self.id)])
+        for i in b_ganador:
+            if i.ganador is True:
+                self.contratista = i.name
+            else:
+                print('No se encontró ganador')
+
     # PROGRAMA DE INVERSION
-    # programa_inversion_licitacion = fields.Many2one('generales.programas_inversion', 'Programa de Inversión')
     programa_inversion_licitacion = fields.Many2one('generales.programas_inversion', 'Programa de Inversión')
 
     # OBRA / RECURSO A LICITAR
@@ -211,15 +221,15 @@ class Eventos(models.Model):
     _name = 'proceso.eventos_licitacion'
     _rec_name = 'numerolicitacion_evento'
 
-    licitacion_id = fields.Char(compute="nombre", store=True)
+    licitacion_id = fields.Char(compute="nombre", store=True, ondelete="cascade")
 
     numerolicitacion_evento = fields.Many2one('proceso.licitacion', string='Numero Licitación:', readonly=True,
-                                              store=True)
+                                              store=True, ondelete="cascade")
 
-    contratista_participantes = fields.Many2many('proceso.contra_participantev', store=True)
-    contratista_aclaraciones = fields.Many2many('proceso.contra_aclaraciones', store=True)
-    contratista_propuesta = fields.Many2many('proceso.contra_propuestas', store=True)
-    contratista_fallo = fields.Many2many('proceso.contra_fallo', compute="llenar_fallo", store=True)
+    contratista_participantes = fields.Many2many('proceso.contra_participantev', store=True, ondelete="cascade")
+    contratista_aclaraciones = fields.Many2many('proceso.contra_aclaraciones', store=True, ondelete="cascade")
+    contratista_propuesta = fields.Many2many('proceso.contra_propuestas', store=True, ondelete="cascade")
+    contratista_fallo = fields.Many2many('proceso.contra_fallo', compute="llenar_fallo", store=True, ondelete="cascade")
 
     # AUXILIAR PARA ACCIONAR METODO
     aux = fields.Float(string="aux",  required=False, )
@@ -231,10 +241,8 @@ class Eventos(models.Model):
         view = self.env.ref('proceso_contratacion.proceso_fallo_datos_form')
         # CONTADOR SI YA FUE CREADO
         count = self.env['proceso.datos_fallo'].search_count([('id_eventos.id', '=', self.id)])
-        print(count)
         # BUSCAR VISTA
         search = self.env['proceso.datos_fallo'].search([('id_eventos.id', '=', self.id)])
-        print(search)
         # SI YA FUE CREADA LA VISTA, ABRIR LA VISTA YA CREADA
         if count == 1:
             return {
@@ -271,7 +279,7 @@ class Eventos(models.Model):
         })
         for i in b_participante.contratista_participantes:
             self.update({
-                'contratista_participantes': [[0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante,
+                'contratista_participantes': [[0, 0, {'name': i.id, 'nombre_representante': i.nombre_representante,
                                                       'correo': i.correo}]]
             })
 
@@ -287,7 +295,7 @@ class Eventos(models.Model):
         for i in b_participante.contratista_participantes:
             self.update({
                 'contratista_aclaraciones': [
-                    [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante,
+                    [0, 0, {'name': i.id, 'nombre_representante': i.nombre_representante,
                             'correo': i.correo, 'licitacion_id': self.numerolicitacion_evento.id}]]
             })
 
@@ -297,18 +305,20 @@ class Eventos(models.Model):
     def llenar_propuesta(self):
         b_participante = self.env['proceso.participante'].search(
             [('numerolicitacion.id', '=', self.numerolicitacion_evento.id)])
+
         self.update({
             'contratista_propuesta': [[5]]
         })
+
         id_lic = b_participante.numerolicitacion
+
         for i in b_participante.contratista_participantes:
             self.update({
                 'contratista_propuesta': [
-                    [0, 0, {'name': i.name, 'nombre_representante': i.nombre_representante, 'numerolicitacion': id_lic,
-                            'aux': '1'}]]
+                    [0, 0, {'name': i.id, 'nombre_representante': i.nombre_representante, 'numerolicitacion': id_lic.id,
+
+                            }]]
             })
-
-
 
     # METODO PARA LLENAR TABLA CON DATOS DE LOS PARTICIPANTES FALLO DE LICITACION
     @api.one
@@ -323,7 +333,7 @@ class Eventos(models.Model):
         for i in b_participante.contratista_participantes:
             self.update({
                 'contratista_fallo': [
-                    [0, 0, {'name': i.name, 'numerolicitacion': id_lic}]]
+                    [0, 0, {'name': i.id, 'numerolicitacion': id_lic}]]
             })
 
 
@@ -331,7 +341,8 @@ class Eventos(models.Model):
 class ContratistaParticipanteV(models.Model):
     _name = 'proceso.contra_participantev'
 
-    name = fields.Char(string="Licitante:")
+    name = fields.Many2one('contratista.contratista', 'Contratista')
+    # name = fields.Char(string="Licitante:")
     nombre_representante = fields.Char(string="Nombre del Representante:")
     correo = fields.Char(string="Correo:")
     asiste = fields.Boolean('Asiste')
@@ -342,7 +353,8 @@ class JuntaAclaraciones(models.Model):
     _name = 'proceso.contra_aclaraciones'
 
     licitacion_id = fields.Many2one('proceso.licitacion', readonly=True)
-    name = fields.Char(string="Licitante:")
+    # name = fields.Char(string="Licitante:")
+    name = fields.Many2one('contratista.contratista', 'Contratista')
     nombre_representante = fields.Char(string="Nombre del Representante:")
     correo = fields.Char(string="Correo:")
     asiste = fields.Boolean('Asiste')
@@ -395,7 +407,8 @@ class AperturaPropuestas(models.Model):
 
     numerolicitacion = fields.Many2one('proceso.licitacion', string='Numero Licitación:')
 
-    name = fields.Char(string="Licitante:", )
+    # name = fields.Char(string="Licitante:", )
+    name = fields.Many2one('contratista.contratista', 'Contratista')
 
     monto = fields.Float(string="Monto:", readonly=True)
     asiste = fields.Boolean('Asiste')
@@ -407,7 +420,7 @@ class AperturaPropuestas(models.Model):
 
     posicion = fields.Selection([('1', 'Posición #1')], 'Posición')
 
-    programar_obra_licitacion2 = fields.Many2many("proceso.propuesta_lic", string="Partida(s):")
+    programar_obra_licitacion2 = fields.Many2many("proceso.propuesta_lic", string="Partida(s):", store=True)
 
     aux = fields.Float(string="aux", required=False, )
 
@@ -425,19 +438,24 @@ class AperturaPropuestas(models.Model):
             self.monto = sum
 
     # METODO PARA TRAER LA OBRA DE LA LICITACION PARA ASIGNAR RECURSO
+
     @api.multi
-    @api.onchange('aux')
+    @api.onchange('numerolicitacion', 'id')
     def llenar_licitacion_r(self):
-        b_lic = self.env['proceso.licitacion'].search(
-            [('id', '=', self.numerolicitacion.id)])
-        self.update({
-            'programar_obra_licitacion2': [[5]]
-        })
-        for i in b_lic.programar_obra_licitacion:
-            self.update({
-                'programar_obra_licitacion2': [[0, 0, {'recursos': i.recursos,
-                                                       'licitacion_id': self.numerolicitacion.id}]]
-            })
+
+        print('PRUEBA METODOOO AQUIIII')
+
+        if self.programar_obra_licitacion2 is None:
+            print('si')
+            b_lic = self.env['proceso.licitacion'].search(
+                [('id', '=', self.numerolicitacion.id)])
+            for i in b_lic.programar_obra_licitacion:
+                self.update({
+                    'programar_obra_licitacion2': [[0, 0, {'recursos': i.recursos,
+                                                           'licitacion_id': self.numerolicitacion.id}]]
+                })
+        else:
+            print('xfvdscg')
 
     # METODO PARA INGRESAR A PROPUESTAS BOTON
     @api.multi
@@ -476,9 +494,10 @@ class Fallo(models.Model):
     _name = 'proceso.contra_fallo'
 
     numerolicitacion = fields.Many2one('proceso.licitacion', string='Numero Licitación:')
-    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:')
+    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:',required=True)
 
-    name = fields.Char(string="Licitante:")
+    # name = fields.Char(string="Licitante:")
+    name = fields.Many2one('contratista.contratista', 'Contratista')
     monto = fields.Float(string="Monto Fallado A/I.V.A:", compute="b_monto")
     posicion = fields.Selection([('1', 'Posición #1')], 'Posición', compute="b_monto")
     nombre_representante = fields.Char(string="Nombre del Representante:")
@@ -489,7 +508,8 @@ class Fallo(models.Model):
         b_mont = self.env['proceso.contra_propuestas'].search([('numerolicitacion.id', '=', self.numerolicitacion.id)])
         acum = 0
         for i in b_mont:
-            if str(i.name) == str(self.name):
+            if int(i.name.id) == int(self.name.id):
+                print('PRUEBA')
                 if i.posicion:
                     for x in i.programar_obra_licitacion2:
                         acum += x.monto_partida
@@ -554,11 +574,13 @@ class Fallo(models.Model):
 # VENTANA DE DATOS DEL FALLO
 class DatosFallo(models.Model):
     _name = 'proceso.datos_fallo'
+    _rec_name = 'ganador'
 
     numerolicitacion = fields.Many2one('proceso.licitacion', string='Numero Licitación:', readonly=True, store=True)
-    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:', required=True)
+    id_eventos = fields.Many2one('proceso.eventos_licitacion', string='id evento:',required=True)
 
-    ganador = fields.Char(string="Ganador:", compute="b_ganador")
+    # ganador = fields.Char(string="Ganador:", compute="b_ganador")
+    ganador = fields.Many2one('contratista.contratista', 'Contratista', compute="b_ganador")
 
     @api.one
     def b_ganador(self):
@@ -566,7 +588,7 @@ class DatosFallo(models.Model):
         for i in b_ganador:
             if i.ganador is True:
                 self.importe_ganador = i.monto
-                self.ganador = i.name
+                self.ganador = i.id
             else:
                 print('No se encontró ganador')
 

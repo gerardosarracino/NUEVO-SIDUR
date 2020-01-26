@@ -68,7 +68,6 @@
                   <sheet>
                       <group>
                           <field name="numerolicitacion" readonly="1"/>
-                          <field name="aux" />
                       </group>
                       <group colspan="2" col="6">
                             <field name="asiste"/>
@@ -76,11 +75,11 @@
                             <field name="revision"/>
                       </group>
                       <group>
-                          <field name="programar_obra_licitacion2" nolabel="1" widget="one2many" force_save="1" >
-                                <tree create="false" editable="bottom" force_save="1">
-                                    <field name="licitacion_id" force_save="1"/>
-                                    <field name="recursos" string="Obras que pertenecen a esta licitación" readonly="1" force_save="1"/>
-                                    <field name="monto_partida" force_save="1"/>
+                          <field name="programar_obra_licitacion2" nolabel="1" widget="one2many" >
+                                <tree editable="bottom" >
+                                    <field name="licitacion_id" force_save="1" invisible="1"/>
+                                    <field name="recursos" string="Obras que pertenecen a esta licitación" />
+                                    <field name="monto_partida" />
                                 </tree>
                           </field>
                       </group>
@@ -117,7 +116,7 @@
                       </group>
                       <group colspan="2" col="4">
                           <field name="asiste"/>
-                          <field name="ganador" attrs="{'readonly': [('contador_ganador','=', 1)]}" force_save="1"/>
+                          <field name="ganador" force_save="1"/> <!-- attrs="{'readonly': [('contador_ganador','=', 1)]}" -->
                       </group>
                       <group>
                           <field name="observaciones"/>
@@ -146,7 +145,7 @@
                       </div>
                   </div>
                   <sheet>
-                          <field name="id_eventos" force_save="1" />
+                          <field name="id_eventos" />
 
                       <group string="Datos Generales Del Fallo" colspan="2" col="4">
                           <field name="ganador"/>
@@ -559,6 +558,8 @@
                 <field name="programa_inversion_licitacion" string="Programa de Inversión"
                        attrs="{'readonly': ['|', ('estado_obra_cancelar','>=', 1), ('estado_obra_desierta','>=', 1)]}"
                         placeholder="Seleccionar Programa de Inversión" />
+
+                <field name="contratista"/>
               </group>
 
               <group>

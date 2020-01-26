@@ -7,14 +7,19 @@ from odoo.exceptions import ValidationError
 class Frente(models.Model):
     _name = 'proceso.frente'
     _rec_name = 'nombre'
+
     nombre = fields.Char(string='FRENTE', required=True)
+    one_m2 = fields.One2many(comodel_name="proceso.rc", inverse_name="frente")
 
 
 class ruta_critica(models.Model):
     _name = 'proceso.rc'
 
     id_partida = fields.Many2one('partidas.partidas')
+
     frente = fields.Many2one('proceso.frente', string='FRENTE')
+
+
     obra = fields.Many2one('registro.programarobra')
     name = fields.Char(string="ACTIVIDADES PRINCIPALES", )
     porcentaje_est = fields.Float(string="P.R.C", )

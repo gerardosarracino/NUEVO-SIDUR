@@ -104,51 +104,11 @@ class Partidas(models.Model):
     # PROGRAMA DE INVERSION
     programaInversion = fields.Many2one('generales.programas_inversion', string="Programa de Inversión",)
 
-    '''@api.one
-    def p_obra(self):
-        b_s = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
-        print(b_s.tipo_contrato, 'tipo contrato x1')
-        if b_s.tipo_contrato == '1':
-            self.obra = self.numero_contrato.obra.programar_obra_licitacion.recursos.concepto
-        elif b_s.tipo_contrato == '2':
-            self.obra = self.numero_contrato.adjudicacion.programar_obra_adjudicacion.obra
-
-    @api.one
-    def p_inve(self):
-        b_s = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
-        print(b_s.tipo_contrato, 'tipo contrato x2')
-        if b_s.tipo_contrato == '1':
-            self.programaInversion = self.numero_contrato.obra.programa_inversion_licitacion
-        elif b_s.tipo_contrato == '2':
-            self.programaInversion = self.numero_contrato.adjudicacion.programas_inversion_adjudicacion'''
-
-    # GALERIA DE IMAGENES DE AVANCE FINANCIERO
-    galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
-
-    _url = fields.Char(compute="_calc_url")
-
-    @api.one
-    def _calc_url(self):
-        original_url = "http://sidur.galartec.com:56733/galeria/?id=" + str(self.id)
-        self._url = original_url
-
-    @api.multi
-    def imprimir_accion(self):
-        return {"type": "ir.actions.act_url", "url": self._url, "target": "new", }
-
-    # METODO DE BUSQUEDA DE DATOS DE ADJUDICACION
-    '''@api.one
-    @api.depends('id_partida')
-    def b_adjudicacion(self):
-        b_adj = self.env['partidas.adjudicacion'].search([('id_sideop_partida', '=', self.id_partida)])
-        self.obra = b_adj.obra[0]'''
-
     @api.one
     @api.depends('id_contrato_relacion')
     def contrato_metodo(self):
         b_id_ad = self.env['proceso.elaboracion_contrato'].search([('id_ad', '=', self.id_contrato_relacion)], limit=1)
         b_id_lic = self.env['proceso.elaboracion_contrato'].search([('id_lic', '=', self.id_contrato_relacion)], limit=1)
-
         if b_id_lic.id_lic >= 1:
             self.numero_contrato = b_id_lic.id
         elif b_id_ad.id_ad >= 1:
@@ -159,27 +119,14 @@ class Partidas(models.Model):
     # RECURSOS LICITACION
     recursos = fields.Many2one('autorizacion_obra.anexo_tecnico', 'Recursos')
 
-    # one2many
-    '''enlace = fields.One2many(comodel_name="proceso.elaboracion_contrato", inverse_name="contrato_partida_adjudicacion",
-                             string="Enlace", required=False, )'''
-
-
-
-    # ESTIMACION ENLACE
-    estimacion_id = fields.Char(compute="nombre", store=True)
-
     # EL OBJETO ES LA DESCRIPCION DE LA OBRA EN EL CONTRATO
     objeto = fields.Text(string="Objeto", related="numero_contrato.name")
 
     monto_partida = fields.Float(string="Monto", )
     iva_partida = fields.Float(string="Iva", compute="iva", store=True)
     total_partida = fields.Float(string="Total", compute="SumaContrato", store=True)
-
-
     # SUMA DE LAS PARTIDAS
     total_contrato = fields.Float(related="numero_contrato.impcontra")
-
-    # NOTA CAMBIAR DESPUES LOS VALORES DE IVA A PERSONALIZADOS NO FIJOS
 
     # CONCEPTOS CONTRATADOS DE PARTIDAS
     _url_conceptos = fields.Char(compute="_calc_url_conceptos")
@@ -248,25 +195,26 @@ class Partidas(models.Model):
         else:
             self.monto_sin_iva_modi = self.monto_sin_iva + self.convenios_
 
-    total_catalogo = fields.Float(string="Monto Total del Catálogo:", compute="SumaImporte", required=True)
+    total_catalogo = fields.Float(string="Monto Total del Catálogo", compute="SumaImporte", required=True)
 
     diferencia = fields.Float(string="Diferencia:", compute="Diferencia")
+
+    # DEDUCCIONES
+    deducciones = fields.Many2many('generales.deducciones', string="Deducciones:")
 
     # ANTICIPOS
     fecha_anticipos = fields.Date(string="Fecha Anticipo", )
     porcentaje_anticipo = fields.Float(string="Anticipo Inicio", compute="b_anticipo")
     anticipo_material = fields.Float(string="Anticipo Material", compute="b_anticipo")
 
+    # BUSCAR LOS PORCENTAJES DEL ANTICIPO DESDE LA ADJUDICACION O LICITACION RESPECTIVAMENTE
     @api.one
     def b_anticipo(self):
-        print('contrato')
         b_contrato = self.env['proceso.elaboracion_contrato'].search([('id', '=', self.numero_contrato.id)])
-        if b_contrato.tipo_contrato == '1':
-            print('xd1')
+        if b_contrato.tipo_contrato == '2':
             self.porcentaje_anticipo = b_contrato.adjudicacion.anticipoinicio
             self.anticipo_material = b_contrato.adjudicacion.anticipomaterial
-        elif b_contrato.tipo_contrato == '2':
-            print('xd2')
+        elif b_contrato.tipo_contrato == '1':
             self.porcentaje_anticipo = b_contrato.obra.anticipoinicio
             self.anticipo_material = b_contrato.obra.anticipomaterial
 
@@ -283,20 +231,14 @@ class Partidas(models.Model):
     # ESTIMACIONES
     radio_estimacion = [('1', "Estimacion"), ('2', "Escalatoria")]
     tipo_estimacion = fields.Selection(radio_estimacion, string="")
-    # estimacions_id = fields.Char(compute="estimacionId", store=True)
     numero_estimacion = fields.Integer(string="Número de Estimación:", required=False, )
     fecha_inicio_estimacion = fields.Date(string="Del:", required=False, )
     fecha_termino_estimacion = fields.Date(string="Al:", required=False, )
     fecha_presentacion = fields.Date(string="Fecha de presentación:", required=False, )
     fecha_revision = fields.Date(string="Fecha revisión Residente:", required=False, )
-    radio_aplica = [(
-        '1', "Estimación Finiquito"), ('2', "Amortizar Total Anticipo	")]
+    radio_aplica = [('1', "Estimación Finiquito"), ('2', "Amortizar Total Anticipo	")]
     si_aplica = fields.Selection(radio_aplica, string="")
     notas = fields.Text(string="Notas:", required=False, )
-
-    # DEDUCCIONES
-    deducciones = fields.Many2many('generales.deducciones', string="Deducciones:")
-
     # CALCULADOS DE ESTIMACIONES
     estimado = fields.Float(string="Importe ejecutado estimación:", required=False, )
     amort_anticipo = fields.Float(string="Amortización de Anticipo 30%:", required=False, )
@@ -307,7 +249,7 @@ class Partidas(models.Model):
     ret_dev = fields.Float(string="Retención/Devolución:", required=False, )
     sancion = fields.Float(string="Sanción por Incump. de plazo:", required=False, )
     a_pagar = fields.Float(string="Importe liquido:", required=False, )
-
+    # porcentaje de la estimacion estimado
     porcentaje_est = fields.Float('% Programado', compute='por_programado')
 
     @api.one
@@ -320,38 +262,29 @@ class Partidas(models.Model):
     menos_clau_retraso = fields.Float(string="Menos Clausula Retraso:", required=False, )
     sancion_incump_plazo = fields.Integer(string="Sanción por Incump. de plazo:", required=False, )
 
-    # CONCEPTOS EJECUTADOS
-    # conceptos_partidas = fields.Many2many('proceso.conceptos_part')
-
     # CONVENIOS MODIFICATORIOS
     convenios_modificatorios = fields.Many2many('proceso.convenios', string="Conv. Modificatorios")
     # RESIDENCIA
-    residente_obra = fields.Many2one(
-        comodel_name='res.users',
-        string='Residente obra:')
+    residente_obra = fields.Many2one(comodel_name='res.users',string='Residente obra:')
     supervision_externa = fields.Many2one('proceso.elaboracion_contrato', string="Supervisión externa:")
     director_obras = fields.Char('Director de obras:')
     puesto_director_obras = fields.Text('Puesto director de obras:')
-
     # Supervicion de obra (JFernandez)
     ruta_critica = fields.Many2many('proceso.rc')
     total_ = fields.Integer(compute='suma_importe')
     # Contador de convenios por obra
     count_convenios_modif = fields.Integer(compute="contar_covenios")
-
     # VISTA DE INFORMACION DE LA PARTIDA
     ejercicio = fields.Many2one("registro.ejercicio", string="Ejercicio", related="obra.obra_planeada.ejercicio")
     municipio = fields.Many2one('generales.municipios', 'Municipio', related="obra.obra_planeada.municipio")
+    estado = fields.Many2one('generales.estado', 'Municipio', related="obra.obra_planeada.estado")
     localidad = fields.Text(string="Localidad", readonly="True", related="obra.obra_planeada.localidad")
     # localidad = fields.Text(string="Localidad", readonly="True", related="obra.obra_planeada.localidad")
     fecha = fields.Date(string="Fecha", related="numero_contrato.fecha")
-
     fechainicio = fields.Date(string="Fecha de Inicio", related="numero_contrato.fechainicio")
     fechatermino = fields.Date(string="Fecha de Termino", related="numero_contrato.fechatermino")
-
     supervisionexterna1 = fields.Many2one('proceso.elaboracion_contrato', string="Supervisión externa:",
                                           related="numero_contrato.supervisionexterna1")
-
     # RELACION CONTRATISTA
     contratista = fields.Many2one('contratista.contratista', related="numero_contrato.contratista")
 
@@ -381,25 +314,85 @@ class Partidas(models.Model):
     description = fields.Text(string="Descripción de los trabajos")
     creditosContra = fields.Char(string="Créditos en contra del contratista al finalizar la obra")
     # FIN FINIQUITO #
-
     # ID PARTIDA
     p_id = fields.Integer('ID DE LA PARTIDA')
-
     # RESTRICCION DEL PROGRAMA, SI NO HAY PROGRAMA NO PERMITE REGISTRAR UNA ESTIMACION
     verif_programa = fields.Boolean(string="", compute="programa_verif")
-
     # VALOR DEL IVA TRAIDO DESDE CONFIGURACION
     b_iva = fields.Float(string="IVA DESDE CONFIGURACION", compute="BuscarIva")
-
     # CONTAR REGISTROS DE ESTIMACIONES
     contar_estimaciones = fields.Integer(compute='ContarEstimaciones', string="PRUEBA")
     # M2M PARA PODER HACER REPORTE DE ESTADO DE CUENTA DE ESTIMACIONES MAS SU METODO
     esti = fields.Many2many(comodel_name="control.estimaciones", nolabel="1", compute="estimaciones_report")
-
     # CONTROL DE EXPEDIENTES
-    # tabla_control = fields.Many2many('control.expediente')
-
     tabla_control = fields.One2many('control.expediente', 'p_id')
+
+    # GALERIA DE IMAGENES DE AVANCE FINANCIERO
+    galleria = fields.Many2many('avance.avance_fisico', nolabel=True)
+
+    # ESTIMACION ENLACE
+    estimacion_id = fields.Char(compute="nombre", store=True)
+    _url = fields.Char(compute="_calc_url")
+
+    # SEMAFORO
+    estado_obra = fields.Many2many('semaforo.estado_obra')
+    estado_actividad = fields.Many2many('semaforo.actividad')
+    recursos_semaforo = fields.Many2many(comodel_name="proceso.anexos", related="numero_contrato.anexos")
+    convenio_semaforo = fields.Many2many(comodel_name="proceso.convenios_modificado", compute="semaforo_convenios")
+    avance_semaforo = fields.Many2many(comodel_name="proceso.iavance", compute="semaforo_avance")
+
+    @api.multi
+    def semaforo_avance(self):
+        partidas = self.env['partidas.partidas']
+        _search_partida = self.env['partidas.partidas'].search(
+            [("id", "=", self.id)]).id
+
+        avanc = self.env['proceso.iavance'].search(
+            [("numero_contrato.id", "=", self.id)])
+
+        for i in avanc:
+            datos_avance = {
+                'avance_semaforo': [[1, i.id, {
+                    'fecha_actual': i.fecha_actual,
+                    'situacion_contrato': i.situacion_contrato,
+                    'porcentaje_estimado': i.porcentaje_estimado,
+                    'com_avance_obra': i.com_avance_obra,
+                    'comentarios_generales': i.comentarios_generales,
+                }]]}
+            partida_est = partidas.browse(_search_partida)
+            avance_semaforo = partida_est.update(datos_avance)
+
+    @api.multi
+    def semaforo_convenios(self):
+        partidas = self.env['partidas.partidas']
+        _search_partida = self.env['partidas.partidas'].search(
+            [("id", "=", self.id)]).id
+
+        conv = self.env['proceso.convenios_modificado'].search(
+            [("contrato.id", "=", self.id)])
+
+        for i in conv:
+            datos_conv = {
+                'convenio_semaforo': [[1, i.id, {
+                    'fecha_convenios': i.fecha_convenios,
+                    'referencia': i.referencia,
+                    'observaciones': i.observaciones,
+                    'monto_total': i.monto_total,
+                    'plazo_fecha_inicio': i.plazo_fecha_inicio,
+                    'plazo_fecha_termino': i.plazo_fecha_termino,
+                    'objeto_nuevo_objeto': i.objeto_nuevo_objeto,
+                }]]}
+            partida_est = partidas.browse(_search_partida)
+            convenio_semaforo = partida_est.update(datos_conv)
+
+    @api.one
+    def _calc_url(self):
+        original_url = "http://sidur.galartec.com:56733/galeria/?id=" + str(self.id)
+        self._url = original_url
+
+    @api.multi
+    def imprimir_accion(self):
+        return {"type": "ir.actions.act_url", "url": self._url, "target": "new", }
 
     # METODO PARA CREAR NUEVO DOCUMENTO CON BOTON
     @api.multi
@@ -451,6 +444,7 @@ class Partidas(models.Model):
                     'tipo_estimacion': i.tipo_estimacion,
                     'fecha_inicio_estimacion': i.fecha_inicio_estimacion,
                     'fecha_termino_estimacion': i.fecha_termino_estimacion,
+                    'amort_anticipo': i.amort_anticipo,
                     'estimado': i.estimado,
                     'a_pagar': i.a_pagar,
                 }]]}
