@@ -1,0 +1,130 @@
+<odoo>
+  <data>
+
+
+ 
+   <record id="autorizacion_pago_tree" model="ir.ui.view">
+       <field name="name">tree autorizcion pago</field>
+       <field name="model">estimacion.autorizacion_pago</field>
+       <field name="arch" type="xml">
+           <tree string="">
+            <field name="vinculo_estimaciones" string="Estimación"/>
+            <field name="numero_contrato" string="Contrato"/>
+            <field name="obra" string="Obra"/>
+            <field name="autorizacion_pago" string="A.P"/>
+            <field name="contratista_contrato" string="Contratista"/>
+            <field name="a_pagar" string="Importe líquido"/>
+            <field name="fecha" string="Fecha de Autorizacion"/>
+            <field name="programa_inversion" string="Recurso"/>
+            <!-- field name="estatus_orden_pago" string="Estatus"/ -->
+           </tree>
+       </field>
+   </record>
+
+<record model="ir.ui.view" id="autorizacion_pago_form">
+       <field name="name">Autorizacion de Pago</field>
+       <field name="model">estimacion.autorizacion_pago</field>
+       <field name="arch" type="xml">
+         <form>
+             <!--header>
+                   <button string="Cancelar" type="object" name="borrador_progressbar" attrs="{'invisible': [('estatus_orden_pago', '=', 'orden_pago')]}"/>
+                   <button string="Marcar como recibido" type="object" name="confirmado_progressbar" class="oe_highlight" attrs="{'invisible': ['|',('estatus_orden_pago','=','recibido'),('estatus_orden_pago','=','pagado')]}"/>
+                   <button string="Pagado" type="object" name="validado_progressbar" class="oe_highlight"  attrs="{'invisible': ['|',('estatus_orden_pago','!=','recibido'),('estatus_orden_pago','=','pagado')]}"/>
+                   <field name="estatus_orden_pago" widget="statusbar"/>
+               </header-->
+             <sheet>
+                 <sheet>
+                     <group>
+                         <h2><field name="autorizacion_pago" placeholder="Autorizacion de Pago" class="oe_inline"/></h2>
+                         <h2><field name="numero_factura" placeholder="# Factura" class="oe_inline"/></h2>
+                         <h2><field name="fecha_factura" placeholder="Fecha de Factura" class="oe_inline"/></h2>
+                     </group>
+                 </sheet>
+
+                 <br/>
+
+                 <h4>TIPO DE PAGO:</h4>
+                 <field name="tipo_pago"  widget="radio"/>
+
+                 <hr/>
+
+                 <group colspan="1" col="4" >
+
+                     <h1>
+                         <h2 attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">Estimación:
+                             <field name="vinculo_estimaciones" force_save="1"
+                             placeholder="Seleccionar Estimación"
+
+                         /></h2> <!-- domain="[('con_orden', '=', False)]" attrs="{'readonly': [('tipo_pago', '=', 'Pago')]}"  -->
+                     </h1>
+
+                     <h1>
+                         <h2>Contrato: <field name="numero_contrato" placeholder="Seleccionar Partida"
+                     force_save="1"/></h2>
+                     </h1>
+
+                 </group>
+
+
+                 <br/>
+                  <group colspan="1" col="4" >
+                     <field name="programa_inversion" class="oe_inline"/>
+                      <field name="fecha" class="oe_inline"/>
+                      <field name="contratista_contrato" readonyl="1"/>
+                 </group>
+                 <group>
+                     <field name="obra" />
+                 </group>
+
+                 <group colspan="1" col="4">
+                     <field name="inversion_anual_aut" />
+                     <field name="inversion_ejercida" />
+                     <field name="saldo_por_ejercer" />
+                     <field name="creditos_deudores" />
+                 </group>
+
+                 <group colspan="1" col="4">
+                     <field name="estimado" />
+                      <field name="amort_anticipo" />
+                      <field name="estimacion_subtotal" />
+                      <field name="estimacion_iva" />
+                      <field name="estimacion_facturado" />
+                      <field name="estimado_deducciones" />
+                      <field name="sancion" />
+                      <field name="ret_neta_est" />
+                      <field name="a_pagar" />
+                 </group>
+
+                 <hr/>
+                 <!--separator string="Estado del pago"/>
+
+                 <group>
+                      <field name="fecha_recibido" class="oe_inline" readonly="1"/>
+                 </group>
+
+                 <group>
+                      <field name="fecha_pago" class="oe_inline" readonly="1"/>
+                 </group-->
+                
+             </sheet>
+         </form>
+       </field>
+     </record>
+
+     <record model="ir.actions.act_window" id="autorizacion_pago_action">
+     <field name="name">Autorizacion de Pago</field>
+     <field name="res_model">estimacion.autorizacion_pago</field>
+     <field name="type">ir.actions.act_window</field>
+     <field name="view_mode">tree,form</field>
+     <field name="target">current</field>
+     <field name="view_ids" eval="[(5, 0, 0),
+ (0, 0, {'view_mode': 'tree', 'view_id': ref('autorizacion_pago_tree')}),
+ (0, 0, {'view_mode': 'form', 'view_id': ref('autorizacion_pago_form')})]"/>
+ </record>
+
+    <menuitem name="Autorizacion de Pago" id="autorizacion_pago_menu" parent="ejecucion_obra.menu_root"
+              action="autorizacion_pago_action" sequence="6"/>
+
+
+  </data>
+</odoo>
