@@ -102,7 +102,7 @@ class EstimacionesCalculos(models.Model):
 
     # METODO PARA CALCULOS DE REPORTE DE PENAS CONVENCIONALES
     @api.multi
-    @api.onchange('conceptos_partidas', 'multiples_escalatorias','amort_anticipo_partida', 'si_aplica_amortizar')
+    @api.onchange('conceptos_partidas', 'amort_anticipo_partida', 'si_aplica_amortizar', 'si_aplica_estimacion')
     def penas_convencionales_metodox(self):
         b_est_count = self.env['control.estimaciones'].search_count([('obra.id', '=', self.obra.id)])
         num_est = 0
@@ -110,8 +110,9 @@ class EstimacionesCalculos(models.Model):
             num_est = b_est_count + 1
         else:
             num_est = int(self.idobra)
-     
-        if not self.tipo_estimacion:# not self.tipo_estimacion or int(num_est) < b_est_count:
+
+        if not self.tipo_estimacion or int(
+                num_est) < b_est_count:  # not self.tipo_estimacion or int(num_est) < b_est_count:
             pass
         else:
             b_est = self.env['control.estimaciones'].search([('obra.id', '=', self.obra.id)])
@@ -191,23 +192,20 @@ class EstimacionesCalculos(models.Model):
                 fecha_inicio_programa = b_programa.fecha_inicio_programa
                 fecha_termino_programa = b_programa.fecha_termino_programa
 
-            # FECHA DE TERMINO DEL PROGRAMA
-            fecha_termino_para_sancion = b_programa.fecha_termino_programa
-            
             # DIAS TRANSCURRIDOS DESDE EL INICIO DEL CONTRATO
-            fe1 = fecha_inicio_programa
-            fe2 = fecha_termino_programa
-            if fe1 and fe2:
-                f1h = datetime.strptime(str(fe1), "%Y-%m-%d")
-                f2h = datetime.strptime(str(fe2), "%Y-%m-%d")
+            if fecha_inicio_programa and fecha_termino_programa:
+                f1h = datetime.strptime(str(fecha_inicio_programa), "%Y-%m-%d")
+                f2h = datetime.strptime(str(fecha_termino_programa), "%Y-%m-%d")
                 rh = f2h - f1h
                 self.dias_transcurridos = rh.days + 1
 
             monto_contrato = b_programa.total_programa
             # NUMERO DE DIAS DESDE EL INICIO DE LA ESTIMACION HASTA EL TERMINO DE ESTA
             diasest = calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
+            self.diasest = diasest
             acum = 0
             cont = 0
+            date_format = "%Y-%m-%d"
             # CICLO QUE RECORRE LA LISTA DE PROGRAMAS
             for i in sorted(b_programa.programa_contratos):
                 cont = cont + 1
@@ -287,7 +285,7 @@ class EstimacionesCalculos(models.Model):
                         m_estimado = (acum - i.monto) + monto_final
 
                     if fechatermino < f_estimacion_termino:
-                        m_estimado = acum  
+                        m_estimado = acum
 
                     self.ultimomonto = monto_final
                     self.diasest = diasest
@@ -479,7 +477,8 @@ class EstimacionesCalculos(models.Model):
                                     pass
                                 elif x.idobra == self.idobra or int(x.idobra) == (b_est_count + 1):
                                     print('#2 COINCIDE CON EL ULTIMO MES DEL PROGRAMA CUANDO SON MESES DIFERENTES')
-                                    diasestx = calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[
+                                    diasestx = \
+                                    calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[
                                         1]
                                     fx = datetime.strptime(str(f_estimacion_inicio), date_format)
                                     fy = datetime.strptime(str(f_estimacion_termino), date_format)
@@ -537,7 +536,8 @@ class EstimacionesCalculos(models.Model):
                                         self.ret_neta_est = (self.retenido_anteriormente * -1) - self.total_ret_est
                                     elif (self.retenido_anteriormente * -1) > self.total_ret_est:  # DEVOLUCION
                                         self.ret_neta_est = (self.retenido_anteriormente * -1) - self.total_ret_est
-                                        self.devolucion_est = (self.retenido_anteriormente * -1) - self.total_ret_est
+                                        self.devolucion_est = (
+                                                                          self.retenido_anteriormente * -1) - self.total_ret_est
                             print('prosigue')
                             pass
                         else:
@@ -557,7 +557,7 @@ class EstimacionesCalculos(models.Model):
                             # CUANTOS DIAS TIENE EL MES DE LA FECHA ESTIMADA
                             diasest = calendar.monthrange(f_estimacion_inicio.year, f_estimacion_inicio.month)[1]
                             dia_mes_termino = \
-                            calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
+                                calendar.monthrange(f_estimacion_termino.year, f_estimacion_termino.month)[1]
 
                             dat = datetime(f_estimacion_termino.year, f_estimacion_termino.month,
                                            f_estimacion_termino.day)
@@ -639,7 +639,8 @@ class EstimacionesCalculos(models.Model):
                                     else:
                                         self.ret_neta_est = self.total_ret_est * -1
                                         self.devolucion_est = 0
-                                elif (self.retenido_anteriormente * -1) > 0 and self.total_ret_est == 0:  # DEVOLUCION
+                                elif (
+                                        self.retenido_anteriormente * -1) > 0 and self.total_ret_est == 0:  # DEVOLUCION
                                     self.ret_neta_est = self.retenido_anteriormente * -1
                                     self.devolucion_est = self.retenido_anteriormente * -1
                                 elif self.retenido_anteriormente == 0 and self.total_ret_est == 0:
@@ -704,7 +705,8 @@ class EstimacionesCalculos(models.Model):
                                     else:
                                         self.ret_neta_est = self.total_ret_est * -1
                                         self.devolucion_est = 0
-                                elif (self.retenido_anteriormente * -1) > 0 and self.total_ret_est == 0:  # DEVOLUCION
+                                elif (
+                                        self.retenido_anteriormente * -1) > 0 and self.total_ret_est == 0:  # DEVOLUCION
                                     self.ret_neta_est = self.retenido_anteriormente * -1
                                     self.devolucion_est = self.retenido_anteriormente * -1
                                 elif self.retenido_anteriormente == 0 and self.total_ret_est == 0:
@@ -830,17 +832,15 @@ class EstimacionesCalculos(models.Model):
             print('---------------------------------xcxxxxxxxxxxxxxxxxxx-------------------------------')
             # --------... DATOS PARA SANCION ...-----------
             # BUSCAR FECHAS DEL PROGRAMA
-            b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
+            # b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
             # VERIFICAR SI EXISTE CONVENIO
-            _search_cove = self.env['proceso.convenios_modificado'].search_count(
-                [("nombre_contrato", "=", self.obra.nombre_contrato), ("tipo_convenio", "=", 'PL' or 'BOTH')])
-            b_convenio = self.env['proceso.convenios_modificado'].search(
-                [('nombre_contrato', '=', self.obra.nombre_contrato)])
+
             fechaterminosancion = ""
             for i in b_programa.programa_contratos:
                 fechaterminosancion = i.fecha_termino
+                fecha_termino_programa = i.fecha_termino
 
-            if _search_cove > 0:
+            '''if _search_cove > 0:
                 for i in b_convenio:
                     if i.tipo_convenio == 'PL' or i.tipo_convenio == 'BOTH':
                         fecha_prog = datetime.strptime(str(i.plazo_fecha_inicio), "%Y-%m-%d").date()
@@ -850,13 +850,15 @@ class EstimacionesCalculos(models.Model):
             else:
                 # FECHA INICIO Y TERMINO DEL PROGRAMA
                 fecha_inicio_programa = b_programa.fecha_inicio_programa
-                fecha_termino_programa = b_programa.fecha_termino_programa
+                fecha_termino_programa = b_programa.fecha_termino_programa'''
 
             estimacion_search = self.env['control.estimaciones'].search([('obra', '=', self.obra.id)])
             b_est_count = self.env['control.estimaciones'].search_count([('obra.id', '=', self.obra.id)])
             f_estimacion_termino = self.fecha_termino_estimacion
+
             # X-X-X-X-X-X-X-X-X--X  SANCION ------------------------------------------------------
-            if self.fecha_termino_estimacion > fecha_termino_programa:
+            if f_estimacion_termino > fechaterminosancion:  # SANCION ///////////////////////////////////////////
+                print(' APLICAR SANCION JUNTO ESTIMACION FINIQUITO')
                 acum_ret = 0
                 termino_periodo_s = datetime.strptime(str(fecha_termino_programa), "%Y-%m-%d")
                 termino_estimacion_s = datetime.strptime(str(f_estimacion_termino), "%Y-%m-%d")
@@ -877,19 +879,41 @@ class EstimacionesCalculos(models.Model):
                 sancion = self.estimado * dias_sancion * 0.001
                 self.sancion = sancion
                 self.dias_atraso_sancion = dias_sancion
+                acum_ret_est = 0
+                ret_anteriores = self.ret_neta_est
+                self.ret_neta_est = 0
+                self.devolucion_est = 0
             else:
                 self.sancion = 0
                 self.dias_atraso_sancion = 0
 
             # --------... TERMINA DATOS PARA SANCION ...-----------
-
-            if self.si_aplica_estimacion == True:  # VERFICAR SI APLICA FINIQUITO
-                acum = 0
-                ret = self.ret_neta_est
+            # SI LA ESTIMACION TERMINA EN EL MISM ODIA DEL PROGRAMA Y TIENE MONTOS QUE RETORNAR, LOS REGRESA
+            print(f_estimacion_termino, '--', fecha_termino_programa)
+            if f_estimacion_termino == fecha_termino_programa:
+                print('xddd si entro', self.idobra)
+                acum_ret_est = 0
                 for i in estimacion_search:
-                    acum += i.ret_neta_est
-                self.ret_neta_est = (acum * -1) - (ret * -1)
-                self.devolucion_est = (acum * -1) - (ret * -1)
+                    if not self.idobra or self.idobra is False:
+                        acum_ret_est += i.ret_neta_est
+                    elif int(i.idobra) >= int(self.idobra):
+                        print('pasar')
+                    else:
+                        acum_ret_est += i.ret_neta_est
+
+                self.ret_neta_est = (acum_ret_est * -1)
+                self.devolucion_est = (acum_ret_est * -1)
+
+            if self.si_aplica_estimacion:
+                acum_ret_est = 0
+                for i in estimacion_search:
+                    if int(i.idobra) >= int(self.idobra):
+                        pass
+                    else:
+                        acum_ret_est += i.ret_neta_est
+
+                self.ret_neta_est = (acum_ret_est * -1)
+                self.devolucion_est = (acum_ret_est * -1)
             # SACAR VALOR DEDUCCIONES
             for rec in self.deducciones:
                 rec.update({
@@ -897,8 +921,8 @@ class EstimacionesCalculos(models.Model):
                 })
                 if self.tipo_estimacion == '3' or self.tipo_estimacion == '2':
                     rec.update({
-                    'valor': self.sub_total_esc_h * rec.porcentaje / 100
-                })
+                        'valor': self.sub_total_esc_h * rec.porcentaje / 100
+                    })
             # SUMA DE DEDUCCIONES
             sumax = 0
             for i in self.deducciones:
@@ -933,7 +957,8 @@ class EstimacionesCalculos(models.Model):
                     elif self.retenido_anteriormente <= self.total_ret_est:
                         rec.update({
                             # SE RETIENE
-                            'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) - (self.ret_neta_est * -1)
+                            'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) - (
+                                        self.ret_neta_est * -1)
                         })
 
                     elif self.retenido_anteriormente > self.total_ret_est:
@@ -958,7 +983,7 @@ class EstimacionesCalculos(models.Model):
                     self.amort_anticipo = self.obra.anticipo_a - acum_amort
             else:
                 print(' AMORT NORMAL')
-                self.amort_anticipo = self.amort_anticipo_partida * self.estimado
+                # self.amort_anticipo = self.amort_anticipo_partida * self.estimado
                 acum_amort = 0
                 for x in estimacion_search:
                     if not self.idobra:
@@ -968,59 +993,62 @@ class EstimacionesCalculos(models.Model):
                     elif int(self.idobra) > int(x.idobra):
                         acum_amort += x.amort_anticipo
                 if not self.idobra:
-                    if self.si_aplica_amortizar == True:  # preguntar si es amortizar todox completo anticipo
+                    '''if self.si_aplica_amortizar:  # preguntar si es amortizar todox completo anticipo
                         self.amort_anticipo = self.obra.anticipo_a - acum_amort
+                    else:'''
+                    amort_actual = (self.amort_anticipo_partida * self.estimado)
+                    acum_amortizado = acum_amort + amort_actual
+                    if acum_amortizado >= float(self.obra.anticipo_a):
+                        # acum_total_anti = acum_amortizado # + (self.amort_anticipo_partida * self.estimado)
+                        self.amort_anticipo = self.obra.anticipo_a - acum_amort  # 0
+                    elif float(self.obra.anticipo_a) == float(acum_amort):
+                        self.amort_anticipo = 0
                     else:
+                        '''if float((self.amort_anticipo_partida * self.estimado) + acum_amort) > float(self.obra.anticipo_a):
+                            acum_total_anti = acum_amort + (self.amort_anticipo_partida * self.estimado)
+                            self.amort_anticipo = self.obra.anticipo_a - acum_total_anti
+                        else:'''
                         self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
-                        acum_amort = acum_amort + self.amort_anticipo
-                        if acum_amort >= float(self.obra.anticipo_a):
-                            self.amort_anticipo = 0
-                        else:
-                            if float(self.amort_anticipo + acum_amort) > float(self.obra.anticipo_a):
-                                acum_total_anti = acum_amort + self.amort_anticipo
-                                self.amort_anticipo = self.obra.anticipo_a - acum_total_anti
-                            else:
-                                self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
                 else:
-                    if self.si_aplica_amortizar == True:  # preguntar si es amortizar todox completo anticipo
+                    '''if self.si_aplica_amortizar:  # preguntar si es amortizar todox completo anticipo
                         self.amort_anticipo = self.obra.anticipo_a - acum_amort
-                    else:
-                        # de lo contratio
-                        self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
+                    else:'''
+                    # de lo contratio
+                    # self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
 
-                        if acum_amort >= float(self.obra.anticipo_a):
-                            self.amort_anticipo = 0
+                    if acum_amort >= float(self.obra.anticipo_a):
+                        self.amort_anticipo = 0
+                    elif float(self.obra.anticipo_a) == float(acum_amort):
+                        self.amort_anticipo = 0
+                    else:
+                        if float(self.amort_anticipo + acum_amort) > float(self.obra.anticipo_a):
+                            # acum_total_anti = acum_amort
+                            self.amort_anticipo = self.obra.anticipo_a - acum_amort
                         else:
-                            if float(self.amort_anticipo + acum_amort) > float(self.obra.anticipo_a):
-                                acum_total_anti = acum_amort
-                                self.amort_anticipo = self.obra.anticipo_a - acum_total_anti
-                            else:
-                                self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
+                            self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
+
                 # CALCULAR ESTIMACION NETA SIN IVA
                 if self.sub_total_esc > 0:
                     self.estimacion_subtotal = self.sub_total_esc_h
                 else:
                     self.estimacion_subtotal = self.estimado - self.amort_anticipo
                 self.estimacion_iva = (
-                                                self.estimado - self.amort_anticipo) * self.b_iva  # METODO PARA CALCULAR ESTIMACION IVA.
+                                              self.estimado - self.amort_anticipo) * self.b_iva  # METODO PARA CALCULAR ESTIMACION IVA.
                 self.estimacion_facturado = self.estimacion_subtotal + self.estimacion_iva  # METODO PARA CALCULAR ESTIMACION + IVA
                 # IMPORTE LIQUIDO
                 for rec in self:
-                    if self.tipo_estimacion == '3' or self.tipo_estimacion == '2':
-                        self.sancion = 0
-                        self.devolucion_est = 0
-                        self.ret_neta_est = 0
-
                     if self.sancion > 0:
+                        print('IMPORTE LIQUIDO CON SANSION')
                         rec.update({
                             # SE RETIENE
-                            'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) - (
-                                self.sancion) + self.devolucion_est - (self.ret_neta_est * -1)
+                            'a_pagar': (
+                                                   self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est - self.sancion
                         })
                     elif self.retenido_anteriormente <= self.total_ret_est:
                         rec.update({
                             # SE RETIENE
-                            'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) - (self.ret_neta_est * -1)
+                            'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) - (
+                                        self.ret_neta_est * -1)
                         })
 
                     elif self.retenido_anteriormente > self.total_ret_est:
@@ -1029,7 +1057,7 @@ class EstimacionesCalculos(models.Model):
                             'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est
                         })
 
-    @api.multi
+    '''@api.multi
     @api.onchange('si_aplica_estimacion')
     def estimacion_finiquito_metodo(self):  # suma_conceptos
         estimacion_search = self.env['control.estimaciones'].search([('obra', '=', self.obra.id)])
@@ -1090,10 +1118,10 @@ class EstimacionesCalculos(models.Model):
                 # SE DEVUELVE
                 self.update({
                     'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est
-                })
+                })'''
                    
 
-    @api.multi
+    '''@api.multi
     @api.onchange('estimado')
     def estimado_manual(self):  
         estimacion_search = self.env['control.estimaciones'].search([('obra', '=', self.obra.id)])
@@ -1233,7 +1261,7 @@ class EstimacionesCalculos(models.Model):
                     # SE DEVUELVE
                     rec.update({
                         'a_pagar': (self.estimacion_facturado - self.estimado_deducciones) + self.devolucion_est
-                    })
+                    })'''
 
 
     # METODO PARA JALAR IMPORTE DE LOS CONCEPTOS DE PARTIDA
@@ -1295,10 +1323,6 @@ class EstimacionesCalculos(models.Model):
             rec.update({
                 'valor': self.estimado * rec.porcentaje / 100
             })
-            if self.tipo_estimacion == '3' or self.tipo_estimacion == '2':
-                    rec.update({
-                    'valor': self.sub_total_esc_h * rec.porcentaje / 100
-                })
 
         # SUMA DE DEDUCCIONES
         sumax = 0
@@ -1321,10 +1345,7 @@ class EstimacionesCalculos(models.Model):
             self.estimacion_facturado = self.estimacion_subtotal + self.estimacion_iva
             # IMPORTE LIQUIDO
             for rec in self:
-                if self.tipo_estimacion == '3' or self.tipo_estimacion == '2':
-                    self.sancion = 0
-                    self.devolucion_est = 0
-                    self.ret_neta_est = 0
+                print(self.sancion, ' ESTA ES LA SANCION A AP,ICAR ')
                 if self.sancion > 0:
                     rec.update({
                         # SE RETIENE
@@ -1372,6 +1393,8 @@ class EstimacionesCalculos(models.Model):
             if not self.idobra:
                 if self.si_aplica_amortizar == True:  # preguntar si es amortizar todox completo anticipo
                     self.amort_anticipo = self.obra.anticipo_a - acum_amort
+                elif float(self.obra.anticipo_a) == float(acum_amort):
+                        self.amort_anticipo = 0
                 else:
                     self.amort_anticipo = (self.amort_anticipo_partida * self.estimado)
                     acum_amort = acum_amort + self.amort_anticipo
@@ -1392,6 +1415,8 @@ class EstimacionesCalculos(models.Model):
 
                     if acum_amort >= float(self.obra.anticipo_a):
                         self.amort_anticipo = 0
+                    elif float(self.obra.anticipo_a) == float(acum_amort):
+                        self.amort_anticipo = 0
                     else:
                         if float(self.amort_anticipo + acum_amort) > float(self.obra.anticipo_a):
                             acum_total_anti = acum_amort
@@ -1411,10 +1436,7 @@ class EstimacionesCalculos(models.Model):
             self.estimacion_facturado = self.estimacion_subtotal + self.estimacion_iva
             # IMPORTE LIQUIDO
             for rec in self:
-                if self.tipo_estimacion == '3' or self.tipo_estimacion == '2':
-                    self.sancion = 0
-                    self.devolucion_est = 0
-                    self.ret_neta_est = 0
+                print(self.sancion, ' ESTA ES LA SANCION A AP,ICAR ')
                 if self.sancion > 0:
                     rec.update({
                         # SE RETIENE

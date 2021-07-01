@@ -10,10 +10,7 @@
         <field name="arch" type="xml">
             <form string="" create="false" delete="false" >
                 <sheet>
-                    <group>
-                        <button name="agregar_expedientes" type="object" string="ACTUALIZAR EXPEDIENTES"
-                                            class="btn btn-outline-info" />
-                    </group>
+
 
                      <group col="4">
                          <field name="contrato_id"/>
@@ -21,13 +18,17 @@
 
                     </group>
 
+                    <!--group>
                     <group>
+                        <button name="agregar_expedientes" type="object" string="ACTUALIZAR EXPEDIENTES"
+                                            class="btn btn-outline-info" />
+                    </group>
                         <button string="BORRAR EXPEDIENTES" name="borrar_expedientes" type="object" class="btn btn-danger"
                                         confirm="Esta seguro de borrar los expedientes?" />
-                    </group>
+                    </group-->
 
                     <group>
-                        <button name="expediente_crear" type="object" string="Agregar Documento" class="btn btn-success"
+                        <button name="expediente_crear" type="object" string="Agregar Documento (ESTIMACION, CONVENIO, FP, ESCALATORIA)" class="btn btn-success"
                     style="float:right;" context="{'default_contrato_id': contrato_id}"/>
                     </group>
                     <group>
@@ -38,7 +39,7 @@
                     </group>
                     <group>
                         <field name="tabla_control" nolabel="1" widget='one2many' >
-                            <tree delete="false" create="false" default_order="numeracion asc" decoration-danger="existe == False and orden != 61
+                            <tree delete="false" create="false" default_order="numeracion asc" limit = "1000" decoration-danger="existe == False and orden != 61
                                 and orden != 62 and orden != 63 and orden != 64 and
                                 nombre_documento != 'ESTIMACIONES' and nombre_documento != 'CONVENIOS' and
                                 nombre_documento != 'FPS' and nombre_documento != 'ESCALATORIAS'"

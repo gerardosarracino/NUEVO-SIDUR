@@ -191,6 +191,7 @@ class FotosInforme(models.Model):
         image = self.fotos
         data = tools.image_get_resized_images(image)
         self.image_medium = data["image_medium"]
+        self.fotos.unlink()
         return True
 
 
@@ -228,6 +229,12 @@ class InformeContratos(models.Model):
     fotos_informe = fields.Many2many('semaforo.fotos_i', string="Fotos para el informe")
 
     dias = fields.Integer(string="", compute="fecha_calculo" )
+
+    contratista = fields.Many2one('contratista.contratista', string='Contratista', related="id_partida.contratista")
+
+    localidad = fields.Text(string="Localidad", related="id_partida.localidad")
+
+    programa_semaforo = fields.Many2many(comodel_name="proceso.programa", related="id_partida.programa_semaforo", string="Programa de obra")
 
     @api.one
     def fecha_calculo(self):

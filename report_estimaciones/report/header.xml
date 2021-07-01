@@ -1,0 +1,12 @@
+<template>
+    <t t-name="report.external_layout_header">
+        <div id="header" style="position:relative;">
+            <div style="position:absolute; top:10; left:50;">
+                <img t-att-src="'/report_estimaciones/static/src/img/logo-sidur.png'" title="logoEnte" alt="logo" width="278" height="50" />
+            </div>
+            <h3>GOBIERNO DEL ESTADO DE SONORA</h3>
+            <h4>
+                SECRETARIA DE INFRAESTRUCTURA Y DESARROLLO URBANO			</h4>
+        </div>
+  </t>
+</template>

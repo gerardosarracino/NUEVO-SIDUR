@@ -11,6 +11,7 @@ SACAR UN REPORTE'''
 class EstimacionMultipleEscalatoria(models.Model):
     _name = 'control.estimacion_escalatoria'
 
+
     obra = fields.Many2one('partidas.partidas', string='Obra:', readonly=True, store=True)
     idobra = fields.Char(string="Numero de Estimacion:", store=True)
     estimacion = fields.Many2one(comodel_name="control.estimaciones", string="Estimacion a Escalar", required=True, )
@@ -37,7 +38,16 @@ class EstimacionMultipleEscalatoria(models.Model):
 
 class Estimaciones(models.Model):
     _name = 'control.estimaciones'
-    _rec_name = 'ide_estimacion'
+    _rec_name = 'idobra'
+    # ide_estimacion
+
+    responsable_ficha = fields.Many2one('res.users', string='Ficha Responsable', compute="xx")  # compute="user_admin"
+
+    @api.one
+    def xx(self):
+        context = self._context
+        current_uid = context.get('uid')
+        self.responsable_ficha = self.env['res.users'].browse(current_uid)
 
     ejercicio = fields.Many2one("registro.ejercicio", string="Ejercicio", related="obra.obra.obra_planeada.ejercicio")
     observaciones_ = fields.Text('OBSERVACIONES')
@@ -85,10 +95,39 @@ class Estimaciones(models.Model):
     clave_obra = fields.Char(string='Clave de Obra')
     clave_estimacion = fields.Char(string='PEP')
 
+    auxiliar_alerta_programa = fields.Boolean(string="Indica si el programa de obra esta correcto para poder proseguir con la estiamcion", store=True  )
+    auxiliar_alerta_fecha = fields.Boolean(string="Indica si la fecha de estimacion no es mayor a 31 dias para poder proseguir con la estiamcion", store=True  )
+
     @api.multi
-    @api.onchange('tipo_estimacion')
+    @api.onchange('tipo_estimacion','conceptos_partidas', 'fecha_inicio_estimacion', 'fecha_termino_estimacion')
     def clave_obra_m(self):
+        date_format = "%Y-%m-%d"
         self.clave_obra = self.obra.obra.obra_planeada.numero_obra
+        b_prog = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
+        if b_prog.restante_programa != 0: # SI ES DIFERENTE A 0 EL PROGRAMA NO ESTA CORRECTO
+            self.auxiliar_alerta_programa = True
+        else:
+            self.auxiliar_alerta_programa = False
+        fie = datetime.strptime(str(self.fecha_inicio_estimacion.replace(day=1)), date_format)
+        # fecha termino programa
+        fte = datetime.strptime(str(self.fecha_termino_estimacion), date_format)
+        dias = fte - fie
+        diass = dias.days + 1
+        fecha_termino_programa = ''
+        for i in b_prog.programa_contratos:
+            fecha_termino_programa = i.fecha_termino
+        f_sansion_est = datetime(self.fecha_termino_estimacion.year, self.fecha_termino_estimacion.month,
+                                 self.fecha_termino_estimacion.day)
+        f_sansion_prog = datetime(fecha_termino_programa.year, fecha_termino_programa.month,
+                                  fecha_termino_programa.day)
+        if f_sansion_est > f_sansion_prog:
+            pass
+        else:
+            if diass > 31:
+                self.auxiliar_alerta_fecha = True
+            else:
+                self.auxiliar_alerta_fecha = False
+
 
     @api.multi
     @api.onchange('estimacion_esc')
@@ -101,6 +140,7 @@ class Estimaciones(models.Model):
             self.clave_estimacion = '%s - %s' % (str(self.clave_obra), str(self.ide_estimacion),)
         else:
             self.clave_estimacion = self.ide_estimacion
+
     # ver si utilizar
     p_id = fields.Integer("ID PARTIDA", related="obra.p_id")
 
@@ -111,7 +151,7 @@ class Estimaciones(models.Model):
 
     # ESTIMACIONES
     radio_estimacion = [(
-        '1', "Estimacion"), ('2', "Escalatoria"), ('3', "Escalatoria Multiple")]
+        '1', "Estimacion"), ('2', "Escalatoria"), ('3', "Escalatoria Multiple"), ('4', "Estimacion Bis")]
     tipo_estimacion = fields.Selection(radio_estimacion, string="", required=True)
 
     # estimacions_id = fields.Char(compute="estimacionId", store=True)
@@ -349,6 +389,7 @@ class Estimaciones(models.Model):
     periodicidadretencion = fields.Selection(select, string="Periodicidad Retención",
                                              related="obra.numero_contrato.periodicidadretencion")
     retencion = fields.Float(string="% Retención", related="obra.numero_contrato.retencion")
+    porcentaje_sancion = fields.Float(string="% Sancion", related="obra.numero_contrato.sancion", digits=(12, 3))
 
     # EXCEL
     _url = fields.Char(compute="_calc_url", string="Vista de impresión")
@@ -537,10 +578,10 @@ class Estimaciones(models.Model):
 
     nuevo_metodo = fields.Boolean(string="si fue activado penas convencionales mostrar otro qweb",  )
 
-    dias_atraso_sancion = fields.Integer(string="Dias de Atraso de la Sancion", required=False, store=True)          
+    dias_atraso_sancion = fields.Integer(string="Dias de Atraso de la Sancion", required=False, store=True)
 
     # FECHA INICIO PROGRAMA
-    @api.one
+    '''@api.one CODIGO VIEJO
     def B_fechas_programa(self):
         date_format = "%Y-%m-%d"
         b_fecha = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
@@ -557,7 +598,33 @@ class Estimaciones(models.Model):
             fecha_prog = datetime.strptime(str(b_fecha.fecha_inicio_programa), date_format).date()
             self.fecha_inicio_programa = fecha_prog
             fecha_prog2 = datetime.strptime(str(b_fecha.fecha_termino_programa), date_format).date()
-            self.fecha_termino_programa = fecha_prog2
+            self.fecha_termino_programa = fecha_prog2'''
+
+    @api.one
+    def B_fechas_programa(self):
+        date_format = "%Y-%m-%d"
+        b_fecha = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
+        if not b_fecha.fecha_inicio_programa:
+            pass
+        else:
+            _search_cove = self.env['proceso.convenios_modificado'].search_count([("contrato_contrato", "=", self.obra.numero_contrato.id), '|' , ("tipo_convenio", "=", 'BOTH'),
+                                                                                  ("tipo_convenio", "=", 'PL')])
+            b_convenio = self.env['proceso.convenios_modificado'].search([('contrato_contrato', '=', self.obra.numero_contrato.id)])
+            print(_search_cove, self.obra.numero_contrato.id)
+            if _search_cove > 0:
+                print('_search_cove')
+                for i in b_convenio:
+                    if i.tipo_convenio == 'PL' or i.tipo_convenio == 'BOTH':
+                        fecha_prog = datetime.strptime(str(i.plazo_fecha_inicio), date_format).date()
+                        self.fecha_inicio_programa = fecha_prog
+                        fecha_prog2 = datetime.strptime(str(i.plazo_fecha_termino), date_format).date()
+                        self.fecha_termino_programa = fecha_prog2
+            elif _search_cove == 0:
+                print('_search_cove x2')
+                fecha_prog = datetime.strptime(str(b_fecha.fecha_inicio_programa), date_format).date()
+                self.fecha_inicio_programa = fecha_prog
+                fecha_prog2 = datetime.strptime(str(b_fecha.fecha_termino_programa), date_format).date()
+                self.fecha_termino_programa = fecha_prog2
 
     '''# FECHA TERMINO PROGRAMA
     @api.one
@@ -614,7 +681,55 @@ class Estimaciones(models.Model):
         partida = self.env['partidas.partidas'].browse(search.id)
         data = {'a_fin': res.a_fin}
         xd = partida.write(data)
+        datos_esti = {
+            'esti': [[4, res.id, {
+            }]]}
+        r = partida.update(datos_esti)
+        if values['estimacion_bis']:
+            for value in values['estimacion_bis']:
+                for dec in value['deducciones']:
+                    dec.write({
+                        'valor': (value['estimado'] - values['estimado']) * dec.porcentaje / 100
+                    })
+                suma2 = 0
+                for i in value['deducciones']:
+                    resultado = i.valor
+                    suma2 = suma2 + resultado
+
+                estimado = value['estimado'] - values['estimado']
+                estimacion_subtotal = (value['estimado'] - values['estimado']) - value['amort_anticipo']
+                estimacion_iva = ((value['estimado'] - value['estimado']) - value['amort_anticipo']) * values['b_iva']
+                estimacion_facturado = estimacion_subtotal + estimacion_iva  # (((rec.estimado - self.estimado) - rec.amort_anticipo) * self.b_iva) + (rec.estimado - self.estimado)
+                print(value['estimacion_subtotal'], value['estimacion_iva'])
+                value.write({
+                    'estimado': estimado,
+                    'estimacion_subtotal': estimacion_subtotal,
+                    'estimacion_iva': estimacion_iva,
+                    'estimacion_facturado': estimacion_facturado,
+                    'estimado_deducciones': suma2,
+                })
+
+                if value['sancion'] > 0:
+                    value.write({
+                        # SE SANCION
+                        'a_pagar': (estimacion_facturado - suma2) - value['sancion'] + value['devolucion_est'] - (
+                                    value['ret_neta_est'] * -1)
+                    })
+                elif value['retenido_anteriormente'] <= value['total_ret_est']:
+                    value.write({
+                        # SE RETIENE
+                        'a_pagar': (estimacion_facturado - suma2) - (value['ret_neta_est'] * -1)
+                    })
+
+                elif value['retenido_anteriormente'] > value['total_ret_est']:
+                    # SE DEVUELVE
+                    value.write({
+                        'a_pagar': (estimacion_facturado - suma2) + value['devolucion_est']
+                    })
+
         return res
+
+
 
     '''# METODO PARA EL CONTADOR DE ESTIMACIONES
     @api.model
@@ -636,7 +751,7 @@ class Estimaciones(models.Model):
     @api.multi  # if these fields are changed, call method
     @api.onchange('p_id')
     def deduccion(self):
-        b_deducciones = self.env['proceso.elaboracion_contrato'].browse(self.numero_contrato.id)
+        b_deducciones = self.env['proceso.elaboracion_contrato'].browse(self.obra.numero_contrato.id)
         '''b_exist = self.env['control.deducciones'].search_count([('estimacion', '=', self.id)])
         if b_exist == 0:'''
         print("NO EXISTEN DEDUCCIONES CREAR")
@@ -755,9 +870,9 @@ class Estimaciones(models.Model):
                                                                             ('precio_unitario', '=', x.precio_unitario),('cantidad', '=', x.cantidad)])
                     # for i in busqueda:
                     est_ant = x.estimado
-                    
+
                     acum = 0
-                    
+
                     for x in busqueda2:
                         est_ant_acum = x.estimacion
 

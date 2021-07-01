@@ -1,0 +1,240 @@
+<odoo>
+  <data>
+
+      <!-- VISTA TREE DE PARTIDAS -->
+      <record model="ir.ui.view" id="control_expediente_tree">
+      <field name="name">Ingreso de Documentos al Expediente Único Tree</field>
+      <field name="model">partidas.partidas</field>
+      <field name="arch" type="xml">
+        <tree create="false" default_order="obra desc">
+           <field name="fechainicio"/>
+            <field name="fechatermino"/>
+            <field name="nombre_partida" string="Subcontrato"/>
+            <field name="tipo_obra" />
+            <field name="objeto"/>
+            <field name="contratista" />
+            <field name="obra"/>
+            <field name="total" string="Importe Contratado" />
+             <field name="a_fis" string="A. fis"/>
+            <field name="porcentajeProgramado" string="P. prog" />
+            <field name="a_fin" />
+        </tree>
+      </field>
+    </record>
+
+          <record model="ir.actions.act_window" id="lista_documentos_action">
+      <field name="name">LISTA DE DOCUMENTOS</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">control.expediente</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">['|',('responsable','=', uid), ('odoo_user_admin','=', uid)]</field>
+      <field name="context">{'search_default_group_etapa': True, 'search_default_p_id': active_id}</field>
+       <field name="view_ids" eval="[(5, 0, 0),
+ (0, 0, {'view_mode': 'tree', 'view_id': ref('exp_import')}),
+ (0, 0, {'view_mode': 'form', 'view_id': ref('form_control_expediente')})]"/>
+    </record>
+
+
+      <!-- VISTA CON BOTONES HACIA ESTIMACION -->
+    <record id="control_expediente_vista_form" model="ir.ui.view">
+        <field name="name">Ingreso de Documentos al Expediente Único Form</field>
+        <field name="model">partidas.partidas</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" delete="false" >
+                <sheet>
+
+                    <field name="prueba_expediente" invisible="1"/>
+
+                    <group>
+                        <button name="expediente_crear" type="object" string="Agregar Documento" class="btn btn-info"
+                    style="float:right;"/>
+                         
+                    </group>
+                    <group>
+                    <button name="%(lista_documentos_action)d" type="action" string="Ver lista de documentos" class="btn btn-info"
+                    style="float:right;"/>
+                    </group>
+
+
+                    <group>
+                        <field name="tabla_control" nolabel="1" widget='one2many' >
+                            <tree editable="bottom" delete="false" create="false">
+                                <!--control>
+                                    <create string="Agregar Documento" context="{'form_view_ref': 'control_expediente.form_control_expediente',
+                                    'default_p_id': active_id}"/>
+                                </control -->
+                                <field name="p_id" readonly="1" force_save="1" invisible="1"/>
+                                <field name="etapa" readonly="1" force_save="1"/>
+                                <field name="nombre" readonly="1" force_save="1"/>
+                                <field name="responsable" readonly="1"/>
+                                
+                                <field name="aplica"/>
+                                <field name="existe"/>
+                                 <field name="revisado" />
+                                 <field name="comentarios" placeholder="..."/>
+
+                                <field name="url" invisible="1"/>
+                                <field name="ejercicio" invisible="1"/>
+                                <!--field name="documento" readonly="1" filename="nombre_documento"/>
+                                <field name="nombre_documento" readonly="1"/-->
+
+                                <button name="cargar_documento" type="object" string="CARGAR DOCUMENTO"/> 
+
+                                <button name="descargar_documento" type="object" string="DESCARGAR DOCUMENTO"
+                                attrs="{'invisible': [('url','=', False)]}"/>
+
+                                
+
+                                <button name="vista_expediente" type="object" string="EDITAR"/>
+
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    
+
+
+      <record id="form_control_expediente" model="ir.ui.view">
+          <field name="name">Control de Expediente Form</field>
+          <field name="model">control.expediente</field>
+          <field name="arch" type="xml">
+              <form string="">
+                  <sheet>
+                      <group colspan="2" col="4">
+                          <field name="url" readonly="1" invisible="1"/> <!-- attrs="{'invisible': [('ejercicio','=', 7)]}" -->
+                          
+                      </group>
+                      <group>
+                          <field name="p_id" force_save="1" invisible="1"/>
+                          <field name="ejercicio" invisible="1"/>
+                          <field name="etapa" force_save="1" readonly="1"/>
+                          <field name="nombre" force_save="1"/>
+                          <field name="responsable" readonly="1"/>
+                          <field name="existe"/>
+                          <field name="aplica"/>
+                          <field name="revisado" />
+                          <field name="fecha" />
+                          <field name="comentarios"/>
+
+                          
+                          <!--  attrs="{'invisible': ['|', ('ejercicio','=', 7), ('url','=', False)]}" -->
+
+                          <!--field name="documento" filename="nombre_documento"/>
+                          <field name="nombre_documento"/-->
+                      </group>
+                      <group col="3">
+                            <button name="eliminar_documento" type="object" string="ELIMINAR DOCUMENTO" class="btn btn-danger"
+                            confirm="Esta seguro de borrar este documento?"/> 
+                            <button name="cargar_documento" type="object" string="CARGAR DOCUMENTO" class="btn btn-info"/> 
+                            <button name="descargar_documento" type="object" string="DESCARGAR DOCUMENTO" 
+                            attrs="{'invisible': [('url','=', False)]}" class="btn btn-success"/> 
+
+                           
+
+                      </group>
+                  </sheet>
+              </form>
+          </field>
+      </record>
+
+
+<!-- ACCIONES VENTANA ESTIMACIONES -->
+    <record model="ir.actions.act_window" id="control_expediente_actionx"> 
+      <field name="name">Ingreso de Documentos al Expediente Único</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">partidas.partidas</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('control_expediente_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('control_expediente_vista_form')})]"/>
+    </record>
+
+    <record id="exp_import" model="ir.ui.view">
+        <field name="name">control expediente import</field>
+        <field name="model">control.expediente</field>
+        <field name="arch" type="xml">
+            <tree string="" editable="bottom" delete="false" create="false">
+                <field name="p_id" readonly="1" force_save="1" />
+                <field name="etapa" readonly="1" force_save="1" />
+                <field name="nombre" readonly="1" force_save="1"/>
+                <field name="responsable" readonly="1"/>
+                
+                <field name="aplica"/>
+                <field name="existe"/>
+                    <field name="revisado" />
+                    <field name="comentarios" placeholder="..."/>
+
+                <field name="url" invisible="1"/>
+                <field name="ejercicio" invisible="1"/>
+                <!--field name="documento" readonly="1" filename="nombre_documento"/>
+                <field name="nombre_documento" readonly="1"/-->
+                 <field name="odoo_user_admin" invisible="1"/> 
+
+                <button name="cargar_documento" type="object" string="CARGAR DOCUMENTO"/> 
+
+                <button name="descargar_documento" type="object" string="DESCARGAR DOCUMENTO"
+                attrs="{'invisible': [('url','=', False)]}"/>
+                <button name="vista_expediente" type="object" string="EDITAR"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <record id="expediente_search_view" model="ir.ui.view">
+        <field name="name">control expediente search</field>
+        <field name="model">control.expediente</field>
+        <field name="arch" type="xml">
+            <search>
+            <filter name="etapa" string="etapa" context="{'group_by':'etapa'}"/>
+                <field name="p_id" />
+                <field name="etapa" />
+                <field name="nombre" />
+                <field name="responsable" />
+                
+                <field name="aplica"/>
+                <field name="existe"/>
+                <field name="revisado" />
+                <field name="comentarios" />
+                <field name="ejercicio" />  
+                <field name="odoo_user_admin" /> 
+                
+
+            </search>
+        </field>
+    </record>
+
+      <record id="exp_action" model="ir.actions.act_window">
+          <field name="name">control expediente import act</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">control.expediente</field>
+          <field name="view_mode">tree</field>
+          <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+              <!-- Add Text Here -->
+            </p><p>
+              <!-- More details about what a user can do with this object will be OK -->
+            </p>
+          </field>
+      </record>
+
+
+
+    <menuitem name="Control de Expediente Único" id="control_expediente.menu_root" sequence="0" web_icon="control_expediente,static/description/icon.png"/>
+
+    <menuitem name="Ingreso de Documentos al Expediente Único" id="control_expediente_documentos"
+              parent="control_expediente.menu_root"
+              action="control_expediente_actionx" sequence="1"/>
+
+ 
+
+      <!--menuitem name="EXPE IMPORT" id="exp_importmenu"
+              parent="control_expediente.menu_root"
+              action="exp_action" sequence="2"/-->
+
+  </data>
+</odoo>

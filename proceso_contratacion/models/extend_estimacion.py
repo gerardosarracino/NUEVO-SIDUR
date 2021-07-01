@@ -556,8 +556,7 @@ class ConceptosDetalleExtend(models.Model):
                                         acum_ftemtp += c.monto
                                         print('acumular')
                                         cx += 1
-                                    '''elif dat4 > f_sansion:
-                                        print('SANSION TERMINAR')'''
+                            
 
                                 ultimo_monto = b_programa.programa_contratos[int(cx)].monto
 

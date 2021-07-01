@@ -15,6 +15,241 @@ class FiniquitoExcel(http.Controller):
     @http.route('/finiquito_excel/finiquito_excel/', auth='public')
     def index(self, **kw):
         try:
+            # workbook = load_workbook(filename="/home/gerardo/Developments/odoo12/extra-addons/finiquito_excel/static/plantilla.xlsx")
+            workbook = load_workbook(filename="/usr/lib/python3/dist-packages/odoo/odoo-extra-addons/finiquito_excel/static/plantilla.xlsx")
+            sheet = workbook.active
+            wb = Workbook()
+
+            # FASTES METHOD
+            # wb = Workbook()
+            # ws = wb.new_sheet("FINIQUITO")
+
+            nombre_partida = ''
+            contratista = ''
+            total_contrato = ''
+            # fill = PatternFill(fill_type=None, start_color='bdbdbd', end_color='bdbdbd')
+            # double = Side(border_style="double", color="000000")
+            # thin = Side(border_style="thin", color="000000")
+
+            '''bordes = NamedStyle(name="bordes")
+            bordes.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            wb.add_named_style(bordes)'''
+
+            # ESTILOS DE SUBTOTAL
+            subtotal_estilo = NamedStyle(name="subtotal_estilo")
+            subtotal_estilo.font = Font(bold=True, size=9)
+            subtotal_estilo.fill = PatternFill("solid", fgColor="ff7043")
+            # subtotal_estilo.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            wb.add_named_style(subtotal_estilo)
+
+            # ESTILOS DE CATEGORIAS
+            categoria_estilo = NamedStyle(name="categoria_estilo")
+            # categoria_estilo.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            categoria_estilo.font = Font(bold=True, size=9)
+            categoria_estilo.fill = PatternFill("solid", fgColor="bdbdbd")
+            wb.add_named_style(categoria_estilo)
+
+            # ESTILOS DE HEADER DE ESTIMACIONES
+            header_est_estilo = NamedStyle(name="header_est_estilo")
+            header_est_estilo.font = Font(name='Arial', size=9, bold=True)
+            header_est_estilo.fill = PatternFill("solid", fgColor="ffff00")
+            # header_est_estilo.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            wb.add_named_style(header_est_estilo)
+
+            # ESTILOS TOTAL
+            total_estilo = NamedStyle(name="total_estilo")
+            # total_estilo.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            total_estilo.fill = PatternFill("solid", fgColor="e65100")
+            total_estilo.font = Font(color="fafafa", name='Arial', size=9, bold=True)
+            wb.add_named_style(total_estilo)
+
+            http.request.env.cr.execute("SELECT clave_linea,concepto,medida,cantidad,precio_unitario,importe FROM proceso_conceptos_part WHERE id_partida = " + kw['id'] + " ORDER BY id ASC")
+            res_concepto = http.request.cr.fetchall()
+
+            # COLUMNA DE TOTALES
+            estimacion = http.request.env['control.estimaciones']
+            estimacion_count = estimacion.search_count([('obra.id', '=', kw['id'])])
+            columna_total_cantidad = get_column_letter(8 + (estimacion_count * 2))
+            columna_total_importe = get_column_letter(9 + (estimacion_count * 2))
+
+            acum_conceptos = 10  # INICIA A PARTIR DE LA FILA # 10 Y SE VA ACUMULANDO PARA IR AGREGANDO UN ESPACIO ABAJO CADA OBJETO
+            for i in res_concepto:
+                acum_conceptos += 1
+                columna_clave = get_column_letter(2)  # COLUMNA CLAVE
+                columna_concepto = get_column_letter(3)  # COLUMNA CONCEPTO
+                columna_unidad = get_column_letter(4)  # COLUMNA UNIDAD
+                columna_cantidad = get_column_letter(5)  # COLUMNA CANTIDAD
+                columna_precio = get_column_letter(6)  # COLUMNA PRECIO UNITARIO
+                columna_importe = get_column_letter(7)  # COLUMNA IMPORTE
+                sheet[columna_clave + str(acum_conceptos)] = i[0]  # AGREGA LA CLAVE EN SU POSICION
+                # sheet[columna_clave + str(acum_conceptos)].style = bordes
+                sheet[columna_concepto + str(acum_conceptos)] = i[1]  # AGREGA CONCETP EN SU POSICION
+                # sheet[columna_concepto + str(acum_conceptos)].style = bordes
+                sheet[columna_unidad + str(acum_conceptos)] = i[2]  # AGREGA UNIDAD EN SU POSICION
+                sheet[columna_cantidad + str(acum_conceptos)] = i[3]  # AGREGA CANTIDAD EN SU POSICION
+                sheet[columna_precio + str(acum_conceptos)] = i[4]  # AGREGA PRECIO U EN SU POSICION
+                sheet[columna_precio + str(acum_conceptos)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+                sheet[columna_importe + str(acum_conceptos)] = i[5]  # AGREGA IMPORTE EN SU POSICION
+                sheet[columna_importe + str(acum_conceptos)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+
+                if not i[4]:  # ES CATEGORIA PASAR
+                    sheet[columna_clave + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_concepto + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_unidad + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_cantidad + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_precio + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_importe + str(acum_conceptos)].style = categoria_estilo
+                    sheet[columna_total_cantidad + str(acum_conceptos)].style = total_estilo
+                    sheet[columna_total_importe + str(acum_conceptos)].style = total_estilo
+                else:
+                    # TOTALES T.CANTIDAD
+                    http.request.env.cr.execute(
+                        "SELECT COALESCE(SUM(estimacion),0),COALESCE(SUM(importe_ejecutado),0) FROM control_detalle_conceptos WHERE id_partida = " +
+                        kw['id'] + " AND estimacion != 0 AND clave_linea = '" + str(
+                            i[0]) + "' AND precio_unitario = " + str(i[4]) + " AND cantidad = " + str(i[3]))
+                    res_importe = http.request.cr.fetchall()
+                    for t in res_importe:
+                        sheet[columna_total_cantidad + str(acum_conceptos)] = t[0]
+                        sheet[columna_total_cantidad + str(acum_conceptos)].style = total_estilo
+                        sheet[columna_total_importe + str(acum_conceptos)] = t[1]
+                        sheet[columna_total_importe + str(acum_conceptos)].style = total_estilo
+                        sheet[columna_total_importe + str(acum_conceptos)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+
+                    http.request.env.cr.execute("SELECT estimacion,clave_linea,precio_unitario,importe_ejecutado,num_est,cantidad FROM control_detalle_conceptos WHERE id_partida = " + kw['id'] + " AND estimacion != 0 AND clave_linea = '" + str(i[0]) + "' AND precio_unitario = " + str(i[4]) + " AND cantidad = " + str(i[3]))
+                    res = http.request.cr.fetchall()
+
+                    columna_cantidad_estimacion = get_column_letter(8)  # COLUMNA DE CANTIDAD DE ESTIMACION
+                    columna_importe_estimacion = get_column_letter(9)  # COLUMNA DE IMPORTE DE ESTIMACION
+
+                    # sheet[columna_cantidad_estimacion + str(acum_conceptos)].style = bordes
+                    # sheet[columna_importe_estimacion + str(acum_conceptos)].style = bordes
+                    for q in res:
+                        print('CLAVE DE LINEA:',q[1], '-------  ESTIMACION:', q[4])
+                        if int(q[4]) == 1: # q[4] = numero de estimacion
+                            sheet[columna_cantidad_estimacion + str(acum_conceptos)] = q[0]  # AGREGA LA CANTIDAD EST
+                            sheet[columna_importe_estimacion + str(acum_conceptos)] = q[3]  # AGREGA EL IMPORTE EST
+                            sheet[columna_importe_estimacion + str(acum_conceptos)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+                        else:
+                            columna_cantidad_estimacion = get_column_letter(7 + q[4] + (q[4]-1))  # COLUMNA DE CANTIDAD DE ESTIMACION
+                            columna_importe_estimacion = get_column_letter(8 + q[4] + (q[4]-1))  # COLUMNA DE IMPORTE DE ESTIMACION
+                            sheet[columna_cantidad_estimacion + str(acum_conceptos)] = q[0]  # AGREGA LA CANTIDAD EST
+                            sheet[columna_importe_estimacion + str(acum_conceptos)] = q[3]  # AGREGA EL IMPORTE EST
+                            sheet[columna_importe_estimacion + str(acum_conceptos)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+
+            # SE AGREGAN LAS COLUMNAS DE ESTIMACION #
+            numero_est = 1
+            acum_estx = 0
+            for r in range(estimacion_count):
+                numero_est += 1
+                if numero_est == 1:
+                    pass
+                else:
+                    acum_estx += 1
+                    columna_numest = get_column_letter(7 + numero_est + acum_estx)
+                    columna_cantidadest = get_column_letter(7 + numero_est + acum_estx)
+                    columna_importeest = get_column_letter(8 + numero_est + acum_estx)
+                    sheet[columna_numest + '9'] = 'ESTIMACION ' + str(numero_est)
+                    sheet[columna_numest + '9'].style = header_est_estilo
+                    sheet[columna_numest + '9'].alignment = Alignment(horizontal="center", vertical="center")
+                    sheet.merge_cells("" + columna_numest + "9:" + columna_importeest + "9")
+                    sheet[columna_cantidadest + '10'] = 'CANTIDAD'
+                    sheet[columna_cantidadest + '10'].style = header_est_estilo
+                    sheet[columna_importeest + '10'] = 'IMPORTE'
+                    sheet[columna_importeest + '10'].style = header_est_estilo
+            print(acum_conceptos, ' xxxxxxxxxxx ')
+            # TOTALES
+            http.request.env.cr.execute(
+                "SELECT COALESCE(SUM(importe_ejecutado),0) FROM control_detalle_conceptos WHERE id_partida = " + kw['id'])
+            res_total = http.request.cr.fetchall()
+            for tt in res_total:
+                sheet[columna_total_importe + str(acum_conceptos+1)] = tt[0]
+                sheet[columna_total_importe + str(acum_conceptos+1)].style = total_estilo
+                sheet[columna_total_importe + str(acum_conceptos+1)].number_format = '[$$-409]#,##0.00;[RED]-[$$-409]#,##0.00'
+
+            sheet[columna_total_cantidad + '9'] = 'TOTALES'
+            sheet.merge_cells("" + columna_total_cantidad + "9:" + columna_total_importe + "9")
+            sheet[columna_total_cantidad + '9'].style = total_estilo
+            sheet[columna_total_cantidad + '9'].alignment = Alignment(wrap_text=True)
+            sheet[columna_total_cantidad + '10'] = 'T.CANTIDAD'
+            sheet[columna_total_cantidad + '10'].style = total_estilo
+            sheet[columna_total_importe + '10'] = 'T.IMPORTE'
+            sheet[columna_total_importe + '10'].style = total_estilo
+            sheet[columna_total_cantidad + str(acum_conceptos+1)] = 'GRAN TOTAL'
+            sheet[columna_total_cantidad + str(acum_conceptos+1)].style = total_estilo
+            # sheet[columna_total_importe + str(acum_conceptos+1)].style = total_estilo
+
+            # Save the spreadsheet
+            workbook.save("/tmp/finiquito.xlsx")
+
+            '''http.request.env.cr.execute(
+                "SELECT clave_linea,concepto,medida,cantidad,precio_unitario,importe FROM proceso_conceptos_part WHERE id_partida = " +
+                kw['id'] + " ORDER BY id ASC")
+            res_concepto = http.request.cr.fetchall()
+            estimacion = http.request.env['control.estimaciones']
+            estimacion_count = estimacion.search_count([('obra.id', '=', kw['id'])])
+            acum_conceptos = 10  # INICIA A PARTIR DE LA FILA # 10 Y SE VA ACUMULANDO PARA IR AGREGANDO UN ESPACIO ABAJO CADA OBJETO
+            for i in res_concepto:
+                acum_conceptos += 1
+                ws[acum_conceptos][2].value = i[0]  # AGREGA LA CLAVE EN SU POSICION
+                ws[acum_conceptos][3].value = i[1]  # AGREGA CONCETP EN SU POSICION
+                ws[acum_conceptos][4].value = i[2]  # AGREGA UNIDAD EN SU POSICION
+                ws[acum_conceptos][5].value = i[3]  # AGREGA CANTIDAD EN SU POSICION
+                ws[acum_conceptos][6].value = i[4]  # AGREGA PRECIO U EN SU POSICION
+                ws[acum_conceptos][7].value = i[5]  # AGREGA IMPORTE EN SU POSICION
+
+                if not i[4]:  # ES CATEGORIA PASAR
+                    pass
+                else:
+                    # TOTALES T.CANTIDAD
+                    ws[acum_conceptos][8 + (estimacion_count * 2)].value = 'x'
+                    ws[acum_conceptos][9 + (estimacion_count * 2)].value = 'x'
+
+                    http.request.env.cr.execute(
+                        "SELECT estimacion,clave_linea,precio_unitario,importe_ejecutado,num_est,cantidad FROM control_detalle_conceptos WHERE id_partida = " +
+                        kw['id'] + " AND estimacion != 0 AND clave_linea = '" + str(
+                            i[0]) + "' AND precio_unitario = " + str(i[4]) + " AND cantidad = " + str(i[3]))
+                    res = http.request.cr.fetchall()
+                    for q in res:
+                        print('CLAVE DE LINEA:', q[1], '-------  ESTIMACION:', q[4])
+
+                        if int(q[4]) == 1:  # q[4] = numero de estimacion
+                            ws[acum_conceptos][8].value = q[0]  # AGREGA LA CANTIDAD EST
+                            ws[acum_conceptos][9].value = q[3]  # AGREGA EL IMPORTE EST
+                        else:
+                            ws[acum_conceptos][7 + q[4] + (q[4] - 1)].value = q[0]  # AGREGA LA CANTIDAD EST
+                            ws[acum_conceptos][8 + q[4] + (q[4] - 1)].value = q[3]  # AGREGA EL IMPORTE EST
+
+                    # SE AGREGAN LAS COLUMNAS DE ESTIMACION #
+                numero_est = 1
+                acum_estx = 0
+                for r in range(estimacion_count):
+                    numero_est += 1
+                    if numero_est == 1:
+                        pass
+                    else:
+                        acum_estx += 1
+                        ws[9][7 + numero_est + acum_estx].value = 'ESTIMACION ' + str(numero_est)
+                        ws[10][7 + numero_est + acum_estx].value = 'CANTIDAD'
+                        ws[10][8 + numero_est + acum_estx].value = 'IMPORTE'''
+
+
+            # wb.save("/tmp/finiquito.xlsx")
+
+            f = open('/tmp/finiquito.xlsx', mode="rb")
+            return http.request.make_response(f.read(),
+                                            [('Content-Type', 'application/octet-stream'),
+                                            ('Content-Disposition',
+                                                'attachment; filename="{}"'.format('finiquito.xlsx'))
+                                            ])
+
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+
+'''class FiniquitoExcel(http.Controller):
+    @http.route('/finiquito_excel/finiquito_excel/', auth='public')
+    def index(self, **kw):
+        try:
             partidax = http.request.env['partidas.partidas']
             partida = partidax.sudo().search([('id', '=', kw['id'])])
             # workbook = load_workbook(filename="/home/gerardo/Developments/odoo12/extra-addons/finiquito_excel/static/plantilla.xlsx")
@@ -220,11 +455,6 @@ class FiniquitoExcel(http.Controller):
                                                                                     bottom=thin)
                     if not y.precio_unitario or str(y.precio_unitario) == '':
                         sheet[column_letter_unidad + str(posicionador)].style = categoria_estilo
-                        '''if pos_concepto > 2:
-                            sheet[column_letter_unidad + str(posicionador)].fill = PatternFill("solid", fgColor="ff7043")
-                            sheet[column_letter_unidad + str(posicionador+1)].fill = PatternFill("solid", fgColor="bdbdbd")
-                        else:
-                            sheet[column_letter_unidad + str(posicionador)].fill = PatternFill("solid", fgColor="bdbdbd")'''
 
                     # CANTIDAD
                     letra = 0
@@ -246,19 +476,7 @@ class FiniquitoExcel(http.Controller):
                         posicionador = acum + 10 + aviso
                         if not y.precio_unitario or str(y.precio_unitario) == '':
                             sheet[column_letter + str(posicionador)].style = categoria_estilo
-                            '''if pos_concepto > 2:
-                                # sheet[column_letter + str(posicionador - 1)] = "=SUM(F" + str(variable2) + ":F" + str(posicionador - 2) + ")"
-                                sheet[column_letter + str(posicionador - 1)].fill = PatternFill("solid", fgColor="ff7043")
-                                sheet[column_letter + str(posicionador - 1)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                sheet[column_letter + str(posicionador)].fill = PatternFill("solid", fgColor="bdbdbd")
-                                sheet[column_letter + str(posicionador)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                # ESTA VARIABLE ALMACENA LA POSICION INICIAL PARA LA SUMA
-                                variable2 = str(posicionador + 1)
-                            else:
-                                sheet[column_letter + str(posicionador)].fill = PatternFill("solid", fgColor="bdbdbd")
-                                sheet[column_letter + str(posicionador)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                # ESTA VARIABLE ALMACENA LA POSICION INICIAL PARA LA SUMA
-                                variable2 = str(posicionador + 1)'''
+                            
                         else:
                             letra += 1
                             sheet[column_letter + str(posicionador)] = y.precio_unitario
@@ -272,19 +490,7 @@ class FiniquitoExcel(http.Controller):
                         posicionador = acum + 10 + aviso
                         if not y.precio_unitario or str(y.precio_unitario) == '':
                             sheet[column_letter + str(posicionador)].style = categoria_estilo
-                            '''if pos_concepto > 2:
-                                sheet[column_letter + str(posicionador - 1)] = "=SUM(G" + str(variable3) + ":G" + str(posicionador - 2) + ")"
-                                sheet[column_letter + str(posicionador - 1)].fill = PatternFill("solid", fgColor="ff7043")
-                                sheet[column_letter + str(posicionador - 1)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                sheet[column_letter + str(posicionador)].fill = PatternFill("solid", fgColor="bdbdbd")
-                                sheet[column_letter + str(posicionador)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                # ESTA VARIABLE ALMACENA LA POSICION INICIAL PARA LA SUMA
-                                variable3 = str(posicionador + 1)
-                            else:
-                                sheet[column_letter + str(posicionador)].fill = PatternFill("solid", fgColor="bdbdbd")
-                                sheet[column_letter + str(posicionador)].border = Border(top=thin, left=thin, right=thin, bottom=thin)
-                                # ESTA VARIABLE ALMACENA LA POSICION INICIAL PARA LA SUMA
-                                variable3 = str(posicionador + 1)'''
+                           
                         else:
                             letra += 1
                             sheet[column_letter + str(posicionador)] = y.importe
@@ -308,11 +514,7 @@ class FiniquitoExcel(http.Controller):
                 # sheet[column_letter + str(posicionador + 1)].fill = PatternFill("solid", fgColor="ff7043")
                 sheet[letra_totales + str(posicionador + 1)].style = subtotal_estilo
                 sheet[letra_totales2 + str(posicionador + 1)].style = subtotal_estilo
-                '''for column in range(3, 8):
-                    column_letter = get_column_letter(column)
-                    sheet[column_letter + str(posicionador + 1)] = ''
-                    sheet[column_letter + str(posicionador + 1)].fill = PatternFill("solid", fgColor="ff7043")
-                    sheet[column_letter + str(posicionador + 1)].border = Border(top=thin, left=thin, right=thin, bottom=thin)'''
+           
                 # CANTIDAD, PRECIO U., IMPORTE
                 # sheet[column_letter_3 + str(posicionador + 1)] = "=SUM(G" + str(variable3) + ":G" + str(posicionador) + ")"
 
@@ -338,7 +540,7 @@ class FiniquitoExcel(http.Controller):
                                             ])
         
         except Exception as e:
-            return "Upss! algo salio mal en: " + str(e)
+            return "Upss! algo salio mal en: " + str(e)'''
 
 
 class ConceptosEstimados(http.Controller):

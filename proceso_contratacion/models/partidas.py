@@ -14,7 +14,7 @@ class PartidasLicitacion(models.Model):
 
     ejercicio = fields.Many2one("registro.ejercicio", string="Ejercicio",
                                 related="obra.obra_planeada.ejercicio")
-                                
+
     id_sideop = fields.Integer()
     id_sideop_partida = fields.Integer()
 
@@ -70,7 +70,7 @@ class PartidasAdjudicacion(models.Model):
     id_sideop_partida = fields.Integer('ID SIDEOP part')
 
     id_adjudicacion = fields.Many2one('proceso.adjudicacion_directa')
-    
+
     recursos = fields.Many2one('autorizacion_obra.anexo_tecnico', 'Recursos')
 
     @api.multi
@@ -140,7 +140,7 @@ class Partidas(models.Model):
     odoo_user_oscar = fields.Many2one('res.users', string='Residente obra:', store=True) # compute="user_admin"
     odoo_user_fabiola = fields.Many2one('res.users', string='Residente obra:', store=True) # compute="user_admin"
     odoo_user_celaya = fields.Many2one('res.users', string='Residente obra:', store=True) # compute="user_admin"
-    
+
     super_residente = fields.Many2many('res.users', string='Ver todas las obras como residente', )
 
     clave_pep = fields.Char(related="obra.obra_planeada.numero_obra")
@@ -177,7 +177,14 @@ class Partidas(models.Model):
         values['numero_contrato'] = b_contrato.id
         estado = self.env['semaforo.estado_obra_lista'].search([('estado_obra', '=', 'Nueva')])
         values['estado_obra_m2o'] = estado.id
-        return super(Partidas, self).create(values)
+        search_usuarios = self.env['res.users'].search([('super_residente', '!=', False)])
+        values['tipo_estado_obra'] = 'Nueva'
+        res = super(Partidas, self).create(values)
+        for i in search_usuarios:
+            datos = {'super_residente': [[4, i.id, {}]]}
+            xd = res.update(datos)
+            print(datos)
+        return res
 
     radio_adj_lic = [('1', "Licitación"), ('2', "Adjudicación")]
     tipo_contrato = fields.Selection(radio_adj_lic, string="Tipo de Contrato", store=True, related="numero_contrato.tipo_contrato")
@@ -202,14 +209,14 @@ class Partidas(models.Model):
     @api.one
     def _calc_url_conceptos(self):
         # original_url = "http://35.238.206.12:56733/?id=" + str(self.id) + "&partida=" + str(self.num_contrato_related)
-        original_url = "http://sidur.galartec.com:9001/conceptos/index.php?id=" + str(self.id) 
-        self._url_conceptos = original_url 
+        original_url = "http://sidur.galartec.com:9001/conceptos/index.php?id=" + str(self.id)
+        self._url_conceptos = original_url
 
     @api.multi
     def decargar_catalogo_excel(self):
         url = "/Conceptos/?id=" + str(self.id)
         return {"type": "ir.actions.act_url", "url": url, "target": "new", }
-        
+
     @api.multi
     def imprimir_accion_concepto(self):
         return {"type": "ir.actions.act_url", "url": self._url_conceptos, "target": "new", }
@@ -221,6 +228,7 @@ class Partidas(models.Model):
 
     # CATALOGO DE CONCEPTOS
     conceptos_partidas = fields.Many2many('proceso.conceptos_part', required=True)
+    ordenes_conceptos = fields.Many2many('ordenes.conceptos_cambio')  # ORDENES DE CAMBIO CONCEPTOS EN ESPEJO
 
     # CONCEPTOS MODIFICADOS PARA EL HISTORIAL DE CATALOGOS AUN NO IMPLEMENTADO
     # conceptos_modificados = fields.Many2many('proceso.conceptos_modificados', required=True)
@@ -239,28 +247,11 @@ class Partidas(models.Model):
     # TOTAL DE LA PARTIDA MONTO CONTRATADO SIN IVA, ESTE USA SIDEOP
     # monto_sin_iva = fields.Float(string="Total:", compute="SumaContrato", digits=(12,2))
     # total con convenio
-    monto_sin_iva_modi = fields.Float(string="Total Modificado", compute="nuevo_total_partida")
+    monto_sin_iva_modi = fields.Float(string="Total Modificado", ) # compute="nuevo_total_partida"
     # TOTAL DE LA PARTIDA
-    # total = fields.Float(string="Monto Total Contratado:", compute="totalContrato", digits=(12,2))
-
     total = fields.Float(string="Monto Total Contratado:", digits=(12,2))
 
-    # total_civa = fields.Float(string="Monto Total Contratado cIva:", compute="totalContratociva", digits=(12,2))
     total_civa = fields.Float(string="Monto Total Contratado cIva:", digits=(12,2), )
-
-    # METODO PARA ASIGNAR EL TOTAL DEL CONTRATO
-    @api.one
-    def totalContrato(self):
-        _search_cove = self.env['proceso.convenios_modificado'].search_count([("nombre_contrato", "=", self.nombre_contrato)])
-        if _search_cove == 0:
-            self.total = self.monto_partida
-        else:
-            self.total = self.monto_sin_iva_modi
-
-    # TOTAL CON IVA
-    @api.one
-    def totalContratociva(self):
-        self.total_civa = (self.total * self.b_iva) + self.total
 
     # BUSQUEDA DE CONVENIOS PARA ESTA PARTIDA
     # FIELD CON EL TOTAL DEL CONVENIO INCLUYE LA SUMA Y RESTA
@@ -366,9 +357,84 @@ class Partidas(models.Model):
     # RUTA CRITICA
     ruta_critica = fields.Many2many('proceso.rc')
 
+    avance_programado_fecha = fields.Float(store=True)
+    fecha_simulacion = fields.Date('Seleccionar Fecha de la Simulacion de Avance Programado')
+
+    @api.multi
+    @api.onchange('fecha_simulacion')
+    def porProgramado(self):
+        b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self._origin.id)])
+        print(b_programa)
+        date_format = "%Y/%m/%d"
+        date_format2 = "%Y-%m-%d"
+        today = self.fecha_simulacion
+        hoy = str(today.strftime(date_format))
+
+        fecha_hoy = today
+
+        if len(hoy) == '':
+            Prog_Del = None
+        else:
+            Prog_Del_ = str(today)
+            Prog_Del = Prog_Del_[0] + Prog_Del_[1] + Prog_Del_[2] + Prog_Del_[3] + '/' + Prog_Del_[4] + \
+                       Prog_Del_[5] + '/' + Prog_Del_[6] + Prog_Del_[7]
+
+        # fecha_hoy = datetime.strptime(str(fecha_act), date_format2)
+
+        for u in b_programa.programa_contratos:
+            fecha_termino_pp = u.fecha_termino
+
+            if str(fecha_termino_pp) == 'False':
+                print('NO HAY FECHA DE TERMINO')
+            else:
+                fecha_termino_contrato = fecha_termino_pp
+
+                acumulado = 0
+                cont = 0
+                porcentajeProgramado = 0
+                for i in b_programa.programa_contratos:
+                    cont += 1
+                    print('CICLO DEL PROGRAMA # ', cont)
+                    if fecha_hoy > fecha_termino_contrato:
+                        print(' LA FECHA DE HOY ES MAYOR A LA DE TERMINO')
+                        porcentajeProgramado = 100.00
+                        self.avance_programado_fecha = porcentajeProgramado
+
+                    # SI NO, LA FECHA DE HOY ES MENOR O IGUAL A LA DEL TERMINO DEL CONTRATO ENTONCES CALCULAR PORCENTAJE
+                    if fecha_hoy <= fecha_termino_contrato:
+                        # POSICIONARSE EN EL PROGRAMA CORRESPONDIENTE DE LA FECHA ACTUAL (MISMO MES Y ANO)
+                        fechainicioprog = datetime.datetime.strptime(str(i.fecha_inicio), date_format2)
+                        if str(fechainicioprog) <= str(fecha_hoy):
+                            # DIAS TRANSCURRIDOS DESDE EL INICIO DEL PROGRAMA ACTUAL HASTA LA FECHA ACTUAL
+                            fechainicioprog = datetime.datetime.strptime(str(i.fecha_inicio), date_format2)
+                            _fecha_actual = datetime.datetime.strptime(str(today), date_format2)
+                            r = _fecha_actual - fechainicioprog
+                            dias_trans = r.days + 1
+                            diasest = calendar.monthrange(i.fecha_inicio.year, i.fecha_inicio.month)[1]
+                            dias_del_mes = diasest  # r2.days + 1
+                            if dias_del_mes == 0:
+                                dias_del_mes = 1
+                            # MONTO ACUMULADO DE PROGRAMAS
+                            acumulado += i.monto
+                            ultimo_monto = i.monto
+
+                            # LA FORMULA ES: MONTO DEL PROGRAMA ACTUAL / LOS DIAS DEL MES DEL PROGRAMA ACTUAL *
+                            # LOS DIAS TRANSCURRIDOS HASTA LA FECHA ACTUAL + EL ACUMULADO DE LOS PROGRAMAS /
+                            # EL TOTAL DEL PROGRAMA * 100
+                            importe_diario = ((((i.monto / dias_del_mes) * dias_trans) + (acumulado - ultimo_monto))
+                                              / b_programa.total_programa) * 100
+                            if importe_diario > 100:
+                                rr = 100
+                            elif importe_diario <= 100:
+                                rr = importe_diario
+                            porcentajeProgramado = rr
+                            self.avance_programado_fecha = rr
+                        else:
+                            pass
+
     comentarios_supervision = fields.Many2many('comentario.supervision', string='Comentarios de Supervision')
     estado_supervision = fields.Selection([('Activa', "Activa"), ('Terminada', "Terminada")], string="Estado de la Supervision", default="Activa")
-    
+
     @api.multi
     def toda_galeria(self):
         # VISTA OBJETIVO
@@ -453,7 +519,7 @@ class Partidas(models.Model):
             "url": original_url,
             "target": "new",
         }
-    # FIN FINIQUITO #   
+    # FIN FINIQUITO #
 
     #Galeria
     @api.multi
@@ -465,7 +531,7 @@ class Partidas(models.Model):
             "target": "new",
         }
 
-       
+
 
     # USADA COMO AUXILIAR
     p_id = fields.Integer('VARIABLE AUXILIAR')
@@ -478,12 +544,26 @@ class Partidas(models.Model):
     contar_estimaciones = fields.Integer(compute='ContarEstimaciones', string="PRUEBA")
 
     # M2M PARA PODER HACER REPORTE DE ESTADO DE CUENTA DE ESTIMACIONES MAS SU METODO
-    esti = fields.Many2many(comodel_name="control.estimaciones", compute="estimaciones_report")
+    esti = fields.Many2many(comodel_name="control.estimaciones", ) # compute="estimaciones_report"
+
+    @api.one
+    def estimaciones_report(self):
+        partidas = self.env['partidas.partidas']
+        dedu = self.env['control.estimaciones'].search(
+            [("obra.id", "=", self.id)])
+        acum = 0
+        for i in dedu:
+            datos_esti = {
+                'esti': [[4, i.id, {
+                }]]}
+
+            partida_est = partidas.browse(self.id)
+            esti = partida_est.update(datos_esti)
 
     # CONTROL DE EXPEDIENTES
     tabla_control = fields.One2many('control.expediente', 'p_id')
     tabla_libros_blancos = fields.Many2many('expediente.libros_blancos', string='Revision de Expedientes', store=True)
-    
+
     unidadresponsableejecucion = fields.Many2one('proceso.unidad_responsable', string="Unidad responsable de su ejecución", related="numero_contrato.unidadresponsableejecucion")
 
     porcentaje_existencia = fields.Float(string="% Existencia", store=True)
@@ -516,7 +596,23 @@ class Partidas(models.Model):
     _url = fields.Char(compute="_calc_url")
 
     # SEMAFORO
-    residente_x = fields.Char('Residente', readonly=True)
+    residente_x = fields.Char('Residente', readonly=True, store=True)
+    residentes_obra = fields.Many2many('partida.residente', string='new residentes', store=True)
+
+    @api.multi
+    @api.onchange('residente_obra')
+    def residente_char(self):
+        ac = ""
+        c = 0
+        for i in self.residente_obra:
+            print(i.name)
+            c += 1
+            if c > 1:
+                ac += "," + str(i.name)
+            else:
+                ac += str(i.name)
+        self.residente_x = ac
+
     monto_del_programa = fields.Float(string="",  compute="_monto_programa" )
 
     fecha_inicio_convenida = fields.Date('Fecha Inicio Convenida', ) # compute="_monto_programa"
@@ -536,7 +632,7 @@ class Partidas(models.Model):
                 pass
 
     estado_obra = fields.Many2many('semaforo.estado_obra')
-    
+
     estado_actividad = fields.Many2many('semaforo.actividad')
 
     @api.multi
@@ -586,8 +682,8 @@ class Partidas(models.Model):
     estado_obra_m2o = fields.Many2one('semaforo.estado_obra_lista', string="Estado", store=True) # NUEVO ESTADO DE OBRA
 
     select_estado2 = [('Abierto', 'Abierto'), ('Cerrado', 'Cerrado'), ('Cancelado', 'Cancelado')]
-    
-    tipo_estado_actividad = fields.Selection(select_estado2, string="Estado Actividad", 
+
+    tipo_estado_actividad = fields.Selection(select_estado2, string="Estado Actividad",
                                              store=True)
 
     recursos_semaforo = fields.Many2many(comodel_name="autorizacion_obra.anexo_tecnico",
@@ -639,7 +735,7 @@ class Partidas(models.Model):
 
     avance_semaforo = fields.Many2many(comodel_name="proceso.iavance", compute="semaforo_avance")
 
-    porcentajeProgramado = fields.Float(string="", digits=(12, 2)) # , compute="porProgramadox", store=True, readonly=False,
+    porcentajeProgramado = fields.Float(string="", digits=(12, 2), store=True) # , compute="porProgramadox", store=True, readonly=False,
 
     atraso = fields.Float(string="", digits=(12,2)) # compute="porProgramado"
 
@@ -658,12 +754,12 @@ class Partidas(models.Model):
         # MODELO DONDE ESTA EL M2M
         partidas = self.env['partidas.partidas']
 
-        # BUSQUEDA DE LOS DATOS 
-        prog = self.env['proceso.programa'].search(
+        # BUSQUEDA DE LOS DATOS
+        prog = self.env['programa.programa_obra'].search(
             [("obra.id", "=", self.id)])
 
         # ITERACION DE LA BUSQUEDA
-        for i in prog:
+        for i in prog.programa_contratos:
             # OBJETO CON LOS DATOS
             datos_p = {
                 'programa_semaforo': [[4, i.id, {
@@ -693,7 +789,7 @@ class Partidas(models.Model):
             acum_amort += i.amort_anticipo
         self.total_estimacion = acum
         self.total_amort_anticipo = acum_amort
-    
+
     @api.one
     @api.depends('p_id', 'a_fis', 'avance_semaforo.fecha_actual')
     def porProgramadox(self):
@@ -881,20 +977,7 @@ class Partidas(models.Model):
     # ACTIVADOR DE ONCHANGE PARA PRUEBAS
     prueba_expediente = fields.Char(string="PRUEBA METODO EJECUCION", required=False, )
 
-    @api.one
-    @api.depends('p_id')
-    def estimaciones_report(self):
-        partidas = self.env['partidas.partidas']
-        dedu = self.env['control.estimaciones'].search(
-            [("obra.id", "=", self.id)])
-        acum = 0
-        for i in dedu:
-            datos_esti = {
-                'esti': [[4, i.id, {
-                }]]}
 
-            partida_est = partidas.browse(self.id)
-            esti = partida_est.update(datos_esti)
 
     # METODO DE CONTAR REGISTROS DE FINIQUITOS PARA ABRIR VISTA EN MODO NEW O TREE VIEW
     @api.one
@@ -928,24 +1011,6 @@ class Partidas(models.Model):
             'domain': [('estimacion', '!=', 0)],
         }
 
-    @api.multi
-    def write(self, values):
-        if self.fecha_anticipos and self.fecha_fianza and self.afianzadora and self.numero_fianza and \
-                self.anticipo_material:
-            return super(Partidas, self).write(values)
-        elif self.ruta_critica is not False:
-            return super(Partidas, self).write(values)
-        elif self.conceptos_partidas:
-            version = self.env['proceso.conceptos_modificados']
-            id_partida = self.id
-            datos = {'justificacion': values['justificacion'], 'obra': id_partida, 'tipo': values['tipo']}
-            nueva_version = version.create(datos)
-            values['tipo'] = ""
-            values['justificacion'] = ""
-            return super(Partidas, self).write(values)
-        else:
-            return super(Partidas, self).write(values)
-
     programa_id = fields.Many2one('programa.programa_obra', string="ID DE LA VENTANA DEL PROGRAMA PARA ESTA PARTIDA", compute="Programaid")
 
     @api.one
@@ -965,6 +1030,38 @@ class Partidas(models.Model):
     def ProgramasVentana(self):
         # VISTA OBJETIVO
         view = self.env.ref('ejecucion_obra.vista_form_programa')
+        # CONTADOR SI YA FUE CREADO
+        count = self.env['programa.programa_obra'].search_count([('obra.id', '=', self.id)])
+        # BUSCAR VISTA
+        search = self.env['programa.programa_obra'].search([('obra.id', '=', self.id)])
+        # SI YA FUE CREADA LA VISTA, ABRIR LA VISTA YA CREADA
+
+        b_fechas_p = self.env['programa.programa_obra'].browse(search.id)
+        if count == 1:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Programa',
+                'res_model': 'programa.programa_obra',
+                'view_mode': 'form',
+                'target': 'new',
+                'view_id': view.id,
+                'res_id': search[0].id,
+            }
+        # NO A SIDO CREADA LA VISTA, CREARLA
+        else:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Programa',
+                'res_model': 'programa.programa_obra',
+                'view_mode': 'form',
+                'target': 'new',
+                'view_id': view.id,
+            }
+
+    @api.multi
+    def ProgramasVentanaSupervision(self):
+        # VISTA OBJETIVO
+        view = self.env.ref('supervision_obra.vista_form_programa_supervision')
         # CONTADOR SI YA FUE CREADO
         count = self.env['programa.programa_obra'].search_count([('obra.id', '=', self.id)])
         # BUSCAR VISTA
@@ -1094,7 +1191,7 @@ class Partidas(models.Model):
         self.numero_contrato = self.enlace.id'''
 
     # METODO DE JCHAIRZ
-    
+
     # @api.onchange('ruta_critica')
     @api.multi
     @api.onchange('ruta_critica')
@@ -1114,13 +1211,13 @@ class Partidas(models.Model):
     # Jesus Fernandez metodo para abrir ruta critica
     @api.multi
     def ruta_critica_over(self):
-        view = self.env.ref('ejecucion_obra.proceso_rutac_form')
+        view = self.env.ref('supervision_obra.supervision_obra_supervision_obra_proceso_rutac_form')
         return {
             'type': 'ir.actions.act_window',
             'name': 'Ruta critica',
             'res_model': 'partidas.partidas',
             'view_mode': 'form',
-            'target': 'new',
+            'target': 'current',
             'view_id': view.id,
             'res_id': self.id,
         }
@@ -1196,7 +1293,7 @@ class ConveniosM(models.Model):
 class ProgramaContrato(models.Model):
     _name = 'proceso.programa'
 
-    obra = fields.Many2one('partidas.partidas', string='Partida:')
+    obra = fields.Many2one('partidas.partidas', string='Partida:', store=True)
     # IMPORTACION
     id_prog = fields.Integer(string="ID PROGRAMA",)
     # TERMINA IMPORTACION
@@ -1221,7 +1318,7 @@ class ProgramaContrato(models.Model):
         else:
             pass
 
-    porcentaje_programa = fields.Float(compute="calcular_porcentaje", ) # store=True
+    porcentaje_programa = fields.Float(store=True ) # store=True
 
     mes_actual = fields.Boolean('Mes actual', compute="_mes_actual") # para ver si es mes actual y aplicar color
     mes_paso = fields.Boolean('Ya paso', compute="_mes_actual") # para ver si es mes actual y aplicar color
@@ -1271,7 +1368,8 @@ class ProgramaContrato(models.Model):
                     self.mes_ultimo = True
 
     # @api.depends('fecha_termino')
-    @api.one
+    @api.multi
+    @api.onchange('fecha_termino', 'fecha_inicio', 'monto')
     def calcular_porcentaje(self):
         b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
         acum = 0
@@ -1286,7 +1384,11 @@ class ProgramaContrato(models.Model):
                         pass
                     elif i.fecha_termino <= self.fecha_termino:
                         acum += i.monto
-                        self.porcentaje_programa = (acum / b_programa.total_programa) * 100
+                        print('pene')
+                        if acum == 0 or b_programa.total_programa == 0:
+                            self.porcentaje_programa = 0
+                        else:
+                            self.porcentaje_programa = (acum / b_programa.total_programa) * 100
 
     # METODO para verificar fechas de programa
     @api.multi
@@ -1299,3 +1401,98 @@ class ProgramaContrato(models.Model):
             return False
 
 
+    @api.model
+    def create(self, values):
+        res = super(ProgramaContrato, self).create(values)
+        b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', res.obra.id)])
+        b_partida = self.env['partidas.partidas'].browse(res.obra.id)
+        date_format = "%Y/%m/%d"
+        date_format2 = "%Y-%m-%d"
+        fechainicioprog = ''
+        fechaterminoprog = ''
+        today = date.today()
+        hoy = str(today.strftime(date_format))
+        ciclo = 0
+        for i in b_programa.programa_contratos:
+            ciclo += 1
+            if ciclo == 1:
+                fechainicioprog = datetime.datetime.strptime(str(i.fecha_inicio), date_format2)
+                fechaterminoprog = datetime.datetime.strptime(str(values['fecha_termino']), date_format2)
+
+            else:
+                fechaterminoprog = datetime.datetime.strptime(str(values['fecha_termino']), date_format2)
+        if ciclo == 0:
+            fechainicioprog = datetime.datetime.strptime(str(values['fecha_inicio']), date_format2)
+            fechaterminoprog = datetime.datetime.strptime(str(values['fecha_termino']), date_format2)
+        _fecha_actual = datetime.datetime.strptime(str(hoy), date_format)
+        r = _fecha_actual - fechainicioprog
+        dias_trans = r.days + 1
+
+        r = fechaterminoprog - fechainicioprog
+        dias_totales = r.days + 1
+        porcentajeProgramado = 0
+        if dias_trans > dias_totales:
+            porcentajeProgramado = 100
+        else:
+            porcentajeProgramado = dias_trans / dias_totales * 100
+
+        atraso = porcentajeProgramado - b_partida.a_fis
+        color = ''
+        if atraso <= 5:
+            color = 'Verde'
+        elif atraso > 5 and atraso <= 25:
+            color = 'Amarillo'
+        elif atraso > 25:
+            color = 'Rojo'
+
+        b_partida.write({'porcentajeProgramado': porcentajeProgramado,
+                         'atraso': atraso, 'color_semaforo': color,
+                         })
+        return res
+
+    @api.multi
+    def borrar(self):
+        b_programa = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
+        b_partida = self.env['partidas.partidas'].browse(self.obra.id)
+        date_format = "%Y/%m/%d"
+        date_format2 = "%Y-%m-%d"
+        fechainicioprog = ''
+        fechaterminoprog = ''
+        today = date.today()
+        hoy = str(today.strftime(date_format))
+        ciclo = 0
+        for i in b_programa.programa_contratos:
+            ciclo += 1
+            if ciclo == 1:
+                fechainicioprog = datetime.datetime.strptime(str(i.fecha_inicio), date_format2)
+                fechaterminoprog = datetime.datetime.strptime(str(i.fecha_termino), date_format2)
+            elif i.fecha_inicio != self.fecha_inicio and i.fecha_termino != self.fecha_termino:
+                fechaterminoprog = datetime.datetime.strptime(str(i.fecha_termino), date_format2)
+            elif i.fecha_inicio == self.fecha_inicio and i.fecha_termino == self.fecha_termino:
+                break
+
+        _fecha_actual = datetime.datetime.strptime(str(hoy), date_format)
+        r = _fecha_actual - fechainicioprog
+        dias_trans = r.days + 1
+
+        r = fechaterminoprog - fechainicioprog
+        dias_totales = r.days + 1
+        porcentajeProgramado = 0
+        if dias_trans > dias_totales:
+            porcentajeProgramado = 100
+        else:
+            porcentajeProgramado = dias_trans / dias_totales * 100
+
+        atraso = porcentajeProgramado - b_partida.a_fis
+        color = ''
+        if atraso <= 5:
+            color = 'Verde'
+        elif atraso > 5 and atraso <= 25:
+            color = 'Amarillo'
+        elif atraso > 25:
+            color = 'Rojo'
+
+        b_partida.write({'porcentajeProgramado': porcentajeProgramado,
+                         'atraso': atraso, 'color_semaforo': color,
+                         })
+        self.env['proceso.programa'].search([('id', '=', self.id)]).unlink()

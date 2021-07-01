@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 class conceptos_partidas(models.Model):
     _name = "proceso.conceptos_part"
-    _rec_name = 'descripcion'
+    _rec_name = 'clave_linea'
 
     id_sideop = fields.Integer('ID SIDEOP CATALOGO')
 
@@ -29,6 +29,9 @@ class conceptos_partidas(models.Model):
     # MODIFICACIONES
     fecha_modificacion = fields.Date('Fecha de la Modificación')
     justificacion = fields.Text('Justificación de Modificación')
+
+    cantidad_ajustada = fields.Float(string="Cantidad Ajustada")
+    importe_ajustado = fields.Float(string="Monto Ajustado")
 
     # CONCEPTOS EJECUTADOS EN EL PERIODO
     # contratada = fields.Float(string="Contratada",  required=False, compute="test")
@@ -105,12 +108,4 @@ class grupo(models.Model):
 class medida(models.Model):
     _name = "proceso.medida"
     name = fields.Char()
-
-
-
-
-
-
-
-
 

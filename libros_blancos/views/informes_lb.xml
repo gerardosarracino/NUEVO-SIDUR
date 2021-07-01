@@ -1,0 +1,35 @@
+<odoo>
+  <data>
+
+    <record id="informe_libro_pivot" model="ir.ui.view">
+            <field name="name">Informe Libros Blancos Pivot</field>
+            <field name="model">expediente.libros_blancos</field>
+            <field name="arch" type="xml">
+                <pivot string="INFORME">
+                    <field name="contrato_id" type="col"/>
+                    <field name="nombre_documento" type="row"/>
+                    <field name="existe" type="row"/>
+                    <field name="existe" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+
+     <!-- ACCIONES VENTANA ESTIMACIONES -->
+    <record model="ir.actions.act_window" id="informes_libros_action">
+      <field name="name">INFORMES</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">expediente.libros_blancos</field>
+      <field name="view_mode">pivot</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'pivot', 'view_id': ref('informe_libro_pivot')})]"/>
+    </record>
+
+
+
+      <menuitem name="INFORMES" id="informes_libros_blancos"
+              parent="revision_expedientes_menu"
+              action="informes_libros_action" sequence="6"/>
+
+  </data>
+</odoo>

@@ -38,8 +38,8 @@
             <field name="a_fin" string="Av. Fin" />
             <field name="ejercicio" string="Ejercicio"/>
             <field name="total_partida" string="Monto C/IVA"/>
-            <field name="color_semaforo" string="Estado"/>
-            <field name="tipo_estado_obra" string="Estado" invisible="1"/>
+            <field name="color_semaforo" string="Color"/>
+            <field name="tipo_estado_obra" string="Estado" />
             <field name="tipo_estado_actividad" string="Estado" invisible="1"/>
            
         </tree>
@@ -262,6 +262,7 @@
                       <tree>
                         
                         <field name="ide_estimacion"/>
+                        <button name="%(ejecucion_obra.estimacion_report)d" string="Control de Estimaciones" type="action"   />
                         <field name="idobra"/>
                         <field name="tipo_estimacion"/>
                         <field name="fecha_inicio_estimacion" />

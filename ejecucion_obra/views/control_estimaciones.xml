@@ -27,6 +27,7 @@
             string="Control de Estimaciones"
             report_type="qweb-html"
             name="report_estimaciones.report_estimaciones"
+            print_report_name="object.ide_estimacion + '/' + 'xxControl-de-estimaciones' + object.obra.numero_contrato.contrato"
         />
 
       <report
@@ -93,14 +94,28 @@
                                     <!-- por mientras para activar metodos -->
                                     <field name="p_id" invisible="1" />
                                     <field name="obra"/>
+                                    <field name="responsable_ficha"/>
 
                                     <field name="retenido_anteriormente" readonly="1" force_save="1" invisible="1"/>
+                                    <field name="a_fin" string="xxx" attrs="{'invisible': [('responsable_ficha','=', 2)]}"/>
                                     <field name="a_fin"/>
-                                    <field name="clave_obra" force_save="1" invisible="1"/>
+                                    <field name="clave_obra" force_save="1" />
+                                    <field name="clave_estimacion" force_save="1" />
                                     <field name="clave_estimacion" invisible="1"/>
+                                    <field name="auxiliar_alerta_programa" force_save="1" invisible="1" />
+                                    <field name="auxiliar_alerta_fecha" force_save="1" invisible="1" />
                                     <br/>
-                                    <field name="tipo_estimacion" widget="radio"/>
+                                    <div><field name="tipo_estimacion" widget="radio"/>
+                                        <p attrs="{'invisible': [('auxiliar_alerta_programa','=', False)]}"
+                                        align="right" style="color: #DE0C0C">ALERTA EL PROGRAMA DE OBRA NO CONTIENE UN MONTO CORRECTO O ACTUALIZADO</p></div>
                                 </group>
+
+                                <group>
+                                    <field name="estimacion_bis" attrs="{'invisible': [('tipo_estimacion','!=', '4')],
+                                    'required': [('tipo_estimacion','=', '4')]}"
+                                     domain="[('obra.id', '=', obra)]"/>
+                                </group>
+
                                 <group>
                                     <field name="idobra" readonly="1" class="oe_inline" style="font-size: 13px;"
                                     force_save="1"/>
@@ -154,11 +169,15 @@
                             </group>
 
                             <group  colspan="2" col="2">
+
                                 <group string="Periodo de la Estimación">
                                     <field name="fecha_inicio_estimacion" class="oe_inline"/>
                                     <br/>
                                     <field name="fecha_termino_estimacion" class="oe_inline"/>
+                                    <p attrs="{'invisible': [('auxiliar_alerta_fecha','=', False)]}"
+                                        align="right" style="color: #DE0C0C">ALERTA LOS DIAS ESTIMADOS SUPERAN LOS 31 DIAS!</p>
                                 </group>
+
                                 <group string="Seguimiento">
                                     <field name="fecha_presentacion" class="oe_inline"/>
                                     <br/>
@@ -190,12 +209,25 @@
                                 <sheet>
                                     <br/>
                                     <group string="Cálculo De Estimación"  colspan="2" col="3">
+
+
+
+                                        <group attrs="{'invisible': [('tipo_estimacion','!=', '4')]}">
+                                            <p colspan="4" align="left">Estimado Bis:   $ <field name="estimado_bis" string="Estimado Bis " nolabel="1"
+                                                       style="color: #237570; font-size: 17px;"  attrs="{'invisible': [('tipo_estimacion','!=', '4')]}" /></p>
+                                        </group>
+
+                                        <group attrs="{'invisible': [('tipo_estimacion','!=', '4')]}">
+                                            <p colspan="4" align="left">Estimado Estimacion Original:   $ <field name="estimado_bis_related" string="Estimado" nolabel="1"
+                                                       style="color: #237570; font-size: 17px;"  attrs="{'invisible': [('tipo_estimacion','!=', '4')]}" /></p>
+                                        </group>
+
                                         <group>
                                             <p colspan="4" align="left">Importe ejecutado estimación:   $<field name="estimado" nolabel="1" readonly="1"
                                                                                                                 force_save="1"
                                             style="color: #237570; font-size: 17px;"/></p>
                                         </group>
-                                        <group>
+                                        <group attrs="{'invisible': [('tipo_estimacion','=', '4')]}">
                                             <p colspan="4" align="left">Amortización de Anticipo <field name="amort_anticipo_partida" placeholder="Ingresar % de anticipo"
                                                                                                         force_save="1"
 
@@ -228,12 +260,14 @@
                                     </group>
 
                                     <group  colspan="2" col="3">
-                                        <group>
+                                        <group attrs="{'invisible': [('tipo_estimacion','=', '4')]}">
                                             <p colspan="4" align="left">Retención/Devolución: $<field name="ret_neta_est" nolabel="1"
                                                                                                       readonly="1" force_save="1"
                                             style="color: #237570;font-size: 17px;"/></p>
                                         </group>
-                                        <group>
+                                        <group attrs="{'invisible': [('tipo_estimacion','=', '4')]}">
+                                            <p>% de Sancion <field name="porcentaje_sancion" nolabel="1"/></p>
+
                                             <p colspan="4" align="left">	Sanción por Incump. de plazo: $<field name="sancion" nolabel="1" force_save="1"
                                                                                                                   readonly="1"
                                             style="color: #237570;font-size: 17px;"/></p>
@@ -350,6 +384,75 @@
 
                             <field name="total_conceptos" readonly="1" invisible="1" />
                         </page>
+
+                        <!--   bis
+                        <page string="Estimacion Bis" attrs="{'invisible': [('tipo_estimacion','!=', '4')]}">
+
+                        <separator string="Estimacion Bis"/>
+                        <group>
+                        <field name="estimado" string="TOTAL DE CONCEPTOS: " readonly="1" force_save="1"/>
+                        <field name="estimado_bis" string="Estimado Bis "/>
+                        </group>
+                        <sheet>
+                        <br/>
+                        <group string="Cálculo De Estimación" colspan="2" col="3">
+                        <group>
+                        <p colspan="4" align="left">
+                        Importe ejecutado estimación: $
+                        <field name="estimado_bis" nolabel="1" readonly="1" force_save="1" style="color: #237570; font-size: 17px;"/>
+                        </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left"> </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left">
+                        <field name="montoreal_bis" invisible="1"/>
+                        </p>
+                        </group>
+                        </group>
+                        <group colspan="2" col="3">
+                        <group>
+                        <p colspan="4" align="left">
+                        I.V.A. 16%: $
+                        <field name="estimacion_iva_bis" force_save="1" readonly="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left">
+                        Importe Total: $
+                        <field name="estimacion_facturado_bis" force_save="1" readonly="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left">
+                        Menos Suma Deducciones: $
+                        <field name="estimado_deducciones_bis" force_save="1" readonly="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        </group>
+                        <group colspan="2" col="3">
+                        <group>
+                        <p colspan="4" align="left">
+                        Retención/Devolución: $
+                        <field name="ret_neta_est_bis" nolabel="1" readonly="1" force_save="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left">
+                        Sanción por Incump. de plazo: $
+                        <field name="sancion_bis" nolabel="1" force_save="1" readonly="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        <group>
+                        <p colspan="4" align="left">
+                        Importe liquido: $
+                        <field name="a_pagar_bis" nolabel="1" force_save="1" readonly="1" style="color: #237570;font-size: 17px;"/>
+                        </p>
+                        </group>
+                        </group>
+                        </sheet>
+                        </page> -->
                     </notebook>
                 </sheet>
             </form>
@@ -571,6 +674,20 @@
                         <page string="Residencia">
                             <group string="Residencia">
                                 <field name="residente_obra"/>
+                            </group>
+                            <group>
+                                <field name="residentes_obra" nolabel="1" widget="one2many"
+                                    context="{'default_partida_id': active_id}">
+                                    <tree editable="bottom" delete="false">
+                                        <field name="partida_id" force_save="1" required="1" invisible="1"/>
+                                        <field name="residente" required="1" placeholder="Buscar residente..."/>
+                                        <button string="QUITAR" name="borrar" type="object" class="btn btn-danger"
+                                        confirm="Esta seguro de borrar este registro?" />
+                                    </tree>
+                                </field>
+                            </group>
+                            <group colspan="2" col="4">
+                                <field name="residente_x" force_save="1"/>
                             </group>
                             <group colspan="2" col="4">
                                 <field name="supervision_externa"/>

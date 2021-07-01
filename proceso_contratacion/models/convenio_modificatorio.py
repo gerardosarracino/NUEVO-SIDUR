@@ -6,7 +6,7 @@ from odoo import api, fields, models, _
 
 class ConveniosModificados(models.Model):
     _name = "proceso.convenios_modificado"
-    _rec_name = 'contrato_contrato'
+    _rec_name = 'referencia'
 
     # importacion
     id_sideop = fields.Integer()
@@ -14,7 +14,7 @@ class ConveniosModificados(models.Model):
 
     # form
     contrato_id = fields.Char(compute="nombre", store=True)
-    contrato = fields.Many2one('partidas.partidas', string='Numero Partida:')
+    contrato = fields.Many2one('partidas.partidas', string='Seleccionar partida a aplicar convenio')
     contrato_contrato = fields.Many2one('proceso.elaboracion_contrato', string='Numero Contrato:')
     nombre_contrato = fields.Char(string='Nombre Contrato:') # para metodo
 
@@ -58,33 +58,42 @@ class ConveniosModificados(models.Model):
     @api.model
     def create(self, values):
         _search_cove = self.env['proceso.convenios_modificado'].search([("contrato", "=", values['contrato'])])
-        _search_part = self.env['partidas.partidas'].search([("nombre_contrato", "=", str(values['nombre_contrato']))])
+        _search_part = self.env['partidas.partidas'].search([("id", "=", values['contrato'])])
         print(_search_part, ' xxdfasd')
         acum = 0
         acum2 = 0
         total = 0
+        totalx = 0
+        ampliacion = 0
+        reduccion = 0
         for vals in _search_cove:
             if vals['tipo_monto'] == 'AM':
                 acum = acum + vals['monto_importe']
+                ampliacion = acum
+                print(ampliacion, 'am')
             elif vals['tipo_monto'] == 'RE':
                 acum2 = acum2 + vals['monto_importe']
-            ampliacion = acum
-            reduccion = acum2
-            total = ampliacion - reduccion
-        totalx = total + values['monto_importe']
+                reduccion = acum2
+                print(reduccion, 're')
+        print(values['monto_importe'])
+
+        if values['tipo_monto'] == 'RE': # REDUCCION
+            totalx = (ampliacion - values['monto_importe']) - reduccion
+        if values['tipo_monto'] == 'AM':
+            totalx = (values['monto_importe'] + ampliacion) - reduccion
+
         if values['tipo_convenio'] == 'MT':
             for i in _search_part:
                 b_contrato = self.env['partidas.partidas'].browse(i['id'])
                 print(b_contrato, ' alv')
                 total_civa = ((b_contrato['monto_partida'] + totalx) * b_contrato['b_iva']) + (b_contrato['monto_partida'] + totalx)
-                b_contrato.write({'total': totalx + b_contrato['monto_partida'], 'total_civa': total_civa})
-                print(b_contrato.write({'total': totalx + b_contrato['monto_partida'], 'total_civa': total_civa}))
+                b_contrato.write({'total': totalx + b_contrato['monto_partida'], 'total_civa': total_civa, 'monto_sin_iva_modi': totalx + b_contrato['monto_partida']})
         elif values['tipo_convenio'] == 'BOTH':
             for i in _search_part:
                 b_contrato = self.env['partidas.partidas'].browse(i['id'])
                 total_civa = ((b_contrato['monto_partida'] + totalx) * b_contrato['b_iva']) + (
                             b_contrato['monto_partida'] + totalx)
-                b_contrato.write({'total': totalx + b_contrato['monto_partida'], 'total_civa': total_civa,
+                b_contrato.write({'total': totalx + b_contrato['monto_partida'], 'total_civa': total_civa, 'monto_sin_iva_modi': totalx + b_contrato['monto_partida'],
                                   'fecha_inicio_convenida': values['plazo_fecha_inicio'],
                                   'fecha_termino_convenida': values['plazo_fecha_termino']})
         elif values['tipo_convenio'] == 'PL':

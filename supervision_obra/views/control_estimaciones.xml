@@ -803,10 +803,7 @@
           </field>
       </record>
 
-    <menuitem name="Supervisión de Obra" id="supervision_obra.menu_root" sequence="0" web_icon="supervision_obra,static/description/icon.png"/>
-
-    <menuitem name="Control de Estimaciones" id="control_esstimacion" parent="supervision_obra.menu_root"
-              action="supervision_obra_control_estimacion_action_window" sequence="2"/>
+    
 
       <!--menuitem name="DETALLES IMPORT" id="detalle_act" parent="ejecucion_obra.menu_root"
               action="supervision_detalle_action" sequence="8"/>

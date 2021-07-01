@@ -26,10 +26,11 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/control_estimaciones.xml',
-        'views/supervision_obra.xml',
+        'views/programa.xml',
+
+        # 'views/supervision_obra.xml',
         'views/templates.xml',
         'views/convenios.xml',
-        'views/programa.xml',
         'views/autorizacion_pago.xml',
         'data/paperformat.xml',
         'data/paperformat_estimacion.xml',

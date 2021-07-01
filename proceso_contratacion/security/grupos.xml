@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="module_management">
+          <field name="name">Licitación</field>
+          <field name="description">User access level for this module</field>
+          <field name="sequence">4</field>
+        </record>
+
+        <record id="group_administrador" model="res.groups">
+         <field name="name">Administrador</field>
+         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+         <field name="category_id" ref="proceso_contratacion.module_management"/>
+        </record>
+
+        <record id="group_coordinador" model="res.groups">
+          <field name="name">Coordinador</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.module_management"/>
+        </record>
+
+        <record id="group_usuario" model="res.groups">
+          <field name="name">Usuario</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.module_management"/>
+        </record>
+
+        <record id="group_consulta" model="res.groups">
+          <field name="name">Consulta</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.module_management"/>
+        </record>
+
+        <!--Adjudicación Directa-->
+        <record model="ir.module.category" id="ad">
+          <field name="name">Adjudicación Directa</field>
+          <field name="description">User access level for this module</field>
+          <field name="sequence">5</field>
+        </record>
+
+        <record id="administrador" model="res.groups">
+         <field name="name">Administrador</field>
+         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+         <field name="category_id" ref="proceso_contratacion.ad"/>
+        </record>
+
+        <record id="coordinador" model="res.groups">
+          <field name="name">Coordinador</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ad"/>
+        </record>
+
+        <record id="usuario" model="res.groups">
+          <field name="name">Usuario</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ad"/>
+        </record>
+
+        <record id="consulta" model="res.groups">
+          <field name="name">Consulta</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ad"/>
+        </record>
+
+        <!--Elaboración de contratos-->
+        <record model="ir.module.category" id="ec">
+          <field name="name">Elaboración de contratos</field>
+          <field name="description">User access level for this module</field>
+          <field name="sequence">5</field>
+        </record>
+
+        <record id="_administrador" model="res.groups">
+         <field name="name">Administrador</field>
+         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+         <field name="category_id" ref="proceso_contratacion.ec"/>
+        </record>
+
+        <record id="_coordinador" model="res.groups">
+          <field name="name">Coordinador</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ec"/>
+        </record>
+
+        <record id="_usuario" model="res.groups">
+          <field name="name">Usuario</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ec"/>
+        </record>
+
+        <record id="_consulta" model="res.groups">
+          <field name="name">Consulta</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.ec"/>
+        </record>
+
+         <!--Supervisión de Obra-->
+        <record model="ir.module.category" id="so">
+          <field name="name">Supervisión de Obra</field>
+          <field name="description">User access level for this module</field>
+          <field name="sequence">5</field>
+        </record>
+
+        <record id="so_administrador" model="res.groups">
+         <field name="name">Administrador</field>
+         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+         <field name="category_id" ref="proceso_contratacion.so"/>
+        </record>
+
+        <record id="so_coordinador" model="res.groups">
+          <field name="name">Coordinador</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.so"/>
+        </record>
+
+        <record id="so_usuario" model="res.groups">
+          <field name="name">Usuario</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.so"/>
+        </record>
+
+        <record id="so_consulta" model="res.groups">
+          <field name="name">Consulta</field>
+          <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+          <field name="category_id" ref="proceso_contratacion.so"/>
+        </record>
+
+    </data>
+</odoo>

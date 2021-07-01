@@ -49,6 +49,7 @@ class ControlExpedienteContrato(models.Model):
             numeracion = 0
             for vals in b_expediente:
                 numeracion += 1
+                print(numeracion)
                 datos = {'tabla_control':
                              [[0, 0,
                                {

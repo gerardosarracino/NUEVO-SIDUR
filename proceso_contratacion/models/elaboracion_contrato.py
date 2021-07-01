@@ -25,7 +25,7 @@ class ElaboracionContratos(models.Model):
                 self.ejercicio = i.id
             else:
                 pass
-            
+
     # contador para esconder los pages
     contrato_contador = fields.Integer(compute="contar_contrato")
 
@@ -99,10 +99,11 @@ class ElaboracionContratos(models.Model):
     periodicidadretencion = fields.Selection([('DIARIO', 'DIARIO'),('MENSUAL','MENSUAL'),('ninguno','Ninguno')],
                                              string="Periodicidad Retención",  default='ninguno')
     retencion = fields.Float(string="% Retención")
+    sancion = fields.Float(string="% Sanción", digits=(12,3))
     # Fianzas
     fianzas = fields.Many2many('proceso.fianza', string="Fianzas:")
     # Deducciones
-    deducciones = fields.Many2many("generales.deducciones", string="Deducciones")
+    deducciones = fields.Many2many("generales.deducciones", string="Deducruta_critica_overciones")
     # RECURSOS ANEXOS
     anexos = fields.Many2many('autorizacion_obra.anexo_tecnico', 'nombre_lista', string="Anexos:", compute="llenar_anexo")
 
@@ -161,12 +162,94 @@ class ElaboracionContratos(models.Model):
     def create(self, values):
         if values['tipo_contrato'] == '2':
             b_adj = self.env['proceso.adjudicacion_directa'].browse(values['adjudicacion'])
-            b_adj.write({'contratado': 1})
+            # b_adj.write({'contratado': 1})
         elif values['tipo_contrato'] == '1':
             b_lici = self.env['proceso.licitacion'].browse(values['obra'])
-            b_lici.write({'contratado': 1})
-        return super(ElaboracionContratos, self).create(values)
-        
+            # b_lici.write({'contratado': 1})
+        var = ''
+        if values['adjudicacion']:  # ADJUDICACION
+            b_adj = self.env['proceso.adjudicacion_directa'].browse(values['adjudicacion'])
+            if b_adj.normatividad == '1':  # 1 = federal
+                var = 'Adjudicación Federal'
+            else:  # estatal
+                var = 'Adjudicación Estatal'
+        else:  # LICITACION
+            b_lic = self.env['proceso.licitacion'].browse(values['obra'])
+            if b_lic.tipolicitacion == '1':  # 1 = LIC PUBLICA
+                if b_lic.normatividad == '1':  # FEDERAL
+                    var = 'Licitación Publica Federal'
+                else:  # ESTATAL
+                    var = 'Licitación Publica Estatal'
+            else:  # LIC SIMPLIFICADA
+                if b_lic.normatividad == '1':  # FEDERAL
+                    var = 'Licitación Simplificada Estatal'
+                else:  # ESTATAL
+                    var = 'Licitación Simplificada Federal'
+
+        b_expediente = self.env['control_expediente.control_expediente'].search(
+            [('tipo_expediente.tipo_expediente', '=', var)],
+            order='orden asc')  # BUSCAMOS LOS DOCUMENTOS DE EXPEDIENTES
+
+        res = super(ElaboracionContratos, self).create(values)
+
+        exp_contrato = self.env['control.expediente_contrato']
+
+        datos_exp = {
+            'contrato_id': res.id,
+            'ejercicio': values['ejercicio'],
+            'tipo_obra': values['tipo_obra'],
+        }
+        xd2 = exp_contrato.create(datos_exp)  # CREAMOS EL FORMULARIO DE EXPEDIENTES
+
+        numeracion = 0
+        for vals in b_expediente:
+            numeracion += 1
+            datos = {'tabla_control':
+                         [[0, 0,
+                           {
+                               'numeracion': numeracion,
+                               'orden': vals.orden,
+                               'nombre': vals.id,
+                               'nombre_documento': vals.nombre,
+                               'contrato_id': res.id,
+                               'auxiliar': False,
+                               'id_documento_categoria': None,
+                               'auxiliar_comprimido': False,
+                               'auxiliar_documentos_categoria': False,
+                               'auxiliar_documentos_categoria2': False,
+                               'p_id': None,
+                               'responsable': vals.responsable.id,
+                               'etapa': vals.etapa,
+                               'categoria_documento': vals.categoria_documento.id,
+                           }
+                           ]]}
+            tt = self.env['control.expediente_contrato'].browse(xd2.id)
+            xd = tt.write(datos)  # ESCRIBIMOS LOS DOCUMENTOS DENTRO DEL FORMULARIO DE EXPEDIENTES
+
+        libros = self.env['libros.blancos']
+        datos = {
+            'contrato': res.id,
+            'comentarios_expediente': '',
+        }
+        r = libros.create(datos)
+        # libros_id = self.env['libros.blancos'].search(['id', '=', r])
+        docs = self.env['expediente.documentos_revision'].search([])  # ("nombre_partida", "=", 'SIDUR-ED-15-039.8')
+        print(docs)
+        for b_docs in docs:
+            datos_d = ({
+                'tabla_libros_blancos': [[0, 0, {
+                    'contrato_id': res.id,
+                    'numero_documento': b_docs.numero_documento,
+                    'nombre_documento': b_docs.nombre_documento,
+                    'etapa': b_docs.etapa,
+                    'nombre_documento_m2o': b_docs.id,
+                    'libros_blancos_id': r.id,
+                }]]
+            })
+            re = r.write(datos_d)
+
+        return res
+
 
 
     # CONTEXT DESCARGAR ARCHIVO
@@ -435,7 +518,7 @@ class ElaboracionContratos(models.Model):
                 adj = 'LS'
         else: # adjudicacion
             adj = 'AD'
-            
+
         numero_id = 2000 + (b_partida + 1)
         nombre_partida = str(self.contrato) + '.' + str(numero_id)
         iva = self.env['ir.config_parameter'].sudo().get_param('generales.iva')

@@ -779,9 +779,9 @@ class Fallo(models.Model):
             for i in self.numerolicitacion.programar_obra_licitacion:
                 b_obra = self.env['registro.programarobra'].browse(i.obra.id)
                 b_lic = self.env['proceso.licitacion'].browse(self.numerolicitacion.id)
-                datos = {'obra_adj_lic': True}
+                # datos = {'obra_adj_lic': True}
                 datos2 = {'fallada': True}
-                lista = b_obra.write(datos)
+                # lista = b_obra.write(datos)
                 lista2 = b_lic.write(datos2)
         else:
             pass

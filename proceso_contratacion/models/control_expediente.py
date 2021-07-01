@@ -70,18 +70,23 @@ class ControlExpediente(models.Model):
                 orden = 55
             elif self.categoria_documento.id == 10:  # escalatoria
                 orden = 58
-
+            print(orden, ' orden')
             search_numero = self.env['control.expediente'].search(
                 [('contrato_id.id', '=', self.contrato_id.id), ('orden', '=', orden)])[0]
 
+            print(search_numero.numeracion, search_numero.nombre_documento, ' xxxx ')
             if not search_documentos:
                 # si no existe algun documento con una categoria, posicionarlo debajo del documento con orden 44
                 self.numeracion = search_numero.numeracion + 1
+                self.nombre_documento = self.categoria_documento.categoria_documento.upper() + " 1"
+                print('numeracion', self.numeracion)
             else:
                 acum_docs = 0
                 for i in search_documentos:
                     acum_docs += 1
-                    self.numeracion = search_numero.numeracion + acum_docs + 1
+                    self.numeracion = i.numeracion + 1
+                    self.nombre_documento = self.categoria_documento.categoria_documento.upper() + " " + str(acum_docs+1)
+                    print('numeracion 2', self.numeracion, i.nombre_documento)
 
     auxiliar = fields.Boolean(string="",  store=True)
 
@@ -90,22 +95,30 @@ class ControlExpediente(models.Model):
         if values['categoria_documento'] == '1':
             pass
         else:
+            print(values['numeracion'])
             search_x = self.env['control.expediente'].search([('contrato_id.id', '=', values['contrato_id']),
-                                                              ('numeracion', '>', values['numeracion'] - 1)],
+                                                              ('auxiliar_documentos_categoria2', '=', False),
+                                                              ('numeracion', '>', int(values['numeracion'] - 1))],
                                                              order='numeracion asc')
-            acum_nuevo = 0
-            for vals in search_x:
-                acum_nuevo += 1
-                numeracion = values['numeracion'] + acum_nuevo
-                browse = self.env['control.expediente'].browse(vals['id'])
-                browse.write({'numeracion': numeracion})
-                # recorrer la numeracion una posicion abajo del que se acaba de insertar
+
+            if values['auxiliar_documentos_categoria2']:
+                pass
+            else:
+                acum_nuevo = 0
+                for vals in search_x:
+                    acum_nuevo += 1
+                    numeracion = values['numeracion'] + acum_nuevo
+                    browse = self.env['control.expediente'].browse(vals['id'])
+                    browse.write({'numeracion': numeracion})
+                    # recorrer la numeracion una posicion abajo del que se acaba de insertar
 
             res = super(ControlExpediente, self).create(values)
 
             if values['auxiliar']: # CONDICIONAL PARA AGREGAR EL REGISTRO A LA TABLA PRINCIPAL
                 datos = {'tabla_control':[[4, res.id,{}]]}
-                tt = self.env['partidas.partidas'].browse(values['p_id'])
+                b_control_contrato = self.env['control.expediente_contrato'].search(
+                    [('contrato_id', '=', values['contrato_id'])])
+                tt = self.env['control.expediente_contrato'].browse(b_control_contrato.id)
                 xd = tt.update(datos)
 
             if values['auxiliar_documentos_categoria']: # CONDICIONAL PARA AGREGAR EL REGISTRO A LA TABLA COMPRIMIDA
@@ -118,8 +131,16 @@ class ControlExpediente(models.Model):
                     aplica = None
                     if vals['orden'] == 45 or vals['orden'] == 48:
                         aplica = False
+                    print(int(numeracion_cat + values['numeracion']))
+
+                    if values['auxiliar_documentos_categoria2']:
+                        numeracion_final = 0
+                    else:
+
+                        numeracion_final = numeracion_cat + values['numeracion']
+
                     datos_categorias = {
-                        'numeracion': numeracion_cat + values['numeracion'],
+                        'numeracion': numeracion_final,
                         'orden': vals['orden'],
                         'nombre': vals['id'],
                         'aplica': aplica,
@@ -493,6 +514,7 @@ class LibrosBlancosx(models.Model):
     fecha_verificado_exp = fields.Date(string="Fecha de Verificado", required=False, )
     comentarios_expediente = fields.Text(string="Comentario", required=False, )
     responsable_revision_exp = fields.Many2one('res.users', string='Responsable')  # compute="user_admin"
+    responsable_ficha = fields.Many2one('res.users', string='Ficha Responsable', default=2)  # compute="user_admin"
 
     p_id = fields.Many2one(comodel_name="partidas.partidas", string="ENLACE A PARTIDAS", compute="datos_partida")
 

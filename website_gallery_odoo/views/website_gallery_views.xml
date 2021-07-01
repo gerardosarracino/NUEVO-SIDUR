@@ -1,0 +1,150 @@
+<odoo>
+    <record model="ir.ui.view" id="website_gallery_list">
+        <field name="name">Gallery List</field>
+        <field name="model">website.gallery</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <!-- <field name="image_resizned" invisible="1"/>-->
+                <field name="image"/>
+                <field name="size"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="website_gallery_form">
+        <field name="name">Gallery Form</field>
+        <field name="model">website.gallery</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <header>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button">
+                                <field name="active" widget="boolean_button" options='{"terminology": "active"}'/>
+                            </button>
+                            <button class="oe_stat_button" name="website_publish_button"
+                                    type="object" icon="fa-globe">
+                                <field name="website_published" widget="website_button"/>
+                            </button>
+                        </div>
+                    </header>
+                    <group>
+                        <field name="name" required="1"/>
+                        <field name="active"/>
+                        <field name="website_published"/>
+                        <!-- <field name="image_resizned" widget="image" required="1"/>-->
+                        <field name="image" widget="image"/>
+                        <field name="size" readonly="1"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="website_gallery_kanban">
+        <field name="name">Gallery Kanban</field>
+        <field name="model">website.gallery</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="image"/>
+                <field name="size"/>
+                <templates>
+                    <t t-name="kanban-tooltip">
+                        <ul class="oe_kanban_tooltip">
+                            <li>
+                                <b>Name:</b>
+                                <field name="name"/>
+                            </li>
+                            <li>
+                                <b>Size:</b>
+                                <field name="size"/>
+                            </li>
+                        </ul>
+                    </t>
+                    <!-- <t t-name="kanban-box">-->
+                    <!--     <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">-->
+                    <!--         <div class="o_dropdown_kanban dropdown">-->
+                    <!--             <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown"-->
+                    <!--                href="#" aria-label="Dropdown menu" title="Dropdown menu">-->
+                    <!--                 <span class="fa fa-ellipsis-v"/>-->
+                    <!--             </a>-->
+                    <!--             &lt;!&ndash;                                <div class="dropdown-menu" role="menu">&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    <t t-if="widget.editable">&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                        <a role="menuitem" type="edit" class="dropdown-item">Edit...</a>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    </t>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    <t t-if="widget.deletable">&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                        <a role="menuitem" type="delete" class="dropdown-item">Delete</a>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    </t>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    <div role="separator" class="dropdown-divider"></div>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    <div role="separator" class="dropdown-header">Record Colour</div>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                    <ul class="oe_kanban_colorpicker" data-field="color"/>&ndash;&gt;-->
+                    <!--             &lt;!&ndash;                                </div>&ndash;&gt;-->
+                    <!--         </div>-->
+                    <!--         &lt;!&ndash;                            <div class="oe_kanban_content" tooltip="kanban-tooltip">&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                <div class="o_kanban_record_top">&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                    <b class="o_kanban_record_title">&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                        <field name="name"/>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                        <small>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                            <span t-if="record.model.raw_value">(<field name="model"/>)&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                            </span>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                        </small>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                    </b>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                </div>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                <div class="o_kanban_record_body">&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                    <div t-if="record.serial_no.raw_value">&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                        <field name="serial_no"/>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                    </div>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                                </div>&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                <div class="o_kanban_record_bottom">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                    <div class="oe_kanban_bottom_left">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        <div class="badge badge-danger"&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                             t-if="record.maintenance_open_count.raw_value">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                            <t t-raw="record.maintenance_open_count.raw_value"/>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                            Request&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        <div class="badge badge-secondary" t-if="record.next_action_date.raw_value">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                            <t t-raw="moment(record.next_action_date.raw_value).format('MMMM Do')"/>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                    </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                    <div class="oe_kanban_bottom_right">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        <div class="o_kanban_inline_block">&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                            <field name="activity_ids" widget="kanban_activity"/>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                        <img t-att-src="kanban_image('res.users', 'image_small', record.owner_user_id.raw_value)"&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                             t-att-title="record.owner_user_id.value"&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                             t-att-alt="record.owner_user_id.value" width="27" height="27"&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                             class="oe_kanban_avatar"/>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                    </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;&lt;!&ndash;                                </div>&ndash;&gt;&ndash;&gt;-->
+                    <!--         &lt;!&ndash;                            </div>&ndash;&gt;-->
+                    <!--         <div class="oe_clear"></div>-->
+                    <!--     </div>-->
+                    <!-- </t>-->
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="website_gallery_search" model="ir.ui.view">
+        <field name="name">website.gallery.search</field>
+        <field name="model">website.gallery</field>
+        <field name="arch" type="xml">
+            <search string="Gallery">
+                <filter name="Inactive" string="Inactive images" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_website_gallery" model="ir.actions.act_window">
+        <field name="name">Gallery</field>
+        <field name="res_model">website.gallery</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+
+    <menuitem name="Gallery" id="website_gallery_odoo.website_gallery_menu_root" sequence="10"
+              action="action_website_gallery" web_icon="website_gallery_odoo,static/description/icon.png"/>
+</odoo>

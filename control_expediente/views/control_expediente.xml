@@ -1,130 +1,11 @@
 <odoo>
   <data>
 
-      <!-- VISTA TREE DE PARTIDAS -->
-      <record model="ir.ui.view" id="control_expediente_tree">
-      <field name="name">Ingreso de Documentos al Expediente Único Tree</field>
-      <field name="model">partidas.partidas</field>
-      <field name="arch" type="xml">
-        <tree create="false" default_order="obra desc">
-           <field name="fechainicio"/>
-            <field name="fechatermino"/>
-            <field name="nombre_partida" string="Subcontrato"/>
-            <field name="tipo_obra" />
-            <field name="objeto"/>
-            <field name="contratista" />
-            <field name="obra"/>
-            <field name="total" string="Importe Contratado" />
-             <field name="a_fis" string="A. fis"/>
-            <field name="porcentajeProgramado" string="P. prog" />
-            <field name="a_fin" />
-        </tree>
-      </field>
-    </record>
-
-  <record model="ir.actions.act_window" id="lista_documento_action">
-      <field name="name">LISTA DE DOCUMENTOS</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">control.expediente</field>
-      <field name="view_mode">tree,form</field>
-      <field name="context">{'search_default_group_etapa': True}</field>
-       <field name="view_ids" eval="[(5, 0, 0),
-         (0, 0, {'view_mode': 'tree', 'view_id': ref('exp_import')}),
-         (0, 0, {'view_mode': 'form', 'view_id': ref('form_control_expediente')})]"/>
-    </record>
 
 
-      <!-- VISTA CON BOTONES HACIA ESTIMACION -->
-    <record id="control_expediente_vista_form" model="ir.ui.view">
-        <field name="name">Ingreso de Documentos al Expediente Único Form</field>
-        <field name="model">partidas.partidas</field>
-        <field name="arch" type="xml">
-            <form string="" create="false" delete="false" >
-                <sheet>
 
-                    <field name="prueba_expediente" invisible="1"/>
-                    <field name="nombre_contrato" invisible="1"/>
-                    <field name="numero_contrato" invisible="1"/>
 
-                    <group>
-                        <button name="agregar_expedientes" type="object" string="ACTUALIZAR EXPEDIENTES"
-                                            class="btn btn-outline-info" />
-                    </group>
 
-                     <group col="4">
-                         <field name="obra" readonly="1"/>
-                        <field name="contratista" readonly="1" />
-
-                    </group>
-
-                    <group>
-                        <button string="BORRAR EXPEDIENTES" name="borrar_expedientes" type="object" class="btn btn-danger"
-                                        confirm="Esta seguro de borrar los expedientes?" />
-                    </group>
-
-                    <group>
-                        <button name="expediente_crear" type="object" string="Agregar Documento" class="btn btn-success"
-                    style="float:right;" context="{'default_contrato_id': numero_contrato}"/>
-                    </group>
-                    <group>
-                        <button name="%(lista_documento_action)d" type="action" string="Ver lista de documentos" class="btn btn-info"
-                        style="float:right;" context="{
-                        'search_default_contrato_id': numero_contrato
-                         }"/>
-                    </group>
-                    <group>
-                        <field name="tabla_control" nolabel="1" widget='one2many' >
-                            <tree delete="false" create="false" default_order="numeracion asc" decoration-danger="existe == False and orden != 61
-                                and orden != 62 and orden != 63 and orden != 64 and
-                                nombre_documento != 'ESTIMACIONES' and nombre_documento != 'CONVENIOS' and
-                                nombre_documento != 'FPS' and nombre_documento != 'ESCALATORIAS'"
-                                decoration-success="existe == True"
-                                decoration-primary="nombre_documento == 'ESTIMACIONES' or nombre_documento == 'CONVENIOS' or
-                                nombre_documento == 'FPS' or nombre_documento == 'ESCALATORIAS'"
-                                decoration-warning="orden == 61 or orden == 62 or orden == 63 or orden == 64">
-
-                                    <field name="numeracion" invisible="1"/>
-                                    <field name="contrato_id" invisible="1" />
-                                    <field name="orden" string="No." attrs="{'invisible': [('orden','=', 0)]}" />
-                                    <field name="p_id" readonly="1" force_save="1" invisible="1"/>
-                                    <field name="etapa" readonly="1" force_save="1"/>
-                                    <field name="nombre_documento" readonly="1" force_save="1"/>
-                                    <field name="categoria_documento" readonly="1" invisible="1"/>
-                                    <field name="responsable" readonly="1"
-                                    attrs="{'invisible': ['|','|','|','|',('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}"/>
-                                    <field name="existe"
-                                    attrs="{'invisible': ['|','|','|','|',('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}"/>
-                                     <field name="revisado"
-                                     attrs="{'invisible': ['|','|','|','|',('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}"/>
-                                     <field name="comentarios" placeholder="..."/>
-                                    <field name="url" invisible="1"/>
-                                    <field name="ejercicio" invisible="1"/>
-                                    <button name="cargar_documento" type="object" string="CARGAR DOCUMENTO"
-                                    attrs="{'invisible': ['|','|','|','|',('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}"/>
-                                    <button name="descargar_documento" type="object" string="DESCARGAR DOCUMENTO"
-                                    attrs="{'invisible': ['|','|','|','|','|',('url','=', False),
-                                    ('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}"/>
-                                    <button name="vista_expediente" type="object" string="EDITAR"
-                                    attrs="{'invisible': ['|','|','|','|',('nombre_documento','=', 'ESTIMACIONES'),
-                                    ('nombre_documento','=', 'CONVENIOS'),('nombre_documento','=', 'FPS')
-                                    ,('nombre_documento','=', 'ESCALATORIAS'),('categoria_documento','!=', False)]}" />
-                            </tree>
-                        </field>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
 
       <record id="form_control_expediente" model="ir.ui.view">
           <field name="name">Control de Expediente Form</field>
@@ -245,12 +126,12 @@
                       </group>
                       <group>
                           <field name="categoria_documento" force_save="1" string="Categoria"
-                                 attrs="{'invisible':[('nombre','!=', False)]}"
+
                                  />
 
                           <field name="ejercicio" invisible="1"/>
 
-                          <field name="nombre" force_save="1" attrs="{'invisible':[('categoria_documento','!=',False)]}" string="Documento"/>
+                          <!--field name="nombre" force_save="1" attrs="{'invisible':[('categoria_documento','!=',False)]}" string="Documento"/ attrs="{'invisible':[('nombre','!=', False)]}"-->
                      </group>
                           <hr/>
                      <group>
@@ -258,9 +139,9 @@
 
                           <field name="etapa" force_save="1" readonly="1"/>
                           <field name="responsable" readonly="1"/>
-                          <field name="existe"/>
+                          <!--field name="existe"/-->
                           <field name="aplica" invisible="1"/>
-                          <field name="revisado" />
+                          <!--field name="revisado" /-->
                           <field name="fecha" />
                           <field name="comentarios"/>
 
@@ -371,16 +252,7 @@
       </record-->
 
 
-<!-- ACCIONES VENTANA ESTIMACIONES -->
-    <record model="ir.actions.act_window" id="control_expediente_actionx"> 
-      <field name="name">Ingreso de Documentos al Expediente Único</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">partidas.partidas</field>
-      <field name="view_mode">tree,form</field>
-      <field name="view_ids" eval="[(5, 0, 0),
-        (0, 0, {'view_mode': 'tree', 'view_id': ref('control_expediente_tree')}),
-        (0, 0, {'view_mode': 'form', 'view_id': ref('control_expediente_vista_form')})]"/>
-    </record>
+
 
     <record id="exp_import" model="ir.ui.view">
         <field name="name">control expediente import</field>
@@ -587,6 +459,17 @@
             <!-- More details about what a user can do with this object will be OK -->
           </p>
         </field>
+    </record>
+
+        <record model="ir.actions.act_window" id="lista_documento_action">
+      <field name="name">LISTA DE DOCUMENTOS</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">control.expediente</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{'search_default_group_etapa': True}</field>
+       <field name="view_ids" eval="[(5, 0, 0),
+         (0, 0, {'view_mode': 'tree', 'view_id': ref('exp_import')}),
+         (0, 0, {'view_mode': 'form', 'view_id': ref('form_control_expediente')})]"/>
     </record>
 
     <menuitem name="Control de Expediente Único" id="control_expediente.menu_root" sequence="0" web_icon="control_expediente,static/description/icon.png"/>

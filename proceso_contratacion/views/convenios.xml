@@ -14,8 +14,9 @@
                 <sheet>
                     <group>
                        <group string="Convenios Modificatorios" colspan="2" col="2">
-                           <field name="contrato" force_save="1" invisible="1"/>
                            <field name="contrato_contrato" force_save="1"/>
+                           <field name="contrato" force_save="1" domain="[('numero_contrato.id', '=', contrato_contrato)]"/>
+
                            <field name="nombre_contrato" invisible="1" force_save="1"/>
                            <field name="name_convenios" class="oe_inline" invisible="1"/>
                        </group>

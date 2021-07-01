@@ -24,11 +24,11 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/control_estimaciones.xml',
+        #'views/control_estimaciones.xml',
         'views/supervision_obra.xml',
-        'views/convenios.xml',
-        'views/galeria_imagenes.xml',
-        'views/catalogo_conceptos.xml',
+        # 'views/convenios.xml',
+        # 'views/galeria_imagenes.xml',
+        # 'views/catalogo_conceptos.xml',
         'views/control_expediente.xml'
     ],
     # only loaded in demonstration mode

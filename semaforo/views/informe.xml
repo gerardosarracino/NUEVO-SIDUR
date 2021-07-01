@@ -179,6 +179,8 @@
                                   <field name="id_partida" invisible="1"/>
                                   <field name="nombre_partida"/>
                                   <field name="obra"/>
+                                  <field name="localidad"/>
+                                  <field name="contratista"/>
                                   <field name="ejercicio"/>
                                   <field name="fecha_avance" string="Ultima fecha avance"/>
                                   <field name="dias" string="Dias desde el ultimo informe" invisible="1"/>
@@ -274,6 +276,32 @@
                       <group>
                           <field name="fecha_avance"/>
                           <field name="ultimo_coment_avance" string="Ultimo Comentario De Avance" />
+                      </group>
+
+                      <group>
+                          <field name="programa_semaforo">
+                              <tree editable="bottom" delete="false" decoration-info="mes_actual==True" decoration-bf="mes_actual == True"
+                                 decoration-warning="mes_restante == True" decoration-danger="mes_ultimo == True"
+                                 decoration-success="mes_paso == True"
+                                 >
+                                     <control>
+                                        <create string="Agregar Periodo" context="{
+                                           'default_obra': active_id,
+                                           }"/>
+                                     </control>
+                                     <field name="id_prog" invisible="1"/> <!-- de importacion -->
+
+                                     <field name="obra" force_save="1" readonly="1" invisible="1"/>
+                                     <field name="fecha_inicio"/>
+                                     <field name="fecha_termino"/>
+                                     <field name="monto" sum="Total:"/>
+                                     <field name="porcentaje_programa" />
+                                     <field name="mes_actual" invisible="1"/>
+                                     <field name="mes_paso" invisible="1"/>
+                                     <field name="mes_restante" invisible="1"/>
+                                     <field name="mes_ultimo" invisible="1"/>
+                                 </tree>
+                          </field>
                       </group>
 
                        <group>

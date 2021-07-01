@@ -356,6 +356,9 @@
                         <field name="fechatermino" class="oe_inline"/>
                         <field name="periodicidadretencion" class="oe_inline"/>
                         <field name="retencion" class="oe_inline"/>
+                        <p>&#160;</p>
+                        <p>&#160;</p>
+                        <field name="sancion" class="oe_inline"/>
                     </group>
                     </page>
 

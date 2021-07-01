@@ -12,7 +12,7 @@ class ProgramaObra(models.Model):
     id_prog = fields.Integer(string="ID PROGRAMA", required=False, )
 
     # TERMINA IMPORTACION
-    obra = fields.Many2one('partidas.partidas', string='Obra:', readonly=True)
+    obra = fields.Many2one('partidas.partidas', string='Obra:', store=True)
 
     obraid = fields.Many2one('partidas.partidas', string='Obra:', readonly=True)
     obra_id = fields.Char(compute="partidaEnlace", store=True)
@@ -32,6 +32,7 @@ class ProgramaObra(models.Model):
     # ULTIMAS FECHAS
     ultima_fecha_inicio = fields.Date('Fecha Inicio', store=True)
     ultima_fecha_termino = fields.Date('Fecha Termino', store=True)
+
 
     @api.multi
     @api.onchange('programa_contratos')

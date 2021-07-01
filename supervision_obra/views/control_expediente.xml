@@ -109,7 +109,7 @@
 
     <menuitem name="Expediente Único" id="control_expediente_documentos"
               parent="supervision_obra.menu_root"
-              action="supervision_obra_control_expediente_action" sequence="6"/>
+              action="control_expediente.control_expediente_contrato_action" sequence="6"/>
 
   </data>
 </odoo>

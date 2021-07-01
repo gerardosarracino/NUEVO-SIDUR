@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'informacion_basica', 'proceso_contratacion', 'autorizacion_obra', 'registro_obras'],
+    'depends': ['base', 'informacion_basica', 'registro_obras', 'autorizacion_obra', 'proceso_contratacion' ],
 
     # always loaded
     'data': [

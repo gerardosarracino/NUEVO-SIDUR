@@ -36,8 +36,10 @@
                  <sheet>
                      <group>
                          <h2><field name="autorizacion_pago" placeholder="Autorizacion de Pago" class="oe_inline"/></h2>
-                         <h2><field name="numero_factura" placeholder="# Factura" class="oe_inline"/></h2>
+                         <!--h2><field name="numero_factura" placeholder="# Factura" class="oe_inline"/></h2-->
                          <h2><field name="fecha_factura" placeholder="Fecha de Factura" class="oe_inline"/></h2>
+                         <h2><field name="numero_factura" placeholder="# de Factura" class="oe_inline"/></h2>
+                         <h2><field name="numero_memo" placeholder="Memo" class="oe_inline"/></h2>
                      </group>
                  </sheet>
 
@@ -48,52 +50,125 @@
 
                  <hr/>
 
-                 <group colspan="1" col="4" >
+                 <table>
+                    <tbody>
+                        <tr >
+                            <td width="50%">
+                                <sheet>
+                                     <group colspan="1" col="4" string="Obra y Contrato">
+                                         <h1>
+                                             <h2>Contrato: <field name="numero_contrato" placeholder="Seleccionar Partida" force_save="1" class="oe_inline"/></h2>
+                                         </h1>
+                                     </group>
 
-                     <h1>
-                         <h2 attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">Estimación:
-                             <field name="vinculo_estimaciones" force_save="1"
-                             placeholder="Seleccionar Estimación"
+                                     <group>
+                                         <field name="contrato" force_save="1" class="oe_inline" invisible="1"/>
+                                         <field name="convenio_asignacion" class="oe_inline" domain="[('contrato_contrato.id', '=', contrato)]"/>
+                                         <field name="director_capturador" invisible="1" force_save="1"/>
+                                         <field name="director_programacion" force_save="1"/>
+                                         <field name="obra"/>
+                                     </group>
+                                 </sheet>
+                                 <br/>
+                            </td>
 
-                         /></h2> <!-- domain="[('con_orden', '=', False)]" attrs="{'readonly': [('tipo_pago', '=', 'Pago')]}"  -->
-                     </h1>
+                            <td rowspan="2" style="height: 340px;">
+                                <sheet >
+                                     <group string="Autorización Presupuestal" >
+                                         <field name="oficio_anexo" force_save="1"/>
+                                         <field name="programa_inversion" class="oe_inline" string="Fuente"/>
+                                     </group>
+                                     <h2>Inversión</h2>
+                                     <group>
+                                         <field name="monto_letra_estimado" force_save="1" invisible="1"/>
+                                         <field name="centavos" force_save="1" invisible="1"/>
+                                         <field name="centro_gestor" force_save="1" invisible="1"/>
+                                         <field name="area_funcional" force_save="1" invisible="1"/>
+                                         <field name="posicion_presupuestal" force_save="1" invisible="1"/>
+                                         <field name="fondo" force_save="1" invisible="1"/>
+                                         <field name="titular" force_save="1" invisible="1"/>
+                                         <field name="director_ejecucion_obras" force_save="1" invisible="1"/>
+                                         <field name="inversion_anual_aut" />
+                                         <field name="inversion_ejercida" />
+                                     </group>
+                                </sheet>
+                            </td>
+                        </tr>
 
-                     <h1>
-                         <h2>Contrato: <field name="numero_contrato" placeholder="Seleccionar Partida"
-                     force_save="1"/></h2>
-                     </h1>
+                        <tr>
+                            <td width="50%">
+                                <sheet>
+                                     <group string="Datos Generales" colspan="3" col="3">
 
-                 </group>
+                                         <h2>
+                                             <p attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">Estimación:</p>
+                                             <field name="vinculo_estimaciones" force_save="1"
+                                             placeholder="Seleccionar Estimación"
+                                             domain="[('numero_contrato.id', '=', contrato)]"
+                                             attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}"
+                                             class="oe_inline"/>
+
+                                             <p attrs="{'invisible': [('tipo_pago', '=', 'Estimacion')]}">
+                                                 Anticipo:</p>
+
+                                             <field name="anticipo_texto" force_save="1" attrs="{'invisible': [('tipo_pago', '=', 'Estimacion')]}"/>
+                                         </h2>
+
+                                         <div attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">
+                                             <sheet>Periodo de la estimación   Del: <field name="fecha_inicio_est" string="Del "/> Al:
+                                                 <field name="fecha_termino_est" string="Al"/> </sheet>
+                                         </div>
+
+                                         <field name="num_estimacion" invisible="1"/>
+                                     </group>
+
+                                     <group>
+                                         <field name="contratista_contrato" force_save="1" readonly="1" string="Proveedor" class="oe_inline"/>
+                                     </group>
+                                </sheet>
+                            </td>
+                        </tr>
+                    </tbody>
+                 </table>
+
 
 
                  <br/>
-                  <group colspan="1" col="4" >
-                     <field name="programa_inversion" class="oe_inline"/>
-                      <field name="fecha" class="oe_inline"/>
-                      <field name="contratista_contrato" readonyl="1"/>
-                 </group>
-                 <group>
-                     <field name="obra" />
+
+                 <group col="2">
+                     <sheet attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">
+                         <group string="Retenciones" attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}">
+                             <field name="deducciones" nolabel="1" string="">
+                                <tree create="false" force_save="1" delete="false">
+                                    <!-- field name="estimacion" force_save="1"/ -->
+                                    <field name="name" string="Deducción"/>
+                                    <field name="porcentaje" force_save="1" />
+                                    <field name="valor" force_save="1" sum="SUMA DE DEDUCCIONES"/>
+                                </tree>
+                             </field>
+                         </group>
+
+                         <group attrs="{'invisible': [('tipo_pago', '=', 'Pago')]}" style="float:right;">
+                             <field name="estimado_deducciones" string="Importe Deducciones" />
+                             <field name="sancion" class="oe_inline" readonly="1" />
+                             <field name="ret_neta_est" class="oe_inline" readonly="1" string="Retención / Devolución"/>
+                         </group>
+                     </sheet>
+
+                     <sheet>
+                         <group>
+                              <field name="saldo_por_ejercer" />
+                              <field name="estimado" string="Importe Estimado:"/>
+                              <field name="amort_anticipo" string="Amort. Anticipo:"/>
+                              <field name="estimacion_subtotal" invisible="1"/>
+                              <field name="estimacion_iva" string="Iva: "/>
+                              <field name="estimacion_facturado" string="Monto:"/>
+                              <field name="a_pagar" string="Pago Neto:"/>
+                         </group>
+                     </sheet>
                  </group>
 
-                 <group colspan="1" col="4">
-                     <field name="inversion_anual_aut" />
-                     <field name="inversion_ejercida" />
-                     <field name="saldo_por_ejercer" />
-                     <field name="creditos_deudores" />
-                 </group>
-
-                 <group colspan="1" col="4">
-                     <field name="estimado" />
-                      <field name="amort_anticipo" />
-                      <field name="estimacion_subtotal" />
-                      <field name="estimacion_iva" />
-                      <field name="estimacion_facturado" />
-                      <field name="estimado_deducciones" />
-                      <field name="sancion" />
-                      <field name="ret_neta_est" />
-                      <field name="a_pagar" />
-                 </group>
+                 <br/>
 
                  <hr/>
                  <!--separator string="Estado del pago"/>

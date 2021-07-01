@@ -161,6 +161,7 @@
       <field name="name">Finiquito de contrato</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">partidas.partidas</field>
+        <field name="domain">['|', ('residente_obra','=', uid), ('super_residente','=', uid)]</field>
       <field name="view_ids" eval="[(5, 0, 0),
       (0, 0, {'view_mode': 'tree', 'view_id': ref('finiquito.partidas_tree')}),
       (0, 0, {'view_mode': 'form', 'view_id': ref('finiquito.partidas_form')})]"/>

@@ -8,62 +8,97 @@
         <field name="arch" type="xml">
             <form string="" >
                 <sheet>
-                <div class="text-right" >
-
-                    <button name="OrdenesLista" class="btn btn-outline-primary btn-lg " type="object"
-                        string="ORDENES DE CAMBIO" context="{'default_id_partida': id_partida, 'default_id_orden': active_id}"
-                        icon="fa-compress"/>
-
-                </div>
-
-                     <group  colspan="2" col="4">
+                    <group  colspan="2" col="4">
                             <div>
                             <b>Contrato: </b>
                         </div>
                         <p>&#160;</p>
-                   </group>
+                    </group>
                     <group>
                         <field name="id_partida" nolabel="1" />
                     </group>
 
 
-                   <group  colspan="2" col="4">
+                    <group  colspan="2" col="4">
                             <div>
                             <b>Nombre de la Obra: </b>
                         </div>
                         <p>&#160;</p>
-                   </group>
+                    </group>
                     <group>
                         <field name="obra" nolabel="1" readonly="1"/>
                     </group>
 
+                    <hr/>
 
-
-
-                    <field name="ordenes_conceptos_espejo" string="# Concepto de Ordenes de Cambio En Espejo" widget="one2many"
-                    readonly="1" force_save="1">
-                        <tree decoration-info="precio_unitario == 0"
-                        decoration-bf="precio_unitario == 0">
-                            <field name="clave_linea"/>
-                            <field name="related_categoria_padre" string="Grupo"/>
-                            <field name="categoria" invisible="1"/>
-                            <field name="concepto"/>
-                            <field name="medida"/>
-
-                            <field name="id_partida" force_save="1" invisible="1" />
-
-                            <field name="cantidad" attrs="{'invisible':[('cantidad','=',0)]}"/>
-                            <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
-                            <field name="importe" sum="importe" attrs="{'invisible':[('importe','=',0.0)]}"/>
-                        </tree>
-                    </field>
-                    <group class="oe_subtotal_footer">
-                            <h6 style="position:relative;
-                                          display: inline-block;
-                                             left: -75px;
-                                              top: -50px;
-                                      white-space: nowrap;"> TOTAL:  </h6>
+                    <group colspan="2" col="6">
+                        <field name="total_contratado" readonly="1"/>
+                        <field name="total_catalogo" readonly="1"/>
+                        <field name="diferencia"  class="o_light_label" attrs="{'invisible':[('diferencia','=',0)]}"
+                               style="color: #0553D4; font-size: 15px;"/>
+                        <field name="diferencia"  class="o_light_label" attrs="{'invisible':[('diferencia','!=',0)]}"
+                               style="color: #D40505; font-size: 15px;"/>
                     </group>
+
+                    <sheet>
+                        <div class="text-right" >
+                            <button name="OrdenesLista" class="btn btn-outline-primary btn-lg " type="object"
+                                string="AGREGAR ORDEN DE CAMBIO"
+                                    context="{'default_id_partida': id_partida,
+                                    'default_id_orden': active_id}"
+                                icon="fa-compress"/>
+
+
+                        </div>
+
+                         <field name="ordenes_conceptos_related" string="# Ordenes de Cambio" force_save="1" nolabel="1">
+                            <tree limit = "1000">
+
+                                <field name="id_partida" force_save="1" invisible="1" />
+                                <field name="numero_orden_cambio" />
+                                <field name="ampliacion" sum="Suma ampliacion"/>
+                                <field name="reduccion" sum="Suma reduccion"/>
+                                <field name="acumulado" />
+                                <field name="porcentaje_acumulado" />
+                                <field name="create_date" />
+                                <field name="fecha_supervision" />
+                                <field name="fecha_autorizacion" />
+
+                                <button string=" X " name="borrar" type="object" class="btn btn-danger"
+                                confirm="Esta seguro de borrar este registro?" icon="fa-bitbucket"/>
+
+                            </tree>
+                        </field>
+                    </sheet>
+
+                    <group>
+                        <field name="subtotal_ordenes" force_save="1" readonly="1" string="Subtotal Ordenes"/>
+                    </group>
+
+                    <notebook>
+                        <page string="VER CATALOGO DE CONCEPTOS">
+                            <field name="ordenes_conceptos_espejo" string="# Concepto de Ordenes de Cambio En Espejo" widget="one2many"
+                            readonly="1" force_save="1" >
+                                <tree decoration-info="precio_unitario == 0"
+                                decoration-bf="precio_unitario == 0" limit = "1000">
+                                    <field name="clave_linea"/>
+                                    <field name="related_categoria_padre" string="Grupo"/>
+                                    <field name="categoria" invisible="1"/>
+                                    <field name="concepto"/>
+                                    <field name="medida"/>
+
+                                    <field name="id_partida" force_save="1" invisible="1" />
+
+                                    <field name="cantidad" attrs="{'invisible':[('cantidad','=',0)]}"/>
+                                    <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
+                                    <field name="importe" sum="importe" attrs="{'invisible':[('importe','=',0.0)]}"/>
+                                    <field name="cantidad_ajustada"  />
+                                    <field name="importe_ajustado" sum="importe ajustado" />
+                                </tree>
+                            </field>
+
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -109,9 +144,11 @@
 
                     <button name="AplicarCambios" class="btn btn-outline-primary btn-lg " type="object"
                         string="APLICAR ORDEN DE CAMBIO"
-                        icon="fa-refresh"/>
+                        icon="fa-refresh" confirm="Esta seguro aplicar estos cambios?" attrs="{'invisible':[('aplicado','=',True)]}"/>
 
                 </div>
+
+                    <field name="aplicado" invisible="1" force_save="1"/>
 
                      <group  colspan="2" col="4">
                             <div>
@@ -119,22 +156,22 @@
                         </div>
                         <p>&#160;</p>
                    </group>
+                    <group>
+                        <field name="id_partida" nolabel="1" readonly="1" force_save="1"/>
+                    </group>
 
                     <group>
                       <field name="comentario_orden"/>
-                  </group>
-
-
-                    <group>
-                        <field name="id_partida" nolabel="1" readonly="1" force_save="1"/>
-
                     </group>
+
+
+
                     <field name="id_orden" nolabel="1" readonly="1" invisible="1"/>
                     <field name="numero_orden" nolabel="1" readonly="1" invisible="1"/>
 
 
                     <field name="ordenes_conceptos" string="# Concepto de Ordenes de Cambio" widget="one2many"
-                    context="{'default_id_partida': id_partida, 'default_id_orden': id_orden}">
+                    context="{'default_id_partida': id_partida, 'default_id_orden': id_orden}" attrs="{'readonly':[('aplicado','=',True)]}">
                         <tree decoration-info="precio_unitario == 0"
                         decoration-bf="precio_unitario == 0">
                             <field name="clave_linea"/>
@@ -149,12 +186,14 @@
                             <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
                             <field name="comentario"/>
                             <field name="importe" sum="importe" attrs="{'invisible':[('importe','=',0.0)]}" force_save="1"/>
+                            <button string="Quitar" name="borrar" type="object" class="btn btn-danger"
+                                    attrs="{'invisible':[('parent.aplicado','=',True)]}"/>
                         </tree>
                     </field>
                     <group class="oe_subtotal_footer">
                             <h6 style="position:relative;
                                           display: inline-block;
-                                             left: -75px;
+                                             left: -90px;
                                               top: -50px;
                                       white-space: nowrap;"> TOTAL:  </h6>
                     </group>
@@ -177,7 +216,7 @@
             <field name="numero_orden" />
             <field name="id_partida" string="Contrato" invisible="1"/>
             <field name="comentario_orden"/>
-            <field name="ordenes_conceptos"/>
+            <field name="ordenes_conceptos" widget="many2many_tags"/>
             <field name="monto_orden" sum="Total de Orden de Cambio"/>
         </tree>
       </field>
@@ -191,8 +230,11 @@
           <field name="arch" type="xml">
               <form string="">
                   <sheet>
-                      <field name="id_partida" force_save="1" invisible="1"/>
-
+                      <group>
+                        <field name="id_partida" force_save="1" invisible="1"/>
+                        <field name="id_orden" force_save="1" invisible="1"/>
+                        <field name="id_cambio" force_save="1" invisible="1"/>
+                      </group>
 
                       <group>
                           <p>AGREGAR CONCEPTO EXISTENTE</p>
@@ -225,9 +267,68 @@
                       <group>
                           <field name="comentario"/>
                       </group>
+                  </sheet>
+              </form>
+          </field>
+      </record>
 
-                      <field name="id_partida" invisible="1" force_save="1"/>
-                      <field name="id_orden" invisible="1" force_save="1"/>
+
+      <record id="ordenes_cambio_conceptos_form" model="ir.ui.view">
+          <field name="name">Ordenes de Cambio</field>
+          <field name="model">ordenes.conceptos_cambio</field>
+          <field name="arch" type="xml">
+              <form string="">
+                  <sheet>
+
+                      <group>
+                          <field name="id_partida" string="Contrato" force_save="1" invisible="1"/>
+                          <field name="id_orden" force_save="1" invisible="1" />
+                      </group>
+
+
+                      <group>
+                          <field name="numero_orden_cambio" force_save="1" readonly="1"/>
+                          <field name="ampliacion" force_save="1" readonly="1"/>
+                          <field name="reduccion" force_save="1" readonly="1"/>
+                          <field name="acumulado" force_save="1" readonly="1"/>
+                          <field name="porcentaje_acumulado" force_save="1" readonly="1"/>
+                      </group>
+
+                      <group>
+                          <field name="fecha_supervision"/>
+                          <field name="fecha_autorizacion"/>
+                      </group>
+
+                      <button name="AgregarConcepto" class="btn btn-outline-primary btn-lg " type="object"
+                            string=" Agregar Concepto" icon="fa-plus" style="float:right;" confirm="Esta seguro de borrar este registro?"/>
+
+                      <group>
+                          <field name="ordenes_conceptos" string="# Concepto de Ordenes de Cambio"
+                                 widget="one2many" nolabel="1">
+                            <tree decoration-info="precio_unitario == 0"
+                            decoration-bf="precio_unitario == 0">
+                                <field name="clave_linea"/>
+                                <field name="related_categoria_padre" string="Categoria"/>
+                                <field name="categoria" invisible="1"/>
+                                <field name="concepto"/>
+                                <field name="medida"/>
+
+                                <field name="id_partida" force_save="1" invisible="1"/>
+                                <field name="id_orden" force_save="1" invisible="1"/>
+                                <field name="id_cambio" force_save="1" invisible="1"/>
+
+                                <field name="cantidad" attrs="{'invisible':[('cantidad','=',0)]}"/>
+                                <field name="precio_unitario" attrs="{'invisible':[('precio_unitario','=',0.0)]}"/>
+                                <field name="comentario" string="Comentario"/>
+                                <field name="importe" sum="importe" attrs="{'invisible':[('importe','=',0.0)]}" force_save="1"/>
+                                <button string="Quitar" name="borrar" type="object" class="btn btn-danger"
+                                        /> <!-- attrs="{'invisible':[('parent.aplicado','=',True)]}" -->
+                            </tree>
+                          </field>
+
+
+
+                      </group>
                   </sheet>
               </form>
           </field>

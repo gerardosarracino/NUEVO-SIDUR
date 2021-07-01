@@ -1,22 +1,211 @@
 # -*- coding: utf-8 -*-
 from odoo import http
-from datetime import datetime
 from docxtpl import DocxTemplate
 from jinja2 import Template
 import json
-import time
 from num2words import num2words
 import binascii #nuevo
-
 
 from datetime import datetime, date, time, timedelta
 from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from openpyxl.styles import colors
-from openpyxl.styles import Font, Color, NamedStyle
 from openpyxl.styles import Border, Side, PatternFill, Font, GradientFill, Alignment
+
+from pathlib import Path
+import os
+
+
+class AppSupervisoresPrueba(http.Controller):
+    @http.route('/apiprueba/ruta_critica/<id>', type='http', auth='user', cors='*')
+    def ruta_critica_get(self, id):
+        try:
+            http.request.env.cr.execute(
+                'select rc.id as "id_ruta", rc.id_partida as "id_partida",pf.nombre as "frente", rc.name as "actividad", rc.porcentaje_est as "porcentaje" from proceso_rc rc '
+                'left join proceso_frente as pf on rc.frente = pf.id '
+                'where rc.id_partida = '+str(id)+' ORDER BY pf.id ASC')
+
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id': pp[0],
+                    'id_partida': pp[1],
+                    'frente': pp[2],
+                    'actividad': pp[3],
+                    'porcentaje': pp[4],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    @http.route('/apiprueba/ruta_critica_post/<id>/<id_frente>/<actividad>/<porcentaje>', type='http', auth='user', cors='*')
+    def ruta_critica_put(self, id, id_frente, actividad, porcentaje):
+        try:
+            print("post")
+            '''ruta = http.request.env['partidas.partidas'].browse(id)
+            datos = {
+                    'ruta_critica': [[0, 0, {
+                    'id_partida': id,
+                    'frente': id_frente,
+                    'name': actividad,
+                    'porcentaje_est': porcentaje,
+                }]]
+            }
+            print(ruta)
+            print(ruta.total_)
+            datos_partida = {
+                    'total_': ruta.total_ + porcentaje,
+            }
+            rt = ruta.write(datos)
+            rp = ruta.write(datos_partida)'''
+
+            ruta = http.request.env['proceso.rc']
+            if actividad:
+                datos = {
+                        'id_partida': id,
+                        'frente': id_frente,
+                        'name': actividad,
+                        'porcentaje_est': porcentaje,
+                        'auxiliar_actividad': True,
+                }
+                rt = ruta.create(datos)
+            else:
+                datos = {
+                    'id_partida': id,
+                    'frente': id_frente,
+                    'name': actividad,
+                    'porcentaje_est': porcentaje,
+                    'auxiliar_actividad': False,
+                }
+                rt = ruta.create(datos)
+            return json.dumps(rt)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    @http.route('/apiprueba/supervisor/<id>', type='http', auth='none', cors='*')
+    def partida(self, id):
+        try:
+            http.request.env.cr.execute(
+                'select pp.id, pp.nombre_partida, ru.login, pc.fechainicio, pc.fechatermino, ej.name, too.tipo_obra, co.name, ro.descripcion, pp.estado_supervision, pp.total, pp.a_fis, "porcentajeProgramado", pp.a_fin, pp.color_semaforo'+
+                " from partidas_partidas pp left join proceso_elaboracion_contrato as pc on pp.numero_contrato = pc.id "+
+                "left join registro_ejercicio as ej on pc.ejercicio = ej.id left join contratista_contratista as co on pc.contratista = co.id "+
+                "left join generales_tipo_obra as too on pc.tipo_obra = too.id left join registro_programarobra as po on pp.obra = po.id "+
+                "left join registro_obra as ro on po.obra_planeada = ro.id left join partida_residente as pr on pp.id = pr.partida_id "+
+                'left join res_users as ru on pr.residente = ru.id WHERE ru.id = '+str(id)+' ORDER BY id ASC')
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id': pp[0],
+                    'nombre_contrato': pp[1],
+                    'residente_obra': pp[2],
+                    'fecha_inicio': str(pp[3]),
+                    'fecha_termino': str(pp[4]),
+                    'tipo_obra': pp[5],
+                    'ejercicio': pp[6],
+                    'contratista': pp[7],
+                    'nombre_obra': pp[8],
+                    'estado_supervision': pp[9],
+                    'monto_siva': pp[10], # Monto total s/iva
+                    'a_fis': pp[11],
+                    'porcentaje_programado': pp[12],
+                    'a_fin': pp[13],
+                    'color_semaforo': pp[14],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+
+class AppSupervisores(http.Controller):
+    @http.route('/api/supervisor/<id>', type='http', auth='public', website=True, cors='*')
+    def partida(self, id):
+        try:
+            http.request.env.cr.execute(
+                'select pp.id, pp.nombre_partida, ru.login, pc.fechainicio, pc.fechatermino, ej.name, too.tipo_obra, co.name, ro.descripcion, pp.estado_supervision, pp.total, pp.a_fis, "porcentajeProgramado", pp.a_fin'+
+                " from partidas_partidas pp left join proceso_elaboracion_contrato as pc on pp.numero_contrato = pc.id "+
+                "left join registro_ejercicio as ej on pc.ejercicio = ej.id left join contratista_contratista as co on pc.contratista = co.id "+
+                "left join generales_tipo_obra as too on pc.tipo_obra = too.id left join registro_programarobra as po on pp.obra = po.id "+
+                "left join registro_obra as ro on po.obra_planeada = ro.id left join partida_residente as pr on pp.id = pr.partida_id "+
+                'left join res_users as ru on pr.residente = ru.id WHERE ru.id = '+str(id)+' ORDER BY id ASC')
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id': pp[0],
+                    'nombre_contrato': pp[1],
+                    'residente_obra': pp[2],
+                    'fecha_inicio': str(pp[3]),
+                    'fecha_termino': str(pp[4]),
+                    'tipo_obra': pp[5],
+                    'ejercicio': pp[6],
+                    'contratista': pp[7],
+                    'nombre_obra': pp[8],
+                    'estado_supervision': pp[9],
+                    'monto_siva': pp[10], # Monto total s/iva
+                    'a_fis': pp[11],
+                    'porcentaje_programado': pp[12],
+                    'a_fin': pp[13],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+
+
+
+class CarpetaInforme(http.Controller):
+    @http.route('/carpetas', type='http', auth='public', website=True)
+    def partida(self):
+        try:
+            plantilla = open(
+                '/home/gerardo/Developments/odoo12/extra-addons/proceso_contratacion/static/src/reporte_documentos_html/resultado.html',
+                'r')
+            template = Template(plantilla.read())
+            print('x')
+
+            p = Path(
+                '/home/gerardo/Developments/odoo12/extra-addons/proceso_contratacion/static/src/reporte_documentos_html/Documentos')
+            str(p.parent)
+            p.relative_to(
+                '/home/gerardo/Developments/odoo12/extra-addons/proceso_contratacion/static/src/reporte_documentos_html/Documentos')
+
+            p.exists()
+            print(p.name, p.parent)
+
+            directory = str(p.parent) + "/Documentos"
+            data = []
+            for filename in os.listdir(directory):
+                print(filename)
+                d = {
+                    'ruta': filename,
+                    'html': filename + "/reporte.html",
+                }
+                data.append(d)
+                print(data)
+                print(d)
+
+            '''directory = "GeeksforGeeks"
+            parent_dir = "/home/gerardo/Developments/odoo12/extra-addons/proceso_contratacion/static/src/reporte_documentos_html/Documentos/"
+            path = os.path.join(parent_dir, directory)
+            os.mkdir(path)
+            print("Directory '% s' created" % directory)'''
+
+            return template.render(
+                id=id,
+                data=data,
+            )
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+
+
+
 
 class ProcesoContratacion(http.Controller):
     @http.route('/documento/CONTRATO/<contrato>/idplantilla/<id>', type='http', auth='public', website=True)
@@ -383,7 +572,13 @@ class Finiquito(http.Controller):
                     'cols3': periodo_est, 'cols4': '{:20,.2f}'.format(est.estimado), 
                     'cols5': '{:20,.2f}'.format(float(est.amort_anticipo)),})
 
+                residente_obra = ''
+                for re in f.residente_obra:
+                    residente_obra = re.name
+
             titular = http.request.env['ir.config_parameter'].sudo().get_param('firmas_logos.nombre_titular')
+            director_general_ejecucionobra = http.request.env['ir.config_parameter'].sudo().get_param('firmas_logos.nombre_responsable_licitacion')
+            director_obras_viales = http.request.env['ir.config_parameter'].sudo().get_param('firmas_logos.nombre_director_obrasviales')
             contratistas = http.request.env['contratista.contratista'].sudo().browse(int(contratista))[0]
 
             for c in contratistas:
@@ -438,6 +633,9 @@ class Finiquito(http.Controller):
                 'nombre_obra': nombre_obra,
                 'representante_contratista': representante_contratista,
                 'titular': titular, # TITULAR DE SIDUR
+                'director_general_ejecucionobra': director_general_ejecucionobra, # DIRECTOR DE EJECUCION
+                'director_obras_viales': director_obras_viales, # DIRECTOR DE OBRAS VIALES
+                'residente_obra': residente_obra, # RESIDENTE DE LA OBRA
                 'numero_fianza': numero_fianza,
                 'afianzadora': afianzadora,
                 'fecha_fianza': fecha_fianza, 

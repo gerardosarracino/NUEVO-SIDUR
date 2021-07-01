@@ -18,13 +18,13 @@
                                 <field name="numero_contrato" invisible="1"/>
 
                                <field name="ruta_critica" string="# Concepto de partidas" widget='one2many'
-                               >
+                               context="{'default_id_partida': active_id}">
                                     <tree editable="bottom" delete="false">
                                         <control>
                                             <create string="Agregar programa de trabajo"  context="{'default_id_partida': active_id}"/>
                                         </control>
-                                            <field name="id_partida" invisible="1"/>
-                                            <field name="frente" string="FRENTE" context="{'default_id_partida': id_partida}" domain="[('id_partida.id', '=', id_partida)]" /> <!-- domain="[('id_partida.id', '=', id_partida)]" -->
+                                            <field name="id_partida" invisible="1" force_save="1"/>
+                                            <field name="frente" string="FRENTE" force_save="1" context="{'default_id_partida': id_partida}" domain="[('id_partida.id', '=', id_partida)]" /> <!-- domain="[('id_partida.id', '=', id_partida)]" -->
                                             <field name="name"/>
                                             <field name="porcentaje_est" />
                                             <field name="avance_fisico" invisible="1" />
@@ -160,8 +160,9 @@
 
                                <field name="ruta_critica" string="# Concepto de partidas" widget="one2many">
                                     <tree editable="bottom" delete="false" create="false">
-                                      <field name="numero_informe" invisible="1" />
-                                      <field name="frente" string="FRENTE" force_save="1" readonly="1"/>
+                                      <field name="numero_informe" invisible="1" /> 
+                                      <field name="numero_contrato" invisible="1" />
+                                      <field name="frente" string="FRENTE" force_save="1" readonly="1" domain="[('id_partida.id', '=', numero_contrato)]"/>
                                       <field name="name" readonly="1" force_save="1" string="ACTIVIDADES PRINCIPALES"/>
                                       <field name="porcentaje_est" sum="PORCENTAJE PROGRAMADO" force_save="1" readonly="1"/>
                                       
@@ -318,6 +319,7 @@
       <field name="arch" type="xml">
         <tree string="">
           <field name="nombre"/>
+          <field name="id_partida" force_save="1"/>
         </tree>
       </field>
     </record>
@@ -330,6 +332,7 @@
                 <sheet>
                     <group>
                         <field name="nombre"/>
+                        <field name="id_partida" force_save="1"/>
                     </group>
                 </sheet>
             </form>
@@ -382,7 +385,7 @@
           <field name="arch" type="xml">
               <tree string="">
                   <field name="numero_contrato"/>
-                  <field name="frente"/>
+                  <field name="frente" />
                   <field name="porcentaje_est"/>
                   <field name="avance_fisico"/>
                   <field name="avance_fisico_ponderado"/>

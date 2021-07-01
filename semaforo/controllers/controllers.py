@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import http
-import pandas as pd
+# import pandas as pd
 
 
 class RegistroObras(http.Controller):

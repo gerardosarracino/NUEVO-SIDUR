@@ -64,8 +64,9 @@
                       <field name="programa_contratos" widget='one2many' nolabel="1" context="{
                                    'default_fecha_inicio': ultima_fecha_inicio,
                                    'default_fecha_termino': ultima_fecha_termino,
+                                   'default_obra': active_id,
                                    }">
-                         <tree editable="bottom" decoration-info="mes_actual==True" decoration-bf="mes_actual == True"
+                         <tree editable="bottom" delete="false" decoration-info="mes_actual==True" decoration-bf="mes_actual == True"
                          decoration-warning="mes_restante == True" decoration-danger="mes_ultimo == True"
                          decoration-success="mes_paso == True"
                          >
@@ -76,15 +77,17 @@
                              </control>
                              <field name="id_prog" invisible="1"/> <!-- de importacion -->
 
-                             <field name="obra" invisible="1"/>
+                             <field name="obra" force_save="1" readonly="1" />
                              <field name="fecha_inicio"/>
                              <field name="fecha_termino"/>
                              <field name="monto" sum="Total:"/>
-                             <field name="porcentaje_programa" />
+                             <field name="porcentaje_programa" force_save="1"/>
                              <field name="mes_actual" invisible="1"/>
                              <field name="mes_paso" invisible="1"/>
                              <field name="mes_restante" invisible="1"/>
                              <field name="mes_ultimo" invisible="1"/>
+                             <button string="BORRAR" name="borrar" type="object" class="btn btn-danger"
+                                        confirm="Esta seguro de borrar esta linea?" />
                          </tree>
                        </field>
                 </group>
@@ -99,6 +102,7 @@
             </form>
         </field>
     </record>
+    
         <!-- FILTRO SEARCH DE ENLACE VERSION DE PROGRAMA -->
         <record id="programa_search" model="ir.ui.view">
            <field name="name">programa search</field>
@@ -118,7 +122,7 @@
         <field name="name">programa tree</field>
         <field name="model">programa.programa_obra</field>
         <field name="arch" type="xml">
-            <tree string="">
+            <tree string="" delete="false">
               <field name="obra"/>
               <field name="fecha_inicio_programa"/>
               <field name="fecha_termino_programa"/>
