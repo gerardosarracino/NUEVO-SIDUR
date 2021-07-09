@@ -1,9 +1,5 @@
-from odoo import models, fields, api, exceptions
-from datetime import date, datetime
-import calendar
-from odoo.exceptions import UserError
-from odoo.exceptions import ValidationError
-
+from odoo import models, fields, api, exceptions, _
+from odoo.exceptions import AccessError, UserError, RedirectWarning, ValidationError, Warning
 
 class Frente(models.Model):
     _name = 'proceso.frente'
@@ -30,28 +26,44 @@ class ruta_critica(models.Model):
         ('line_section', "Section"),
         ('line_note', "Note")], default=False)
 
-    auxiliar_actividad = fields.Boolean('auxiliar que indica si fue agregada una actividad')
-    numeracion = fields.Integer("Numeracion para acomodo de frentes y actividades")
+    auxiliar_actividad = fields.Boolean('auxiliar que indica si fue agregada una actividad', store=True)
+    numeracion = fields.Integer("Numeracion para acomodo de frentes y actividades", store=True)
 
     @api.model
     def create(self, values):
-        res = super(ruta_critica, self).create(values)
-        b_partida = self.env['partidas.partidas'].browse(res.id_partida.id)
-        b_ruta = self.env['proceso.rc'].search([('id_partida.id', '=', res.id_partida.id)], order='numeracion asc')
-        b_rc = self.env['proceso.rc'].browse(res.id)
-        b_ruta_count = self.env['proceso.rc'].search_count(
-            [('id_partida.id', '=', res.id_partida.id), ('frente.id', '=', res.frente.id)])
-        if not res.auxiliar_actividad:
-            print("sxxxxxxxxxxxxxxxxxxxxxxx")
-            datosn = {
-                'numeracion': b_ruta_count + 1
-            }
-            r = b_rc.write(datosn)
-            datos = {
-                'ruta_critica': [[4, res.id, {}]]
-            }
-            tabla = b_partida.update(datos)
+        # res = super(ruta_critica, self).create(values)
+        b_partida = self.env['partidas.partidas'].browse(values['id_partida'])
+        b_ruta = self.env['proceso.rc'].search([('id_partida.id', '=', b_partida.id)], order='numeracion asc')
+        if values['auxiliar_actividad'] is False: # es frente
+            auxiliar = False
+            for value in b_ruta:
+                b_rt = self.env['proceso.rc'].browse(value['id'])
+                print(value['frente'], ' -----', values['frente'], b_rt.frente.id)
+                if values['frente'] == b_rt.frente.id:
+                    print('YA ESTA EL FRENTE EN LA TABLA NO SE PUEDE AGREGAR')
+                    auxiliar = True
+                    raise Warning(_("No se puede volver a agregar un frente que ya existe en la tabla"))
+
+            if auxiliar is False:
+                res = super(ruta_critica, self).create(values)
+                b_rc = self.env['proceso.rc'].browse(res.id)
+                count_ruta = self.env['proceso.rc'].search_count([('id_partida.id', '=', res.id_partida.id)])
+                print('no tenia el frente agregar')
+                datosn = {
+                    'numeracion': count_ruta
+                }
+                r = b_rc.write(datosn)
+                datos = {
+                    'ruta_critica': [[4, res.id, {}]]
+                }
+                tabla = b_partida.update(datos)
         else:
+            res = super(ruta_critica, self).create(values)
+            b_ruta = self.env['proceso.rc'].search([('id_partida.id', '=', res.id_partida.id)],
+                                                   order='numeracion asc')
+            b_ruta_count = self.env['proceso.rc'].search_count(
+                [('id_partida.id', '=', res.id_partida.id), ('frente.id', '=', res.frente.id)])
+            b_rc = self.env['proceso.rc'].browse(res.id)
             # print('es actividad agregar debajo de su categoria en orden descendente')
             porcentaje = 0
             for value in b_ruta:
@@ -95,28 +107,50 @@ class ruta_critica(models.Model):
                 'total_': porcentaje
             }
             r = b_partida.write(datos)
-            return res
+        return res
 
     @api.multi
     def borrar(self):
         print(self.frente, '---', self.name)
-
-        b_ruta = self.env['proceso.rc'].search([('id_partida.id', '=', self.id_partida.id)])
+        id_frente = self.frente.id
+        id_partida = self.id_partida.id
+        porcentaje_est = self.porcentaje_est
+        if not self.auxiliar_actividad: # es frente, al borrar frente que borre todas sus actividades!
+            print('frente quitar')
+            b_rutas_frentes = self.env['proceso.rc'].search([('frente.id', '=', id_frente)])
+            for i in b_rutas_frentes:
+                i.unlink()
+            '''b_frente = self.env['proceso.frente'].search([('id', '=', id_frente)])
+            for i in b_frente:
+                i.unlink()'''
+        else: # es actividad
+            print('actividad quitar')
+            self.env['proceso.rc'].search([('id', '=', self.id)]).unlink()
+        print('llego')
+        b_ruta = self.env['proceso.rc'].search([('id_partida.id', '=', id_partida)])
         porcentaje = 0
+        acum = 0
         for v in b_ruta:
+            acum += 1
+            datos_numeracion = {
+                'numeracion': acum
+            }
+            r = v.write(datos_numeracion)
             porcentaje += v.porcentaje_est
+            print('llego', v.porcentaje_est)
 
-        b_partida = self.env['partidas.partidas'].browse(self.id_partida.id)
+
+        b_partida = self.env['partidas.partidas'].browse(id_partida)
         if porcentaje < 0:
             porcentaje = 0
         else:
-            porcentaje = porcentaje - self.porcentaje_est
+            porcentaje = porcentaje
         datos = {
             'total_': porcentaje
         }
         r = b_partida.write(datos)
 
-        if self.frente is not False and self.name is False:  # ES FRENTE
+        '''if self.frente is not False and self.name is False:  # ES FRENTE
             s = self.env['proceso.rc'].search(
                 [('frente', '=', self.frente.id), ('id_partida', '=', self.id_partida.id)])
             print(s, 'es frente')
@@ -125,10 +159,10 @@ class ruta_critica(models.Model):
                 print(i)
         else:  # ES ACTIVIDAD
             self.env['proceso.rc'].search([('id', '=', self.id)]).unlink()
-            print('es act')
+            print('es act')'''
 
     @api.multi
-    def button_method_name(self):
+    def agregar_frentes_actividades(self):
         print('hola')
         # search = self.env['project.project'].search([('id', '=', self.project_id.id)])
         form = self.env.ref('supervision_obra.concepto_ruta_critica_form')
@@ -148,10 +182,17 @@ class ruta_critica(models.Model):
             # 'res_id': search.id,  # (view.id, 'form')
         }
 
+    @api.multi
+    def unlink(self):
+        return super(ruta_critica, self).unlink()
+
 
 class ruta_critica_avance(models.Model):
     _name = 'proceso.rc_a'
     _rec_name = 'frente'
+
+    auxiliar_actividad = fields.Boolean('auxiliar que indica si fue agregada una actividad', store=True)
+    numeracion = fields.Integer("Numeracion para acomodo de frentes y actividades", store=True)
 
     id_sideop = fields.Integer()
     numero_contrato = fields.Many2one('partidas.partidas')
@@ -353,7 +394,9 @@ class informe_avance(models.Model):
                 self.update({
                     'ruta_critica': [[0, 0, {'frente': conceptos.frente.id, 'name': conceptos.name,
                                              'porcentaje_est': conceptos.porcentaje_est, 'numero_informe': num,
-                                             'numero_contrato': self.numero_contrato.id
+                                             'numero_contrato': self.numero_contrato.id,
+                                             'auxiliar_actividad': conceptos.auxiliar_actividad,
+                                             'numeracion': conceptos.numeracion,
                                              }]]
                 })
 
@@ -371,7 +414,9 @@ class informe_avance(models.Model):
                                              'avance_fisico': b_actividades_informe.avance_fisico,
                                              'avance_fisico_ponderado': (b_actividades_informe.porcentaje_est
                                                                          * b_actividades_informe.avance_fisico) / 100,
-                                             'numero_contrato': self.numero_contrato.id
+                                             'numero_contrato': self.numero_contrato.id,
+                                             'auxiliar_actividad': conceptos.auxiliar_actividad,
+                                             'numeracion': conceptos.numeracion,
                 }]]
                 })
 
@@ -436,6 +481,11 @@ class informe_avance(models.Model):
             "url": original_url,
             "target": "new",
         }
+
+    @api.multi
+    def unlink(self):
+        self.ruta_critica.unlink()
+        return super(informe_avance, self).unlink()
 
 
 class ComentarioSupervision(models.Model):

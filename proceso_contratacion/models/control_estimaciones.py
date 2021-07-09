@@ -93,16 +93,33 @@ class Estimaciones(models.Model):
     obra_id = fields.Char(compute="obra_enlace", store=True)
 
     clave_obra = fields.Char(string='Clave de Obra')
+
+    autorizacion_recurso = fields.Char(string='Autorizacion de Recurso') # CAMPOS PARA REPORTE DE TRAMITE DE AUTORIZACION DE PAGO
+    area_funcional = fields.Char(string='Area Funcional') # CAMPOS PARA REPORTE DE TRAMITE DE AUTORIZACION DE PAGO
+    pospre = fields.Char(string='Pospre') # CAMPOS PARA REPORTE DE TRAMITE DE AUTORIZACION DE PAGO
+    fondo = fields.Char(string='Fondo') # CAMPOS PARA REPORTE DE TRAMITE DE AUTORIZACION DE PAGO
+
     clave_estimacion = fields.Char(string='PEP')
 
-    auxiliar_alerta_programa = fields.Boolean(string="Indica si el programa de obra esta correcto para poder proseguir con la estiamcion", store=True  )
-    auxiliar_alerta_fecha = fields.Boolean(string="Indica si la fecha de estimacion no es mayor a 31 dias para poder proseguir con la estiamcion", store=True  )
+    auxiliar_alerta_programa = fields.Boolean(string="Indica si el programa de obra esta correcto para poder proseguir con la estimacion", store=True  )
+    auxiliar_alerta_fecha = fields.Boolean(string="Indica si la fecha de estimacion no es mayor a 31 dias para poder proseguir con la estimacion", store=True  )
 
     @api.multi
-    @api.onchange('tipo_estimacion','conceptos_partidas', 'fecha_inicio_estimacion', 'fecha_termino_estimacion')
+    @api.onchange('tipo_estimacion', 'fecha_inicio_estimacion', 'fecha_termino_estimacion')
     def clave_obra_m(self):
         date_format = "%Y-%m-%d"
         self.clave_obra = self.obra.obra.obra_planeada.numero_obra
+        search_oficio = self.env['autorizacion_obra.anexo_tecnico'].search(
+            [('concepto.id', '=', self.obra.obra.id)])
+
+        clave_string = search_oficio.clave_presupuestal.partition('-')
+        clave_string2 = clave_string[2].partition('-')
+        clave_string3 = clave_string2[2].partition('-')
+        clave_string4 = clave_string3[2].partition('-')
+        self.area_funcional = clave_string2[0]
+        self.pospre = clave_string3[0]
+        self.fondo = clave_string4[0]
+
         b_prog = self.env['programa.programa_obra'].search([('obra.id', '=', self.obra.id)])
         if b_prog.restante_programa != 0: # SI ES DIFERENTE A 0 EL PROGRAMA NO ESTA CORRECTO
             self.auxiliar_alerta_programa = True
@@ -686,7 +703,8 @@ class Estimaciones(models.Model):
             }]]}
         r = partida.update(datos_esti)
         if values['estimacion_bis']:
-            for value in values['estimacion_bis']:
+            estimacion_bis = self.env['control.estimaciones'].browse(values['estimacion_bis'])
+            for value in estimacion_bis:
                 for dec in value['deducciones']:
                     dec.write({
                         'valor': (value['estimado'] - values['estimado']) * dec.porcentaje / 100
@@ -698,7 +716,7 @@ class Estimaciones(models.Model):
 
                 estimado = value['estimado'] - values['estimado']
                 estimacion_subtotal = (value['estimado'] - values['estimado']) - value['amort_anticipo']
-                estimacion_iva = ((value['estimado'] - value['estimado']) - value['amort_anticipo']) * values['b_iva']
+                estimacion_iva = estimacion_subtotal * values['b_iva']
                 estimacion_facturado = estimacion_subtotal + estimacion_iva  # (((rec.estimado - self.estimado) - rec.amort_anticipo) * self.b_iva) + (rec.estimado - self.estimado)
                 print(value['estimacion_subtotal'], value['estimacion_iva'])
                 value.write({
@@ -1860,8 +1878,7 @@ class Detalleconceptos(models.Model):
     pendiente = fields.Integer(string="Pendiente", required=False, store=True)
     estimacion = fields.Float(string="Estimacion", required=False, digits=(12, 5), store=True)
     importe_ejecutado = fields.Float(string="Importe", required=False, store=True, digits=(12, 2))
-    id_partida = fields.Many2one(comodel_name="partidas.partidas", string="Numero de partida", readonly=True,
-                                 store=True)
+    id_partida = fields.Many2one(comodel_name="partidas.partidas", string="Numero de partida", readonly=True, store=True)
     # importe = fields.Float(compute="sumaCantidad")
     # MODIFICACIONES
     fecha_modificacion = fields.Date('Fecha de la Modificación')

@@ -25,6 +25,8 @@
     'data': [
         'data/paperformat.xml',
         'data/paperformat_pago.xml',
+        'report/estimacion_tramite_report.xml',
+        'report/config_estimacion_tramite.xml',
         #'report/control_estimaciones_report.xml',
         #'report/reporte_control_est.xml',
         #'report/relacion_conceptos_report.xml',

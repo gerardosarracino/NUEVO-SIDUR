@@ -35,10 +35,19 @@ class EstimacionesBis(models.Model):
                                digits=(12, 2))
 
     estimado_bis_related = fields.Float('Estimado Bis', related="estimacion_bis.estimado")
+    estimado_bis_actual = fields.Float('Estimado Bis Actual', store=True)
+    estimado_bis_original = fields.Float('Estimado Bis Original', store=True)
+
+    @api.multi
+    @api.onchange('estimacion_bis')
+    def estimado_original(self):
+        self.estimado_bis_original = self.estimado_bis_related
+        self.estimado_bis_actual = self.estimado_bis_related
 
     @api.multi
     @api.onchange('estimado_bis')
     def calculos_bis(self):
+        self.estimado_bis_actual = self.estimado_bis_original - self.estimado_bis
         self.estimado = self.estimado_bis
         self.estimacion_subtotal = self.estimado_bis
         self.estimacion_iva = self.estimacion_subtotal * self.b_iva

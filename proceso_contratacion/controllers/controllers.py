@@ -41,47 +41,206 @@ class AppSupervisoresPrueba(http.Controller):
         except Exception as e:
             return "Upss! algo salio mal en: " + str(e)
 
-    @http.route('/apiprueba/ruta_critica_post/<id>/<id_frente>/<actividad>/<porcentaje>', type='http', auth='user', cors='*')
-    def ruta_critica_put(self, id, id_frente, actividad, porcentaje):
+    @http.route('/apiprueba/ruta_critica_post/<id>/<nombre_frente>/<actividad>/<porcentaje>', type='http', auth='user', cors='*')
+    def ruta_critica_post(self, id, nombre_frente, actividad, porcentaje):
         try:
             print("post")
-            '''ruta = http.request.env['partidas.partidas'].browse(id)
-            datos = {
-                    'ruta_critica': [[0, 0, {
-                    'id_partida': id,
-                    'frente': id_frente,
-                    'name': actividad,
-                    'porcentaje_est': porcentaje,
-                }]]
-            }
-            print(ruta)
-            print(ruta.total_)
-            datos_partida = {
-                    'total_': ruta.total_ + porcentaje,
-            }
-            rt = ruta.write(datos)
-            rp = ruta.write(datos_partida)'''
-
             ruta = http.request.env['proceso.rc']
-            if actividad:
+            frente = http.request.env['proceso.frente']
+            frente_search = http.request.env['proceso.frente'].search([('nombre', '=', nombre_frente),('id_partida.id', '=', id)])
+            datos = {}
+            if actividad and actividad != "False": # ----------- ES ACTIVIDAD
                 datos = {
                         'id_partida': id,
-                        'frente': id_frente,
+                        'frente': frente_search.id,
                         'name': actividad,
                         'porcentaje_est': porcentaje,
                         'auxiliar_actividad': True,
                 }
                 rt = ruta.create(datos)
-            else:
-                datos = {
-                    'id_partida': id,
-                    'frente': id_frente,
+
+            if actividad == "False" or actividad is False: # --- ES FRENTE
+                if not frente_search: # SI NO EXISTE EL FRENTE, CREAR
+                    datos_frente = {
+                        'id_partida': id,
+                        'nombre': nombre_frente,
+                    }
+                    f = frente.create(datos_frente)
+                    datos = {
+                        'id_partida': id,
+                        'frente': f.id,
+                        'name': None,
+                        'porcentaje_est': porcentaje,
+                        'auxiliar_actividad': False,
+                    }
+                    rt = ruta.create(datos)
+                else: # SI EXISTE EL FRENTE YA, INSERTAR
+                    datos = {
+                        'id_partida': id,
+                        'frente': frente_search.id,
+                        'name': None,
+                        'porcentaje_est': porcentaje,
+                        'auxiliar_actividad': False,
+                    }
+                    rt = ruta.create(datos)
+            return json.dumps(datos)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    @http.route('/apiprueba/ruta_critica_put/<id>/<id_ruta>/<actividad>/<porcentaje>', type='http', auth='user', cors='*')
+    def ruta_critica_put(self, id, id_ruta, actividad, porcentaje):
+        try:
+            print("put actualizar datos!")
+            ruta = http.request.env['proceso.rc'].browse(id_ruta)
+            datos = {
                     'name': actividad,
                     'porcentaje_est': porcentaje,
-                    'auxiliar_actividad': False,
+            }
+            rt = ruta.write(datos)
+            partida = http.request.env['partidas.partidas'].browse(id)
+            por = 0
+            b_ruta = http.request.env['proceso.rc'].search([('id_partida.id', '=', id)])
+            for i in b_ruta:
+                por += i.porcentaje_est
+            datos_partida = {
+                    'total_': float(por)
+            }
+            rp = partida.write(datos_partida)
+
+            return json.dumps(datos)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    @http.route('/apiprueba/ruta_critica_delete/<id_ruta>', type='http', auth='user', cors='*')
+    def ruta_critica_delete(self, id_ruta):
+        try:
+            print("delete datos!")
+            b_ruta = http.request.env['proceso.rc'].search([('id', '=', id_ruta)])
+            r = http.request.env['proceso.rc'].search([('id', '=', id_ruta)]).unlink()
+            return json.dumps(r)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    # ----------»»»»»»»»»»»»»»»»»»»»-----------------------  INFORME ------------------xxxxxxxxxxxx-------------
+
+    @http.route('/apiprueba/informe_avance/<id>', type='http', auth='user', cors='*')
+    def informe_avance_get(self, id):
+        try:
+            http.request.env.cr.execute(
+                'select pi.id as "id_informe",pi.numero_contrato as "numero_contrato",pi.num_avance as "numero_avance",pi.porcentaje_estimado as "avance_fisico",pi.situacion_contrato as "situacion_contrato",'+
+                'pi.comentarios_generales as "comentarios_generales",pi.fecha_actual as "fecha_informe",pi.com_avance_obra as "comentario_avance",pi.avance_financiero as "avance_financiero"'+
+                'from proceso_iavance as pi where pi.numero_contrato = '+ str(id) + ' order by pi.num_avance desc'
+            )
+
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id': pp[0],
+                    'id_partida': pp[1],
+                    'numero_avance': pp[2],
+                    'avance_fisico': pp[3],
+                    'situacion_contrato': pp[4],
+                    'comentarios_generales': pp[5],
+                    'fecha_informe': str(pp[6]),
+                    'comentario_avance': pp[7],
+                    'avance_financiero': pp[8],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    # CONTROLLER CON CONSULTA PARA TRAER DATOS DE LA TABLA DE RUTA CRITICA PARA MOSTRAR AL MOMENTO DE CREAR EL INFORME DE AVANCE
+    @http.route(
+        '/apiprueba/informe_avance_newcreate/<id>',
+        type='http', auth='user', cors='*')
+    def informe_avance_newcreate(self, id):
+        try:
+            print("post avance")
+            # informe_rca = http.request.env['proceso.rc_a']
+
+            informe_c = http.request.env['proceso.iavance'].search_count([('numero_contrato.id', '=', id)])
+            num_avance = 0
+            if informe_c == 0:
+                print('no hay informes creado este sera el primero por lo tanto el numero de avance es el #1!')
+                num_avance = 1
+            else:
+                num_avance = informe_c + 1
+
+            http.request.env.cr.execute('select pr.id_partida, pf.nombre, pr.name, pr.porcentaje_est, pr.auxiliar_actividad, pr.numeracion from proceso_rc as pr ' +
+                                        'left join proceso_frente as pf on pr.frente = pf.id where pr.id_partida = ' + str(id) + 'order by pr.numeracion asc')
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id_partida': pp[0],
+                    'frente': pp[1],
+                    'actividad': pp[2],
+                    'porcentaje_actividad': pp[3],
+                    'auxiliar_actividad': pp[4],
+                    'numeracion': pp[5],
+                    'numero_avance': num_avance,
+                }]
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    # CONTROLLER QUE REALIZA EL CREATE DEL INFORME DE AVANCE PERO SIN LA TABLA DE ACTIVIDADES Y PORCENTAJES
+    @http.route(
+        '/apiprueba/informe_avance_post/<id>/<situacion_contrato>/<fecha_actual>/<comentarios_generales>/<avance_fisico>/<comentarios_avance>',
+        type='http', auth='user', cors='*')
+    def informe_avance_post(self, id, situacion_contrato, fecha_actual, comentarios_generales, avance_fisico,
+                            comentarios_avance):  # , comentarios_generales, fecha, avance_fisico, comentarios_avance   /<comentarios_generales>/<fecha>/<avance_fisico>/<comentarios_avance>
+        try:
+            print("post avance")
+            informe = http.request.env['proceso.iavance']
+
+            datos = {
+                'numero_contrato': id,
+                'porcentaje_estimado': avance_fisico,
+                'fecha_actual': fecha_actual,
+                'comentarios_generales': comentarios_generales,
+                'situacion_contrato': situacion_contrato,
+                'com_avance_obra': comentarios_avance,
+            }
+            i = informe.create(datos)
+            return json.dumps(datos)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    # CONTROLLER PARA EDITAR LA INFORMACION DE UN INFORME DE AVANCE
+    @http.route('/apiprueba/informe_avance_put/<id>/<id_informe>/<fecha_actual>/<comentarios_generales>/<comentarios_avance>/<situacion_contrato>', type='http', auth='user',
+                cors='*')
+    def informe_avance_put(self, id, id_informe, fecha_actual, comentarios_generales, comentarios_avance, situacion_contrato):
+        try:
+            informe = http.request.env['proceso.iavance'].search([('id', '=', int(id_informe))])
+            for i in informe:
+                informe_b = http.request.env['proceso.iavance'].browse(i.id)
+                datos = {
+                    'fecha_actual': fecha_actual,
+                    'comentarios_generales': comentarios_generales,
+                    'com_avance_obra': comentarios_avance,
+                    'situacion_contrato': situacion_contrato,
                 }
-                rt = ruta.create(datos)
-            return json.dumps(rt)
+                ia = informe_b.write(datos)
+                return json.dumps(datos)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
+    @http.route('/apiprueba/informe_avance_delete/<id_informe>/<num_avance>/<numero_contrato>', type='http', auth='user', cors='*')
+    def informe_avance_delete(self, id_informe, num_avance, numero_contrato):
+        try:
+            print("delete datos!")
+            b_informe_count = http.request.env['proceso.iavance'].search_count([('numero_contrato.id', '=', numero_contrato)])
+            if int(num_avance) == int(b_informe_count): # SI ES EL ULTIMO INFORME SI SE PUEDE ELIMINAR
+                b_ruta = http.request.env['proceso.rc_a'].search([('numero_contrato.id', '=', numero_contrato),('numero_informe', '=', int(num_avance))])
+                for i in b_ruta:
+                    i.unlink()
+                b_informe = http.request.env['proceso.iavance'].search([('id', '=', id_informe)]).unlink()
+                return json.dumps(b_informe)
+            else:
+                return "No se puede eliminar un informe que no sea el ultimo creado"
         except Exception as e:
             return "Upss! algo salio mal en: " + str(e)
 
@@ -120,6 +279,41 @@ class AppSupervisoresPrueba(http.Controller):
         except Exception as e:
             return "Upss! algo salio mal en: " + str(e)
 
+    @http.route('/apiprueba/supervisor_partida/<id>', type='http', auth='none', cors='*')
+    def partida_supervisor(self, id):
+        try:
+            http.request.env.cr.execute(
+                'select pp.id, pp.nombre_partida, ru.login, pc.fechainicio, pc.fechatermino, ej.name, too.tipo_obra, co.name, ro.descripcion, pp.estado_supervision, pp.total, pp.a_fis, "porcentajeProgramado", pp.a_fin, pp.color_semaforo' +
+                " from partidas_partidas pp left join proceso_elaboracion_contrato as pc on pp.numero_contrato = pc.id " +
+                "left join registro_ejercicio as ej on pc.ejercicio = ej.id left join contratista_contratista as co on pc.contratista = co.id " +
+                "left join generales_tipo_obra as too on pc.tipo_obra = too.id left join registro_programarobra as po on pp.obra = po.id " +
+                "left join registro_obra as ro on po.obra_planeada = ro.id left join partida_residente as pr on pp.id = pr.partida_id " +
+                'left join res_users as ru on pr.residente = ru.id WHERE pp.id = ' + str(id) + ' ORDER BY id ASC')
+            res = http.request.cr.fetchall()
+            context = []
+            for pp in res:
+                context += [{
+                    'id': pp[0],
+                    'nombre_contrato': pp[1],
+                    'residente_obra': pp[2],
+                    'fecha_inicio': str(pp[3]),
+                    'fecha_termino': str(pp[4]),
+                    'tipo_obra': pp[5],
+                    'ejercicio': pp[6],
+                    'contratista': pp[7],
+                    'nombre_obra': pp[8],
+                    'estado_supervision': pp[9],
+                    'monto_siva': pp[10],  # Monto total s/iva
+                    'a_fis': pp[11],
+                    'porcentaje_programado': pp[12],
+                    'a_fin': pp[13],
+                    'color_semaforo': pp[14],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
+
 
 class AppSupervisores(http.Controller):
     @http.route('/api/supervisor/<id>', type='http', auth='public', website=True, cors='*')
@@ -131,9 +325,10 @@ class AppSupervisores(http.Controller):
                 "left join registro_ejercicio as ej on pc.ejercicio = ej.id left join contratista_contratista as co on pc.contratista = co.id "+
                 "left join generales_tipo_obra as too on pc.tipo_obra = too.id left join registro_programarobra as po on pp.obra = po.id "+
                 "left join registro_obra as ro on po.obra_planeada = ro.id left join partida_residente as pr on pp.id = pr.partida_id "+
-                'left join res_users as ru on pr.residente = ru.id WHERE ru.id = '+str(id)+' ORDER BY id ASC')
+                'left join res_users as ru on pr.residente = ru.id WHERE ru.id = '+str(id)+' and pp.a_fis != 100 ORDER BY pp.atraso desc ')
             res = http.request.cr.fetchall()
             context = []
+
             for pp in res:
                 context += [{
                     'id': pp[0],
@@ -157,6 +352,31 @@ class AppSupervisores(http.Controller):
             return "Upss! algo salio mal en: " + str(e)
 
 
+class AppSupervisoresContarObras(http.Controller):
+    @http.route('/api/supervisor_contar_obras/<id>', type='http', auth='public', website=True, cors='*')
+    def partida(self, id):
+        try:
+            http.request.env.cr.execute(
+            "select COUNT(pp.color_semaforo), COUNT(pp.color_semaforo) FILTER (WHERE pp.color_semaforo = 'Rojo'), "+
+            "COUNT(pp.color_semaforo) FILTER (WHERE pp.color_semaforo = 'Amarillo'), COUNT(pp.color_semaforo) FILTER (WHERE pp.color_semaforo = 'Verde')"+
+            'from partidas_partidas as pp left join partida_residente as pr on pp.id = pr.partida_id ' +
+            'left join res_users as ru on pr.residente = ru.id where ru.id = ' + str(id) + ' and pp.a_fis != 100')
+
+            res = http.request.cr.fetchall()
+            context = []
+            count_obras = http.request.env['partida.residente'].search_count([('residente.id', '=', id)])
+            for pp in res:
+                context += [{
+                    'id_residente': id,
+                    'numero_obras': count_obras,
+                    'color_rojo': pp[0],
+                    'color_amarillo': pp[1],
+                    'color_verde': pp[2],
+                }]
+
+            return json.dumps(context)
+        except Exception as e:
+            return "Upss! algo salio mal en: " + str(e)
 
 
 class CarpetaInforme(http.Controller):

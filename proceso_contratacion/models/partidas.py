@@ -1090,6 +1090,26 @@ class Partidas(models.Model):
                 'view_id': view.id,
             }
 
+    @api.multi
+    def agregar_frente(self):
+        print('frente')
+        # search = self.env['project.project'].search([('id', '=', self.project_id.id)])
+        form = self.env.ref('supervision_obra.concepto_ruta_critica_frente_form')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Ruta critica',
+            'res_model': 'proceso.rc',
+            'view_mode': 'form',
+            'target': 'new',
+            # 'domain': [('proyecto_id', '=', self.project_id.id)],
+            # 'view_id': view.id,
+            'context': {'default_id_partida': self.id},
+            'views': [
+                (form.id, 'form'),
+            ],
+            # 'res_id': search.id,  # (view.id, 'form')
+        }
+
     @api.one
     def FechaAnticipo(self):
         search = self.env['anticipo.anticipo'].search([('obra.id', '=', self.id)])

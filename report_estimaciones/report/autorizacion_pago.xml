@@ -3,165 +3,165 @@
     <data>
         <template id="report_autorizacion_pago" >
             <t t-call="web.html_container">
-                 <t t-foreach="docs" t-as="o">
-                     <t t-call="web.external_layout">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
                         <style>
                             body {
-                                font-size: 14px;
-                                font-family: Arial, Helvetica, sans-serif;
+                            font-size: 14px;
+                            font-family: Arial, Helvetica, sans-serif;
                             }
 
                             #header {
-                                text-align: center;
-                                border-bottom: 1px solid #666;
-                                padding-bottom: 3px;
+                            text-align: center;
+                            border-bottom: 1px solid #666;
+                            padding-bottom: 3px;
                             }
 
                             h3,
                             h4,
                             h5 {
-                                margin: 0;
-                                line-height: 25px;
+                            margin: 0;
+                            line-height: 25px;
                             }
 
                             table,
                             td,
                             th {
-                                border-color: #eee;
-                                font-size: 11px;
+                            border-color: #eee;
+                            font-size: 11px;
                             }
 
                             caption {
-                                font-weight: 700;
-                                margin-bottom: 20px;
-                                margin-top: 10px;
+                            font-weight: 700;
+                            margin-bottom: 20px;
+                            margin-top: 10px;
                             }
 
                             #footer h5 {
-                                text-align: center;
-                                border-bottom: 1px solid #eee;
+                            text-align: center;
+                            border-bottom: 1px solid #eee;
                             }
 
                             #opciones {
-                                position: fixed;
-                                top: 0;
-                                background-color: #999;
-                                padding: 5px;
-                                right: 0;
-                                z-index: 99999;
-                                margin-right: 8px;
-                                display: inline-block;
-                                -moz-box-shadow: 0 0 3px #999;
-                                -webkit-box-shadow: 0 0 3px #999;
-                                box-shadow: 0 0 3px #999;
+                            position: fixed;
+                            top: 0;
+                            background-color: #999;
+                            padding: 5px;
+                            right: 0;
+                            z-index: 99999;
+                            margin-right: 8px;
+                            display: inline-block;
+                            -moz-box-shadow: 0 0 3px #999;
+                            -webkit-box-shadow: 0 0 3px #999;
+                            box-shadow: 0 0 3px #999;
                             }
 
                             #opciones a {
-                                border-right: 1px solid #ccc;
-                                padding-right: 5px;
-                                color: #fff;
-                                text-decoration: none;
+                            border-right: 1px solid #ccc;
+                            padding-right: 5px;
+                            color: #fff;
+                            text-decoration: none;
                             }
 
                             #opciones a:last-child {
-                                border: none;
+                            border: none;
                             }
 
                             #opciones a:before {
-                                content: " ";
+                            content: " ";
                             }
 
                             .logo {
-                              background-image: url("/report_estimaciones/static/src/img/sello.jpeg");
-                              width: 100px;
-                                height:100px;
+                            background-image: url("/report_estimaciones/static/src/img/sello.jpeg");
+                            width: 100px;
+                            height:100px;
                             }
 
                         </style>
 
 
 
-                         <body>
+                        <body>
                             <div id="header" style="position:relative;">
-                            <div style="position:absolute; top:0; left:40;">
-                                <!--img alt="logoEnte" src="http://sidur.galartec.com:9001/logo/logo2.svg" width="85" height="85"/-->
-                                <p>SECRETARÍA DE HACIENDA</p>
-                            </div>
+                                <div style="position:absolute; top:0; left:40;">
+                                    <!--img alt="logoEnte" src="http://sidur.galartec.com:9001/logo/logo2.svg" width="85" height="85"/-->
+                                    <p>SECRETARÍA DE HACIENDA</p>
+                                </div>
 
-                            <div valign="top" align="right">
-                                Autorización de Pago No. <br/> <span t-field="o.autorizacion_pago"/>
-                            </div>
+                                <div valign="top" align="right">
+                                    Autorización de Pago No. <br/> <span t-field="o.autorizacion_pago"/>
+                                </div>
 
                                 <br/>
                                 <br/>
                                 <br/>
 
-                            <div valign="top" align="right">
-                                <p> Hermosillo, Sonora, a <span t-field="o.fecha_factura" t-options='{"format": "d MMMM y"}'/></p>
-                            </div>
+                                <div valign="top" align="right">
+                                    <p> Hermosillo, Sonora, a <span t-field="o.fecha_factura" t-options='{"format": "d MMMM y"}'/></p>
+                                </div>
 
                             </div>
 
-                             <!-- PRIMERA PARTE CANTIDAD EN LETRA -->
-                             <div>
-                                 <strong>AFECTACIÓN PRESUPUESTAL DEL GASTO DE INVERSIÓN POR: $ &#160; &#160; <span t-field="o.estimado" /> </strong>
-                             </div>
+                            <!-- PRIMERA PARTE CANTIDAD EN LETRA -->
+                            <div>
+                                <strong>AFECTACIÓN PRESUPUESTAL DEL GASTO DE INVERSIÓN POR: $ &#160; &#160; <span t-field="o.estimado" /> </strong>
+                            </div>
 
                             <div id="datosObra" style="margin-top:10px;">
                                 <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody><tr>
                                         <th width="15%" rowspan="2">CANTIDAD CON LETRA:</th>
                                         <td colspan="3" rowspan="2" valign="top">
-                                          <strong> SON: &#160; <span t-field="o.monto_letra_estimado" style="text-transform:uppercase;"/> PESOS, <span t-field="o.centavos" style="text-transform:uppercase;"/> M.N. </strong> 	</td>
+                                            <strong> SON: &#160; <span t-field="o.monto_letra_estimado" style="text-transform:uppercase;"/> PESOS, <span t-field="o.centavos" style="text-transform:uppercase;"/> M.N. </strong> 	</td>
                                     </tr>
-                                </tbody></table>
+                                    </tbody></table>
                             </div>
 
-                             <!-- SEGUNDA PARTE PARTIDA CARGADA -->
-                             <div id="datosContratacion" style="margin-top:15px;">
+                            <!-- SEGUNDA PARTE PARTIDA CARGADA -->
+                            <div id="datosContratacion" style="margin-top:15px;">
                                 <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody><tr>
                                         <th colspan="5">CÁRGUESE A LA PARTIDA:</th>
                                     </tr>
-                                    <tr>
-                                        <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle" ><span t-field="o.centro_gestor"  /></th>
-                                        <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.area_funcional" /></th>
-                                        <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.posicion_presupuestal"  /></th>
-                                        <th align="center" valign="middle" style="text-align: center;"> <span t-field="o.fondo"  /></th>
-                                        <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.numero_contrato.obra.obra_planeada.numero_obra"/>	</th>
-                                    </tr>
-                                    <tr>
-                                        <td rowspan="2" align="center" valign="middle">
-                                            <p>  Centro Gestor  </p>	</td>
-                                        <td rowspan="2" align="center" valign="middle">
-                                            <p>  Area Funcional </p>			</td>
-                                        <td rowspan="2" align="center" valign="middle">
-                                             <p>  Posición Presup </p>			</td>
-                                        <td rowspan="2" align="center" valign="middle">
-                                             <p>  Fondo  </p>			</td>
-                                        <td rowspan="2" align="center" valign="middle">
-                                             <p>  Programa Presupuestal  </p>			</td>
-                                    </tr>
-                                </tbody></table>
+                                        <tr>
+                                            <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle" ><span t-field="o.centro_gestor"  /></th>
+                                            <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.area_funcional" /></th>
+                                            <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.posicion_presupuestal"  /></th>
+                                            <th align="center" valign="middle" style="text-align: center;"> <span t-field="o.fondo"  /></th>
+                                            <th style="border-bottom: thin solid; text-align: center;" align="center" valign="middle"><span t-field="o.numero_contrato.obra.obra_planeada.numero_obra"/>	</th>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="2" align="center" valign="middle">
+                                                <p>  Centro Gestor  </p>	</td>
+                                            <td rowspan="2" align="center" valign="middle">
+                                                <p>  Area Funcional </p>			</td>
+                                            <td rowspan="2" align="center" valign="middle">
+                                                <p>  Posición Presup </p>			</td>
+                                            <td rowspan="2" align="center" valign="middle">
+                                                <p>  Fondo  </p>			</td>
+                                            <td rowspan="2" align="center" valign="middle">
+                                                <p>  Programa Presupuestal  </p>			</td>
+                                        </tr>
+                                    </tbody></table>
                             </div>
 
-                             <!-- TERCERA PARTE PROGRAMA DE INVERSION -->
-                             <div id="datosObra" style="margin-top:10px;">
+                            <!-- TERCERA PARTE PROGRAMA DE INVERSION -->
+                            <div id="datosObra" style="margin-top:10px;">
                                 <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody><tr>
                                         <th width="15%" rowspan="2">PROGRAMA DE INVERSIÓN:</th>
                                         <td colspan="3" rowspan="2" align="center" valign="middle">
-                                          <strong> <span t-field="o.programa_inversion" style="float:center;text-transform:uppercase;" />  </strong> 	</td>
+                                            <strong> <span t-field="o.programa_inversion" style="float:center;text-transform:uppercase;" />  </strong> 	</td>
                                     </tr>
-                                </tbody></table>
+                                    </tbody></table>
                             </div>
 
 
 
-                             <strong>A FAVOR DE:</strong>
+                            <strong>A FAVOR DE:</strong>
 
-                             <div id="datosObra" style="margin-top:10px;">
-                                 <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
+                            <div id="datosObra" style="margin-top:10px;">
+                                <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody>
                                         <tr>
                                             <td colspan="2" width="70%">NOMBRE DEL CONTRATISTA O PROVEEDOR</td>
@@ -176,14 +176,14 @@
                                         </tr>
                                         <tr>
                                             <td colspan="3"><span t-field="o.contratista_contrato.calles"/>, COL.
-                                            <span t-field="o.contratista_contrato.colonia" style="text-transform:uppercase;"/>, <span t-field="o.contratista_contrato.municipio_delegacion" style="text-transform:uppercase;"/>,
-                                            <span t-field="o.contratista_contrato.estado_entidad" style="text-transform:uppercase;"/></td>
+                                                <span t-field="o.contratista_contrato.colonia" style="text-transform:uppercase;"/>, <span t-field="o.contratista_contrato.municipio_delegacion" style="text-transform:uppercase;"/>,
+                                                <span t-field="o.contratista_contrato.estado_entidad" style="text-transform:uppercase;"/></td>
                                         </tr>
                                     </tbody>
                                 </table>
-                             </div>
+                            </div>
 
-                             <div id="datosObra" style="margin-top:10px;">
+                            <div id="datosObra" style="margin-top:10px;">
                                 <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody>
                                         <tr>
@@ -202,12 +202,12 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                             </div>
+                            </div>
 
 
-                             <!-- FORMA DE EJECUCION -->
-                             <div id="datosObra" style="margin-top:10px;">
-                                 <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
+                            <!-- FORMA DE EJECUCION -->
+                            <div id="datosObra" style="margin-top:10px;">
+                                <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody>
                                         <tr>
                                             <th>FORMA DE EJECUCIÓN:</th>
@@ -220,10 +220,10 @@
                                 </table>
                             </div>
 
-                             &#160;
+                            &#160;
 
-                             <div id="datosObra" style="margin-top:10px;">
-                                 <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
+                            <div id="datosObra" style="margin-top:10px;">
+                                <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse;">
                                     <tbody>
                                         <tr>
                                             <th colspan="2" width="40%" align="center" valign="middle" style="text-align: center;">INFORMACIÓN DE LA OBRA</th>
@@ -305,13 +305,13 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                             </div>
+                            </div>
 
-                             <br/>
-                             <br/>
-                             <br/>
+                            <br/>
+                            <br/>
+                            <br/>
 
-                             <div id="footer">
+                            <div id="footer">
                                 <div>
                                     <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse; ">
                                         <tbody>
@@ -319,9 +319,9 @@
                                                 <th width="40%" align="center" valign="middle" style="text-align: center;">REVISÓ</th>
                                                 <th width="20%" align="center" valign="middle" style="text-align: center;">&#160;</th>
                                                 <th width="40%" align="center" valign="middle" style="text-align: center;">ATENTAMENTE <br/>
-                                                EL SECRETARIO DEL RAMO</th>
+                                                    EL SECRETARIO DEL RAMO</th>
                                             </tr>
-                                             <tr>
+                                            <tr>
                                                 <td  align="center" valign="middle">&#160;  <br/> &#160;</td>
                                                 <td  align="center" valign="middle">&#160;  <br/> &#160;</td>
                                                 <td  align="center" valign="middle">&#160;  <br/> &#160;</td>
@@ -346,14 +346,14 @@
                                     </table>
                                 </div >
 
-                                 <p>&#160;</p>
+                                <p>&#160;</p>
 
                                 <table width="100%" cellpadding="3" cellspacing="0" style="border-collapse:collapse; ">
                                     <tbody>
-                                         <tr>
+                                        <tr>
                                             <td>C.c.p Dirección General de Programación y Evaluación, S.I.D.U.R <br/>
-                                            C.c.p Archivo <br/>
-                                            <span t-field="o.director_capturador" style="text-transform:uppercase;"/>
+                                                C.c.p Archivo <br/>
+                                                <span t-field="o.director_capturador" style="text-transform:uppercase;"/>
                                             </td>
                                             <td>&#160;</td>
                                             <td>&#160;</td>
@@ -364,8 +364,8 @@
                                 <div style="clear:both; height:1%;"></div>
                             </div>
                         </body>
-                     </t>
-                 </t>
+                    </t>
+                </t>
             </t>
         </template>
     </data>

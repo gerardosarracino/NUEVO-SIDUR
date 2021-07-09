@@ -104,7 +104,7 @@ class FiniquitoExcel(http.Controller):
                 else:
                     # TOTALES T.CANTIDAD
                     http.request.env.cr.execute(
-                        "SELECT COALESCE(SUM(estimacion),0),COALESCE(SUM(importe_ejecutado),0) FROM control_detalle_conceptos WHERE id_partida = " +
+                        "SELECT COALESCE(SUM(estimacion),0),c FROM control_detalle_conceptos WHERE id_partida = " +
                         kw['id'] + " AND estimacion != 0 AND clave_linea = '" + str(
                             i[0]) + "' AND precio_unitario = " + str(i[4]) + " AND cantidad = " + str(i[3]))
                     res_importe = http.request.cr.fetchall()
